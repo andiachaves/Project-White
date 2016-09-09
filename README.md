@@ -145,8 +145,8 @@ model{
 // All data and parameters used in this section must be defined above
 
 // Fixed effects priors
-b0 ~ normal(-5.5, 100 ); //
-parEnvironment ~ normal(0 , 10 );
+b0 ~ normal(0, 100 ); //
+parEnvironment ~ normal(0 , 100 );
 
 //Hyperpriors
 tauMonth  ~ inv_gamma(0.001, 0.001);    
