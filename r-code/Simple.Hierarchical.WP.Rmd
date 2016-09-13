@@ -37,23 +37,55 @@ RStan code to predict prevalences of White PLague disease in corals in the US-Vi
 ## Loading data and librarie
 ```{r}
 rm(list=ls(all=TRUE))
-# Date format - forms part of names of created files or graphs
-today<-format(Sys.time(), "%Y.%m.%d")
+# Load settings
+source('r-code/00_settings.r')
 
 
-# load data & libraries
+# load data
 White <- read.csv("data/Deep.csv", header = TRUE)
 
 # load libraries
-library(formatR)
-library(StanHeaders)
-library(rstan)
-library(MCMCpack) # rwish function
-library(modeest)
-library(IDPmisc)
-library(ggplot2)
-# create directory if not existing
-suppressWarnings(dir.create(file.path(getwd(),"results/04_Rstan")))
+if(!require(formatR))
+{
+  install.packages("formatR", repos = mir)
+  require(formatR)
+}
+
+if(!require(StanHeaders)) 
+{
+  install.packages("StanHeaders", repos = mir)
+  require(StanHeaders)
+}
+
+if(!require(rstan))
+{
+  install.packages("rstan", repos = mir)
+  require(rstan)
+}
+
+if(!require(MCMCpack)) # rwish function
+{
+  install.packages("MCMCpack", repos = mir)
+  require(MCMCpack)
+}
+
+if(!require(modeest)) 
+{
+  install.packages("modeest", repos = mir)
+  require(modeest)
+} 
+
+if(!require(IDPmisc))
+{
+  install.packages("IDPmisc", repos = mir)
+  require(IDPmisc)
+} 
+
+if(!require(ggplot2)) 
+{
+  install.packages("ggplot2", repos = mir)
+  require(ggplot2)
+}
 ```
 
 ## Data preparation
@@ -176,6 +208,70 @@ stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, 
 ```
 
 
+```{r rmd2r,echo=FALSE,eval=FALSE}
+# export to .r format
+if(!require(stringi)) # stri_sub function
+{
+  install.packages("stringi", repos = mir)
+  require(stringi)
+}
+#' ## script for converting .Rmd files to .R scripts.
+
+#' #### Kevin Keenan 2014
+#' http://rstudio-pubs-static.s3.amazonaws.com/12734_0a38887f19a34d92b7311a2c9cb15022.html
+#' 
+#' This function will read a standard R markdown source file and convert it to 
+#' an R script to allow the code to be run using the "source" function.
+#' 
+#' The function is quite simplisting in that it reads a .Rmd file and adds 
+#' comments to non-r code sections, while leaving R code without comments
+#' so that the interpreter can run the commands.
+#' 
+#' 
+# library "stringi" needs to be loaded
+rmd2rscript <- function(infile){
+  # read the file
+  flIn <- readLines(infile)
+  # identify the start of code blocks
+  cdStrt <- which(grepl(flIn, pattern = "```{r*", perl = TRUE))
+  # identify the end of code blocks
+  cdEnd <- sapply(cdStrt, function(x){
+    preidx <- which(grepl(flIn[-(1:x)], pattern = "```", perl = TRUE))[1]
+    return(preidx + x)
+  })
+  # define an expansion function
+  # strip code block indacators
+  flIn[c(cdStrt, cdEnd)] <- ""
+  expFun <- function(strt, End){
+    strt <- strt+1
+    End <- End-1
+    return(strt:End)
+  }
+  idx <- unlist(mapply(FUN = expFun, strt = cdStrt, End = cdEnd, 
+                       SIMPLIFY = FALSE))
+  # add comments to all lines except code blocks
+  comIdx <- 1:length(flIn)
+  comIdx <- comIdx[-idx]
+  for(i in comIdx){
+    flIn[i] <- paste("#' ", flIn[i], sep = "")
+  }
+  # create an output file
+  #nm <- strsplit(infile, split = "\\.")[[1]][1]
+  nm <- stri_sub(infile,1,-5)
+  flOut <- file(paste(nm, "_rmd2r.R", sep = ""), "w")
+  for(i in 1:length(flIn)){
+    cat(flIn[i], "\n", file = flOut, sep = "\t")
+  }
+  close(flOut)
+}
+
+rmd2rscript("r-code/Simple.Hierarchical.WP.Rmd")
+unloadNamespace("evaluate")
+unloadNamespace("stringr")
+detach("package:stringi", unload=TRUE)
+```
+
+
 ```{r model_run,eval=FALSE}
 time <- proc.time()
 set.seed(2016)
@@ -184,25 +280,34 @@ stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000,
 ```
 
 
-# Session info
-```{r}
-devtools::session_info()
-```
 
 
 ```{r ploting from stan to ggmcmc}
-print(stan.white)
-plot(stan.white)
+if(!require(ggmcmc))
+{
+  install.packages("ggmcmc", repos = mir)
+  require(ggmcmc)
+}
+if(!require(coda))
+{
+  install.packages("coda", repos = mir)
+  require(coda)
+}
 
-library(ggmcmc)
-library(coda)
 
 #This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
 #devtools::install_github('christophergandrud/StanCat')
 StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]')
 
-#To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
-library(plyr)
+#To use ggmcmc
+#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
+
+if(!require(plyr))
+{
+  install.packages("plyr", repos = mir)
+  require(plyr)
+}
+
 #this one extracts everything but is not plotting histograms properly
 s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
 #this one extracts only some functions
@@ -218,24 +323,26 @@ ggs_caterpillar(S)
 s <- rstan::extract(stan.white, pars = 'v_raw', permuted = TRUE)$parEnvironment 
 s <- do.call(mcmc.list, alply(s[,,-4], 2, mcmc))
 
+detach("package:ggmcmc")
+detach("package:coda")
+detach("package:plyr")
 ```
 
 ```{r-To save the r markdown file}
+# note: folder figures synchronized in cloud (dropbox) but not results folder
 
-save(dataList, stan.white, file = paste("Figures/", today, "_fit.fullModel.pdf",
-sep = ""))
-save(dataList, file = paste("Figures/", today, "_fit.fullModel_data.Rdata",
-sep = ""))
+save(dataList, stan.white, file = paste("results/", today, "_fit.fullModel.Rdata",sep = ""))
+save(dataList, file = paste("results/", today, "_fit.fullModel_data.Rdata",sep = ""))
+
 library(lattice)
-trellis.device("pdf", file = paste("Figures/", today, "_Output_rstan.pdf",
+trellis.device("pdf", file = paste("figures/", today, "_Output_rstan.pdf",
 sep = ""), width = 14, height = 7)
 plot(stan.white)
 dev.off()
+```
 
-
-library(lattice)
-trellis.device("pdf")
-file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
-plot(stan.white)
+# Session info
+```{r}
+devtools::session_info()
 ```
 
