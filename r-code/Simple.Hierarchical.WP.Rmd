@@ -38,7 +38,7 @@ RStan code to predict prevalences of White PLague disease in corals in the US-Vi
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-source('r-code/00_settings.r')
+source('r-code/00_settings.R')
 
 
 # load data

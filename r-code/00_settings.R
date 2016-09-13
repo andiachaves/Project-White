@@ -1,4 +1,4 @@
-source("r-code/00_helper_functions.r")
+source("r-code/00_helper_functions.R")
 mir <- "http://cran.us.r-project.org" # define R repository
 
 ########################

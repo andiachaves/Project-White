@@ -38,7 +38,7 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 #'
 rm(list=ls(all=TRUE))
 # Load settings
-source('r-code/00_settings.r')
+source('r-code/00_settings.R')
 
 
 # load data
