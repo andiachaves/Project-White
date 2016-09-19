@@ -146,15 +146,11 @@ int<lower=0> nWP;  //number of White Plague cases, int=integer  and non negative
 int<lower=0> nEnvi;  //number of environmental variables
 int<lower=0> nBio;  //number of biological variables
 int<lower=0> nMonth; //number of Months sampled
-int<lower=0> nYear; //number of Years sampled
-
 
 // predictors
 matrix[nWP, nEnvi] Environment;
 matrix[nWP, nBio] Biological;
 int<lower=0> Month[nWP];
-int<lower=0> Year[nWP];
-
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -170,9 +166,7 @@ vector[nEnvi] parEnvironment;   //Environmental-level
 vector[nBio] parBiological;   //Biological-level
 
 real <lower=0> tauMonth;
-real <lower=0> tauYear;
 vector[nMonth] v_raw;
-vector[nYear] u_raw;
 }
 
 transformed parameters {
@@ -181,7 +175,6 @@ transformed parameters {
 
 
 vector[nMonth] v; //month effects
-vector[nYear] u; //year effects
 real RealDisease[nWP];
 vector[nWP] mu; //
 
@@ -190,17 +183,12 @@ for (h in 1:nMonth){
 v[h] = v_raw[h]*(tauMonth);
 }
 
-for (j in 1:nYear){
-v[j] = u_raw[j]*(tauYear);
-}
-
 
 for( i in 1:nWP ) {
-mu[i] = v[Month[i]] + u[Year[i]];
+mu[i] = v[Month[i]];
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Biological[i] * parBiological + mu[i]);
 }
 }
-
 
 model{
 // This is area for describing the model including the priors and likelihood
@@ -214,12 +202,11 @@ parBiological ~ normal(0 , 10 );
 
 //Hyperpriors
 tauMonth ~ inv_gamma(0.001, 0.001);    
-tauYear ~ inv_gamma(0.001, 0.001);  
 
 
 //Random effects priors
 v_raw ~ normal(0, 1);
-u_raw ~ normal(0, 1);
+
 
 
 #specification of the model-Binomial-logit model
