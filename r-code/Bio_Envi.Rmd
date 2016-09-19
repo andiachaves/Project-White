@@ -10,6 +10,7 @@ header-includes: \usepackage{graphicx}
 email: \email{}
 ---
 
+
 ```{r setup, include=FALSE, warnings=FALSE}
 library(knitr)
 opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
@@ -28,30 +29,61 @@ RStan code to predict prevalences of White PLague disease in corals in the US-Vi
 
 # Data
 
-
-
 # Joint model
-## Loading data and librarie
+## Loading data 
 ```{r}
 rm(list=ls(all=TRUE))
-# Date format - forms part of names of created files or graphs
-today<-format(Sys.time(), "%Y.%m.%d")
-
+# Load settings
+source('r-code/00_settings.R')
 
 # load data & libraries
 White <- read.csv("data/DeepEnvBio.csv", header = TRUE)
+```
 
-# load libraries
-library(formatR)
-library(StanHeaders)
-library(rstan)
-library(MCMCpack) # rwish function
-library(modeest)
-library(IDPmisc)
-library(ggplot2)
+#Loading librarie
+```{r load Libraries if required}
 
-# create directory if not existing
-#suppressWarnings(dir.create(file.path(getwd(),"results/04_Rstan")))
+if(!require(formatR))
+{
+  install.packages("formatR", repos = mir)
+  require(formatR)
+}
+
+if(!require(StanHeaders)) 
+{
+  install.packages("StanHeaders", repos = mir)
+  require(StanHeaders)
+}
+
+if(!require(rstan))
+{
+  install.packages("rstan", repos = mir)
+  require(rstan)
+}
+
+if(!require(MCMCpack)) # rwish function
+{
+  install.packages("MCMCpack", repos = mir)
+  require(MCMCpack)
+}
+
+if(!require(modeest)) 
+{
+  install.packages("modeest", repos = mir)
+  require(modeest)
+} 
+
+if(!require(IDPmisc))
+{
+  install.packages("IDPmisc", repos = mir)
+  require(IDPmisc)
+} 
+
+if(!require(ggplot2)) 
+{
+  install.packages("ggplot2", repos = mir)
+  require(ggplot2)
+}
 ```
 
 ## Data preparation
@@ -63,7 +95,7 @@ scale(White$Sal)
 scale(White$Tur)
 scale(White$Plague)
 
-#Environmental variables include temperature and rainfall
+##Environmental variables include temperature and rainfall
 enviroselection = c(5:8) # to select environmental variables
 
 bioselection = c(4:4) #to select biological variables
@@ -92,10 +124,10 @@ dataList = list (
        
         nMonth = length(unique(Month)),
         nYear= lenght(unique(Year)),
-        nStation = length(unique(Station)),
-        Month = White$Month,
-        Year = White$Year,
-        Station = White$Station
+        nStation = length(unique(Station))
+        #Month = White$Month,
+        #Year = White$Year,
+        #Station = White$Station
 )
 ```
 

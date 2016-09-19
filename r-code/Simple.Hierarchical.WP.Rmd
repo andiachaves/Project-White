@@ -44,7 +44,7 @@ source('r-code/00_settings.R')
 # load data
 White <- read.csv("data/Deep.csv", header = TRUE)
 
-# load libraries
+# load libraries only if required
 if(!require(formatR))
 {
   install.packages("formatR", repos = mir)
