@@ -1,6 +1,6 @@
 ---
 title: White plaque disease - Appendix A
-author: 
+author: Andia
 date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: 
   pdf_document: 
