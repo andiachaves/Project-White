@@ -1,6 +1,6 @@
 ---
-title: White plaque disease - Appendix A
-author: Andia
+title: White plaque disease - Appendix A- Biological and Environmental Variables Included
+author: Andia Chaves Fonnegra
 date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: 
   pdf_document: 
@@ -49,8 +49,9 @@ library(MCMCpack) # rwish function
 library(modeest)
 library(IDPmisc)
 library(ggplot2)
+
 # create directory if not existing
-suppressWarnings(dir.create(file.path(getwd(),"results/04_Rstan")))
+#suppressWarnings(dir.create(file.path(getwd(),"results/04_Rstan")))
 ```
 
 ## Data preparation
@@ -72,7 +73,7 @@ bioselection = c(4:4) #to select biological variables
 # Data as a list
 ```{r}
 Month=c(sort(rep(1:16,4)))
-dataList = list(
+dataList = list (
         TotalObservedcolonies = White$Ntot,
         Diseasedcolonies = White$ill,
         nWP = length(White$Plague),
@@ -88,12 +89,13 @@ dataList = list(
         Environment = White[5:(5-1+length(enviroselection))],
         nEnvi = length(enviroselection),
 
-        #Month = White$Month,
+       
+        nMonth = length(unique(Month)),
+        nYear= lenght(unique(Year)),
+        nStation = length(unique(Station)),
         Month = White$Month,
-        nMonth = length(unique(Month))
+        Year = White$Year,
         Station = White$Station
-        nStation = length(unique(Station)
-        nYear = 
 )
 ```
 
@@ -107,14 +109,18 @@ dataList = list(
 model.bn.Wplague <- '
 data {
 // counters
-int<lower=0> nWP;    //number of White Plague cases, int=integer  and non negative >0 
+int<lower=0> nWP;  //number of White Plague cases, int=integer  and non negative >0 
 int<lower=0> nEnvi;  //number of environmental variables
 int<lower=0> nMonth; //number of Months sampled
-
+int<lower=0> nYear; //number of Years sampled
+int<lower=0> nStation; //number of Stations sampled
 
 // predictors
 matrix[nWP, nEnvi] Environment;
+matrix[nWP, nBio] Biological;
 int<lower=0> Month[nWP];
+int<lower=0> Year[nWP];
+int<lower=0> Station[nWP];
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -127,10 +133,14 @@ parameters {
 
 real b0;                        // intercept
 vector[nEnvi] parEnvironment;   //Environmental-level
-
+vector[nBio] parBiological;   //Biological-level
 
 real <lower=0> tauMonth;
+real <lower=0> tauYear;
+real <lower=0> tauStation;
 vector[nMonth] v_raw;
+vector[nYear] u_raw;
+vector[nStation] w_raw;
 }
 
 transformed parameters {
@@ -139,6 +149,8 @@ transformed parameters {
 
 
 vector[nMonth] v; //month effects
+vector[nYear] u; //year effects
+vector[nStation] w; //Station (site) effects
 real RealDisease[nWP];
 vector[nWP] mu; //
 
@@ -147,9 +159,17 @@ for (h in 1:nMonth){
 v[h] = v_raw[h]*(tauMonth);
 }
 
+for (j in 1:nYear){
+v[j] = u_raw[j]*(tauYear);
+}
+
+for (k in 1:nStation){
+v[k] = w_raw[k]*(tauStation);
+}
+
 for( i in 1:nWP ) {
-mu[i] = v[Month[i]];
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + mu[i]);
+mu[i] = v[Month[i]] + u[Year[i]] + w[Station[i]];
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Biological[i] * parBiological mu[i]);
 }
 }
 
@@ -160,15 +180,21 @@ model{
 // All data and parameters used in this section must be defined above
 
 // Fixed effects priors
-b0 ~ normal(0, 100 ); //
-parEnvironment ~ normal(0 , 100 );
+b0 ~ normal(0, 10 ); //
+parEnvironment ~ normal(0 , 10 );
+parBiological ~ normal(0 , 10 );
 
 //Hyperpriors
-tauMonth  ~ inv_gamma(0.001, 0.001);    
+tauMonth ~ inv_gamma(0.001, 0.001);    
+tauYear ~ inv_gamma(0.001, 0.001);  
+tauRegion ~ inv_gamma(0.001, 0.001); 
 
 //Random effects priors
 v_raw ~ normal(0, 1);
+u_raw ~ normal(0, 1);
+w_raw ~ normal(0, 1);
 
+#specification of the model-Binomial-logit model
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
 
@@ -194,7 +220,7 @@ stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, 
 ```{r model_run,eval=FALSE}
 time <- proc.time()
 set.seed(2016)
-stan.white3 <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 
