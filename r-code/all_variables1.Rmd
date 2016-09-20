@@ -33,6 +33,7 @@ RStan code to predict prevalences of White PLague disease in corals in the US-Vi
 # Joint model
 ## Loading data and librarie
 ```{r}
+setwd("Users/andia/Documents/Project-White")
 rm(list=ls(all=TRUE))
 # Date format - forms part of names of created files or graphs
 today<-format(Sys.time(), "%Y.%m.%d")

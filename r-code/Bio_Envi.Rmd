@@ -32,6 +32,7 @@ RStan code to predict prevalences of White PLague disease in corals in the US-Vi
 # Joint model
 ## Loading data 
 ```{r}
+setwd("/Users/andia/Documents/Project-White")
 rm(list=ls(all=TRUE))
 # Load settings
 library(ROCR)
@@ -238,7 +239,7 @@ set.seed(2016)
 stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
-
+6
 
 # Session info
 ```{r}
@@ -247,27 +248,33 @@ devtools::session_info()
 
 
 ```{r ploting from stan to ggmcmc}
-print(stan.white3)
-plot(stan.white3)
+print(stan.white)
+plot(stan.white)
 
 library(ggmcmc)
 library(coda)
 
-#This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
-#devtools::install_github('christophergandrud/StanCat')
-StanCat::stan_caterpillar(stan.white3, pars = 'v_raw\\[.*\\]')
 
-#To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
-library(plyr)
-#this one extracts everything but is not plotting histograms properly
-s <- rstan::extract(stan.white3, inc_warmup=FALSE, permuted=FALSE) 
+#this one extracts everything 
+s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
 #this one extracts only some functions
 
 s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))
 S <- ggs(s) 
+#This function makes all types of graphs in one, takes a while to be process
 ggmcmc(S)
+
+#Only traceplots and caterpillar plots
 ggs_traceplots(S)
 ggs_caterpillar(S)
+
+#To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
+library(plyr)
+#This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
+#devtools::install_github('christophergandrud/StanCat')
+#stan_caterpillar(obj, pars, pars_labels = NULL, hpd = TRUE,
+#  order_medians = TRUE, horizontal = TRUE, alpha_bounds = 0.3)
+StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]',pars_labels = "1, 2, 3, 4, 5, 6, 7,8,9,10,11,12,13,14,15,14" )
 
 
 #for specific parameters. But is not runing
@@ -278,12 +285,12 @@ s <- do.call(mcmc.list, alply(s[,,-4], 2, mcmc))
 
 ```{r-To save the r markdown file}
 
-save(dataList, stan.white, file = paste("Figures/", today, "_fit.fullModel.pdf",
+save(dataList, stan.white, file = paste("Results/", today, "_fit.fullModel.pdf",
 sep = ""))
-save(dataList, file = paste("Figures/", today, "_fit.fullModel_data.Rdata",
+save(dataList, file = paste("Results/", today, "_fit.fullModel_data.Rdata",
 sep = ""))
 library(lattice)
-trellis.device("pdf", file = paste("Figures/", today, "_Output_rstan.pdf",
+trellis.device("pdf", file = paste("Results/", today, "_Output_rstan.pdf",
 sep = ""), width = 14, height = 7)
 plot(stan.white)
 dev.off()
@@ -299,5 +306,12 @@ plot(stan.white)
 library(shiny)
 library(shinystan)
 launch_shinystan(stan.white2)
+```
+
+```{r Plot caterpillar plots with names}
+S intercepts <- data.frame(
++ Parameter = paste("alpha[", White$counties$id.county, "]", sep = ""),
++ Label = radon$counties$County)
+R> head(L.radon.intercepts)
 ```
 
