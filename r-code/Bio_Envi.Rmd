@@ -247,13 +247,31 @@ devtools::session_info()
 ```
 
 
+```{r-To save the r markdown file}
+#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
+save(dataList, stan.white, file = paste("Results/", today, "_fit.fullModel.pdf",
+sep = ""))
+#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
+save(dataList, file = paste("Results/", today, "_fit.fullModel_data.Rdata",
+sep = ""))
+
+#This one works
+library(lattice)
+trellis.device("pdf", file = paste("Results/", today, "_Output_rstan.pdf",
+sep = ""), width = 14, height = 7)
+plot(stan.white)
+dev.off()
+
+```
+
+
+
 ```{r ploting from stan to ggmcmc}
 print(stan.white)
 plot(stan.white)
 
 library(ggmcmc)
 library(coda)
-
 
 #this one extracts everything 
 s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
@@ -264,13 +282,7 @@ S <- ggs(s)
 #This function makes all types of graphs in one, takes a while to be process
 ggmcmc(S)
 
-#Only traceplots and caterpillar plots
-ggs_traceplots(S)
-ggs_caterpillar(S)
-
-
-
-#for specific parameters. But is not runing
+#for specific parameters. But is not running
 s <- rstan::extract(stan.white, pars = 'v_raw', permuted = TRUE)$parEnvironment 
 s <- do.call(mcmc.list, alply(s[,,-4], 2, mcmc))
 
@@ -295,27 +307,7 @@ StanCat::stan_caterpillar(stan.white, pars = 'parEnvironment\\[.*\\]', pars_labe
 ```
 
 
-```{r-To save the r markdown file}
-#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
-save(dataList, stan.white, file = paste("Results/", today, "_fit.fullModel.pdf",
-sep = ""))
-save(dataList, file = paste("Results/", today, "_fit.fullModel_data.Rdata",
-sep = ""))
-
-
-library(lattice)
-trellis.device("pdf", file = paste("Results/", today, "_Output_rstan.pdf",
-sep = ""), width = 14, height = 7)
-plot(stan.white)
-dev.off()
-
-library(lattice)
-trellis.device("pdf")
-file= paste("Results/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
-plot(stan.white)
-```
-
-```{r extract with shiny}
+```{r extract and plot with shiny -Stan}
 library(shiny)
 library(shinystan)
 launch_shinystan(stan.white)
