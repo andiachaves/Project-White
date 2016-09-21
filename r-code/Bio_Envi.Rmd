@@ -247,15 +247,8 @@ devtools::session_info()
 ```
 
 
-```{r-To save the r markdown file}
-#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
-save(dataList, stan.white, file = paste("Results/", today, "_fit.fullModel.pdf",
-sep = ""))
-#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
-save(dataList, file = paste("Results/", today, "_fit.fullModel_data.Rdata",
-sep = ""))
+```{r-To save the output file}
 
-#This one works
 library(lattice)
 trellis.device("pdf", file = paste("Results/", today, "_Output_rstan.pdf",
 sep = ""), width = 14, height = 7)

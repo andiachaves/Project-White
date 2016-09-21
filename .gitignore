@@ -6,3 +6,4 @@ data/*
 *.Rdata
 
 *.pdf
+.Data/*
