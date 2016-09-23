@@ -99,32 +99,17 @@ if(!require(qtlcharts))
 
 ## Data preparation
 ```{r data_preparation}
-<<<<<<< HEAD
-scale(White$Cor)
-scale(White$Temp)
-scale(White$Chl)
-scale(White$Sal)
-scale(White$Tur)
-scale(White$Plague)
-scale(White$DHW)
-=======
 White$TempScaled   <- scale(White$Temp)
 White$ChlScaled    <- scale(White$Chl)
 White$SalScaled    <- scale(White$Sal)
 White$TurScaled    <- scale(White$Tur)
->>>>>>> origin/master
+
 
 Year=White$Year
 Season=White$Season
 Station=White$Station
 ##Environmental variables include temperature and rainfall
-<<<<<<< HEAD
-enviroselection = c(5:9) # to select environmental variables
-
-bioselection = c(4:4) #to select biological variables
-=======
 enviroselection = c(12:15) # to select environmental variables
->>>>>>> origin/master
 ```
 
 
