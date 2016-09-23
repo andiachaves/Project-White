@@ -146,17 +146,6 @@ dataList = list (
 model.bn.Wplague <- '
 data {
 // counters
-<<<<<<< HEAD
-int<lower=0> nWP;  //number of White Plague cases, int=integer  and non negative >0 
-int<lower=0> nEnvi;  //number of environmental variables
-int<lower=0> nBio;  //number of biological variables
-int<lower=0> nSeason; //number of Seasons sampled
-
-// predictors
-matrix[nWP, nEnvi] Environment;
-matrix[nWP, nBio] Biological;
-int<lower=0> Season[nWP];
-=======
 int<lower=0> nWP;      // number of White Plague cases, int=integer  and non negative >0 
 int<lower=0> nEnvi;    // number of environmental variables
 int<lower=0> nSeason;  // number of Seasons sampled
@@ -169,7 +158,7 @@ real Cor [nWP];
 int<lower=0> Season[nWP];
 int<lower=0> Station[nWP];
 int<lower=0> Year[nWP];
->>>>>>> origin/master
+
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -186,15 +175,13 @@ real parCor;                    // total % of coral species (biotic variable)
 
 real <lower=0> tauSeason;
 vector[nSeason] v_raw;
-<<<<<<< HEAD
-=======
 
 real <lower=0> tauStation;
 vector[nSeason] u_raw;
 
 real <lower=0> tauYear;
 vector[nSeason] y_raw;
->>>>>>> origin/master
+
 }
 
 transformed parameters {
@@ -205,39 +192,23 @@ vector[nSeason] v;    // Season effects
 vector[nStation] u;   // Station effects
 vector[nYear] y;      // Year effects
 
-
-<<<<<<< HEAD
-vector[nSeason] v; //Season effects
-=======
->>>>>>> origin/master
 real RealDisease[nWP];
-vector[nWP] mu;          // model error
+vector[nWP] mu;      // model error
+
 
 for (h in 1:nSeason){
 v[h] = v_raw[h]*(tauSeason);
 }
-
-<<<<<<< HEAD
-for (h in 1:nSeason){
-v[h] = v_raw[h]*(tauSeason);
-=======
 for (j in 1:nStation){
 u[j] = u_raw[j]*(tauStation);
->>>>>>> origin/master
 }
-
 for (k in 1:nYear){
 y[k] = y_raw[k]*(tauYear);
 }
 
 for( i in 1:nWP ) {
-<<<<<<< HEAD
-mu[i] = v[Season[i]];
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Biological[i] * parBiological + mu[i]);
-=======
 mu[i] = v[Season[i]] + u[Station[i]]+ y[Year[i]];
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Cor[i] * parCor + mu[i]);
->>>>>>> origin/master
 }
 }
 
@@ -253,12 +224,9 @@ parCor ~ normal(0 , 10 );
 
 //Hyperpriors
 tauSeason ~ inv_gamma(0.001, 0.001);    
-<<<<<<< HEAD
-
-=======
 tauStation ~ inv_gamma(0.001, 0.001);    
 tauYear ~ inv_gamma(0.001, 0.001); 
->>>>>>> origin/master
+
 
 //Random effects priors
 v_raw ~ normal(0, 1);
@@ -291,13 +259,11 @@ devtools::session_info()
 
 
 ```{r-To save the output file}
-
 library(lattice)
 trellis.device("pdf", file = paste("Figures_Season/", today, "_Output_rstan.pdf",
 sep = ""), width = 14, height = 7)
 plot(stan.white)
 dev.off()
-
 ```
 
 
@@ -340,11 +306,8 @@ StanCat::stan_caterpillar(stan.season, pars = 'v_raw\\[.*\\]', pars_labels = c("
 #Biological Variables
 StanCat::stan_caterpillar(stan.season, pars = 'parBiological\\[.*\\]', pars_labels = "% Coral")
 #Environmental Variables
-<<<<<<< HEAD
-StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature", "DHW"))
-=======
+
 StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature"))
->>>>>>> origin/master
 
 
 ```
