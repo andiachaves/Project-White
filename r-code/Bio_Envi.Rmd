@@ -120,15 +120,9 @@ dataList = list (
         Diseasedcolonies = White$ill,
         nWP = length(White$Plague),
         
-        #Biological = White[4:(4-1+length(bioselection))],
-        #nBio = length(bioselection),
         Cor = White$Cor,
-        
-        Temperature = White$TempScaled,
-        Chlorophyll = White$ChlScaled,
-        Salinity = White$SalScaled,
-        Turbidity = White$TurScaled,
-        Environment = White[12:(12-1+length(enviroselection))],
+
+        Environment = White[12:(12-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
         nEnvi = length(enviroselection),
 
         Season = White$Season,
@@ -151,18 +145,20 @@ dataList = list (
 model.bn.Wplague <- '
 data {
 // counters
-int<lower=0> nWP;  //number of White Plague cases, int=integer  and non negative >0 
-int<lower=0> nEnvi;  //number of environmental variables
-int<lower=0> nSeason; //number of Seasons sampled
+int<lower=0> nWP;      // number of White Plague cases, int=integer  and non negative >0 
+int<lower=0> nEnvi;    // number of environmental variables
+int<lower=0> nSeason;  // number of Seasons sampled
+int<lower=0> nStation; // number of Stations sampled
 
 // predictors
 matrix[nWP, nEnvi] Environment;
 real Cor [nWP]; 
 int<lower=0> Season[nWP];
+int<lower=0> Station[nWP];
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
-int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
+int<lower=0> Diseasedcolonies [nWP];      // number of diseased coral colonies (successes)
 }
 
 parameters {
@@ -171,10 +167,13 @@ parameters {
 
 real b0;                        // intercept
 vector[nEnvi] parEnvironment;   // Environmental-level
-real parCor;                    // Biological-level
+real parCor;                    // total % of coral species (biotic variable)
 
 real <lower=0> tauSeason;
 vector[nSeason] v_raw;
+
+real <lower=0> tauStation;
+vector[nSeason] u_raw;
 }
 
 transformed parameters {
@@ -182,16 +181,21 @@ transformed parameters {
 // these will be saved and printed with the output
 
 vector[nSeason] v;       // Season effects
+vector[nStation] u;      // Station effects
+
 real RealDisease[nWP];
-vector[nWP] mu;          //
+vector[nWP] mu;          // model error
 
 for (h in 1:nSeason){
 v[h] = v_raw[h]*(tauSeason);
 }
 
+for (j in 1:nStation){
+u[j] = u_raw[j]*(tauStation);
+}
 
 for( i in 1:nWP ) {
-mu[i] = v[Season[i]];
+mu[i] = v[Season[i]] + u[Station[i]];
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Cor[i] * parCor + mu[i]);
 }
 }
@@ -208,11 +212,11 @@ parCor ~ normal(0 , 10 );
 
 //Hyperpriors
 tauSeason ~ inv_gamma(0.001, 0.001);    
-
+tauStation ~ inv_gamma(0.001, 0.001);    
 
 //Random effects priors
 v_raw ~ normal(0, 1);
-
+u_raw ~ normal(0, 1);
 
 
 #specification of the model-Binomial-logit model
