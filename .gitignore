@@ -8,3 +8,4 @@ data/*
 *.pdf
 .Data/*
 .Figures_Season/*
+Results/*

@@ -96,12 +96,13 @@ scale(White$Chl)
 scale(White$Sal)
 scale(White$Tur)
 scale(White$Plague)
+scale(White$DHW)
 
 Year=White$Year
 Season=White$Season
 Station=White$Station
 ##Environmental variables include temperature and rainfall
-enviroselection = c(5:8) # to select environmental variables
+enviroselection = c(5:9) # to select environmental variables
 
 bioselection = c(4:4) #to select biological variables
 ```
@@ -299,7 +300,7 @@ StanCat::stan_caterpillar(stan.season, pars = 'v_raw\\[.*\\]', pars_labels = c("
 #Biological Variables
 StanCat::stan_caterpillar(stan.season, pars = 'parBiological\\[.*\\]', pars_labels = "% Coral")
 #Environmental Variables
-StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature"))
+StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature", "DHW"))
 
 
 ```
