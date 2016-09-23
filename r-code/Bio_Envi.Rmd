@@ -39,7 +39,7 @@ library(ROCR)
 source('r-code/00_settings.R')
 
 # load data & libraries
-White <- read.csv("data/DeepEnvBio.csv", header = TRUE)
+White <- read.csv("data/DeepSeasonEnviBio.csv", header = TRUE)
 ```
 
 #Loading librarie
@@ -90,13 +90,16 @@ if(!require(ggplot2))
 
 ## Data preparation
 ```{r data_preparation}
-scale(White$Orb)
+scale(White$Cor)
 scale(White$Temp)
 scale(White$Chl)
 scale(White$Sal)
 scale(White$Tur)
 scale(White$Plague)
 
+Year=White$Year
+Season=White$Season
+Station=White$Station
 ##Environmental variables include temperature and rainfall
 enviroselection = c(5:8) # to select environmental variables
 
@@ -106,7 +109,7 @@ bioselection = c(4:4) #to select biological variables
 
 # Data as a list
 ```{r}
-Month=c(sort(rep(1:16,4)))
+Season=c(sort(rep(1:4,4)))
 dataList = list (
         TotalObservedcolonies = White$Ntot,
         Diseasedcolonies = White$ill,
@@ -123,10 +126,10 @@ dataList = list (
         Environment = White[5:(5-1+length(enviroselection))],
         nEnvi = length(enviroselection),
 
-        Month = White$Month,
+        Season = White$Season,
         Year = White$Year,
         Station = White$Station,
-        nMonth = length(unique(Month)),
+        nSeason = length(unique(Season)),
         nYear= length(unique(Year)),
         nStation = length(unique(Station))
         
@@ -146,12 +149,12 @@ data {
 int<lower=0> nWP;  //number of White Plague cases, int=integer  and non negative >0 
 int<lower=0> nEnvi;  //number of environmental variables
 int<lower=0> nBio;  //number of biological variables
-int<lower=0> nMonth; //number of Months sampled
+int<lower=0> nSeason; //number of Seasons sampled
 
 // predictors
 matrix[nWP, nEnvi] Environment;
 matrix[nWP, nBio] Biological;
-int<lower=0> Month[nWP];
+int<lower=0> Season[nWP];
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -166,8 +169,8 @@ real b0;                        // intercept
 vector[nEnvi] parEnvironment;   //Environmental-level
 vector[nBio] parBiological;   //Biological-level
 
-real <lower=0> tauMonth;
-vector[nMonth] v_raw;
+real <lower=0> tauSeason;
+vector[nSeason] v_raw;
 }
 
 transformed parameters {
@@ -175,18 +178,18 @@ transformed parameters {
 // these will be saved and printed with the output
 
 
-vector[nMonth] v; //month effects
+vector[nSeason] v; //Season effects
 real RealDisease[nWP];
 vector[nWP] mu; //
 
 
-for (h in 1:nMonth){
-v[h] = v_raw[h]*(tauMonth);
+for (h in 1:nSeason){
+v[h] = v_raw[h]*(tauSeason);
 }
 
 
 for( i in 1:nWP ) {
-mu[i] = v[Month[i]];
+mu[i] = v[Season[i]];
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Biological[i] * parBiological + mu[i]);
 }
 }
@@ -202,7 +205,7 @@ parEnvironment ~ normal(0 , 10 );
 parBiological ~ normal(0 , 10 );
 
 //Hyperpriors
-tauMonth ~ inv_gamma(0.001, 0.001);    
+tauSeason ~ inv_gamma(0.001, 0.001);    
 
 
 //Random effects priors
@@ -232,11 +235,10 @@ Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
 ```
 
-
 ```{r model_run,eval=FALSE}
 time <- proc.time()
 set.seed(2016)
-stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+stan.season<- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 6
@@ -247,17 +249,10 @@ devtools::session_info()
 ```
 
 
-```{r-To save the r markdown file}
-#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
-save(dataList, stan.white, file = paste("Results/", today, "_fit.fullModel.pdf",
-sep = ""))
-#It is saving it, but it does not allow me to open PDF, it does not decode properly..mm??
-save(dataList, file = paste("Results/", today, "_fit.fullModel_data.Rdata",
-sep = ""))
+```{r-To save the output file}
 
-#This one works
 library(lattice)
-trellis.device("pdf", file = paste("Results/", today, "_Output_rstan.pdf",
+trellis.device("pdf", file = paste("Figures_Season/", today, "_Output_rstan.pdf",
 sep = ""), width = 14, height = 7)
 plot(stan.white)
 dev.off()
@@ -267,14 +262,14 @@ dev.off()
 
 
 ```{r ploting from stan to ggmcmc}
-print(stan.white)
-plot(stan.white)
+print(stan.season)
+plot(stan.season)
 
 library(ggmcmc)
 library(coda)
 
 #this one extracts everything 
-s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
+s <- rstan::extract(stan.season, inc_warmup=FALSE, permuted=FALSE) 
 #this one extracts only some functions
 
 s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))
@@ -298,10 +293,13 @@ library(plyr)
 #  order_medians = TRUE, horizontal = TRUE, alpha_bounds = 0.3)
 #For months
 StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]', pars_labels = c("Feb/12", "Mar/12", "Apr/12", "May/12", "Aug/12", "Sep/12", "Oct/12", "Nov/12", "Dec/12", "Feb/13", "Mar/13", "May/13", "Jul/13", "Aug/13", "Nov/13", "Dec/13"))
+
+#Seasons
+StanCat::stan_caterpillar(stan.season, pars = 'v_raw\\[.*\\]', pars_labels = c("Dry", "Dry-Wet", "Wet", "Wet Heat Stress"))
 #Biological Variables
-StanCat::stan_caterpillar(stan.white, pars = 'parBiological\\[.*\\]', pars_labels = "% Orbicela")
+StanCat::stan_caterpillar(stan.season, pars = 'parBiological\\[.*\\]', pars_labels = "% Coral")
 #Environmental Variables
-StanCat::stan_caterpillar(stan.white, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature"))
+StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature"))
 
 
 ```
