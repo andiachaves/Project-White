@@ -1,6 +1,6 @@
 ---
-title: White plaque disease - Appendix A- Biological and Environmental Variables Included
-author: Andia Chaves Fonnegra
+title: White plaque disease - Appendix A - Biological and Environmental Variables Included
+author: Andia Chaves Fonnegra, Bernd Panassiti
 date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: 
   pdf_document: 
@@ -32,7 +32,6 @@ RStan code to predict prevalences of White PLague disease in corals in the US-Vi
 # Joint model
 ## Loading data 
 ```{r}
-setwd("/Users/andia/Documents/Project-White")
 rm(list=ls(all=TRUE))
 # Load settings
 library(ROCR)
@@ -86,10 +85,21 @@ if(!require(ggplot2))
   install.packages("ggplot2", repos = mir)
   require(ggplot2)
 }
+if(!require(shinystan))
+{
+  install.packages("shinystan", repos = mir)
+  require(shinystan)
+}
+if(!require(qtlcharts))
+{
+  install.packages("qtlcharts", repos = mir)
+  require(qtlcharts)
+}
 ```
 
 ## Data preparation
 ```{r data_preparation}
+<<<<<<< HEAD
 scale(White$Cor)
 scale(White$Temp)
 scale(White$Chl)
@@ -97,14 +107,24 @@ scale(White$Sal)
 scale(White$Tur)
 scale(White$Plague)
 scale(White$DHW)
+=======
+White$TempScaled   <- scale(White$Temp)
+White$ChlScaled    <- scale(White$Chl)
+White$SalScaled    <- scale(White$Sal)
+White$TurScaled    <- scale(White$Tur)
+>>>>>>> origin/master
 
 Year=White$Year
 Season=White$Season
 Station=White$Station
 ##Environmental variables include temperature and rainfall
+<<<<<<< HEAD
 enviroselection = c(5:9) # to select environmental variables
 
 bioselection = c(4:4) #to select biological variables
+=======
+enviroselection = c(12:15) # to select environmental variables
+>>>>>>> origin/master
 ```
 
 
@@ -116,15 +136,9 @@ dataList = list (
         Diseasedcolonies = White$ill,
         nWP = length(White$Plague),
         
-        Biological = White[4:(4-1+length(bioselection))],
-        nBio = length(bioselection),
-        
-        
-        Temperature = White$Temp,
-        Chlorophyll = White$Chl,
-        Salinity = White$Sal,
-        Turbidity = White$Tur,
-        Environment = White[5:(5-1+length(enviroselection))],
+        Cor = White$Cor,
+
+        Environment = White[12:(12-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
         nEnvi = length(enviroselection),
 
         Season = White$Season,
@@ -147,6 +161,7 @@ dataList = list (
 model.bn.Wplague <- '
 data {
 // counters
+<<<<<<< HEAD
 int<lower=0> nWP;  //number of White Plague cases, int=integer  and non negative >0 
 int<lower=0> nEnvi;  //number of environmental variables
 int<lower=0> nBio;  //number of biological variables
@@ -156,10 +171,24 @@ int<lower=0> nSeason; //number of Seasons sampled
 matrix[nWP, nEnvi] Environment;
 matrix[nWP, nBio] Biological;
 int<lower=0> Season[nWP];
+=======
+int<lower=0> nWP;      // number of White Plague cases, int=integer  and non negative >0 
+int<lower=0> nEnvi;    // number of environmental variables
+int<lower=0> nSeason;  // number of Seasons sampled
+int<lower=0> nStation; // number of Stations sampled
+int<lower=0> nYear;    // number of Years sampled
+
+// predictors
+matrix[nWP, nEnvi] Environment;
+real Cor [nWP]; 
+int<lower=0> Season[nWP];
+int<lower=0> Station[nWP];
+int<lower=0> Year[nWP];
+>>>>>>> origin/master
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
-int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
+int<lower=0> Diseasedcolonies [nWP];      // number of diseased coral colonies (successes)
 }
 
 parameters {
@@ -167,31 +196,63 @@ parameters {
 // these will be saved and printed with the output
 
 real b0;                        // intercept
-vector[nEnvi] parEnvironment;   //Environmental-level
-vector[nBio] parBiological;   //Biological-level
+vector[nEnvi] parEnvironment;   // Environmental-level
+real parCor;                    // total % of coral species (biotic variable)
 
 real <lower=0> tauSeason;
 vector[nSeason] v_raw;
+<<<<<<< HEAD
+=======
+
+real <lower=0> tauStation;
+vector[nSeason] u_raw;
+
+real <lower=0> tauYear;
+vector[nSeason] y_raw;
+>>>>>>> origin/master
 }
 
 transformed parameters {
 // generation of derived parameters from parameters above should be defined here
 // these will be saved and printed with the output
 
+vector[nSeason] v;    // Season effects
+vector[nStation] u;   // Station effects
+vector[nYear] y;      // Year effects
 
+
+<<<<<<< HEAD
 vector[nSeason] v; //Season effects
+=======
+>>>>>>> origin/master
 real RealDisease[nWP];
-vector[nWP] mu; //
-
+vector[nWP] mu;          // model error
 
 for (h in 1:nSeason){
 v[h] = v_raw[h]*(tauSeason);
 }
 
+<<<<<<< HEAD
+for (h in 1:nSeason){
+v[h] = v_raw[h]*(tauSeason);
+=======
+for (j in 1:nStation){
+u[j] = u_raw[j]*(tauStation);
+>>>>>>> origin/master
+}
+
+for (k in 1:nYear){
+y[k] = y_raw[k]*(tauYear);
+}
 
 for( i in 1:nWP ) {
+<<<<<<< HEAD
 mu[i] = v[Season[i]];
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Biological[i] * parBiological + mu[i]);
+=======
+mu[i] = v[Season[i]] + u[Station[i]]+ y[Year[i]];
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Cor[i] * parCor + mu[i]);
+>>>>>>> origin/master
 }
 }
 
@@ -203,37 +264,31 @@ model{
 // Fixed effects priors
 b0 ~ normal(0, 10 ); //
 parEnvironment ~ normal(0 , 10 );
-parBiological ~ normal(0 , 10 );
+parCor ~ normal(0 , 10 );
 
 //Hyperpriors
 tauSeason ~ inv_gamma(0.001, 0.001);    
+<<<<<<< HEAD
 
+=======
+tauStation ~ inv_gamma(0.001, 0.001);    
+tauYear ~ inv_gamma(0.001, 0.001); 
+>>>>>>> origin/master
 
 //Random effects priors
 v_raw ~ normal(0, 1);
-
-
+u_raw ~ normal(0, 1);
+y_raw ~ normal(0, 1);
 
 #specification of the model-Binomial-logit model
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
-
-
-#predictive inference
-#generated quantities
-#{
-#real DiseasePredictions[nWP]; //vector to store predictions
-
-#for( i in 1:nWP ) {
-#DiseasePredictions [i] <- binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + #Environment[i] * parEnvironment + mu[i]));
-#}
-#}
 '
 ```
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
-stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
+stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 5000, chains = 1,refresh=1,thin=1)
 ```
 
 ```{r model_run,eval=FALSE}
@@ -300,15 +355,17 @@ StanCat::stan_caterpillar(stan.season, pars = 'v_raw\\[.*\\]', pars_labels = c("
 #Biological Variables
 StanCat::stan_caterpillar(stan.season, pars = 'parBiological\\[.*\\]', pars_labels = "% Coral")
 #Environmental Variables
+<<<<<<< HEAD
 StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature", "DHW"))
+=======
+StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature"))
+>>>>>>> origin/master
 
 
 ```
 
 
 ```{r extract and plot with shiny -Stan}
-library(shiny)
-library(shinystan)
 launch_shinystan(stan.white)
 ```
 
