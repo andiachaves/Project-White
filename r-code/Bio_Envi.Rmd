@@ -238,12 +238,14 @@ Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
 
 //Predictive Inference
-PrevalenceDiseasePredictions[nWP]; //vector to store predictions
+DiseasePredictions[nWP]; //vector to store predictions
 
 for (i in 1:nWP) {
 
-PrevalenceDiseasePredictions[i]<binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + Environment[i] * parEnviro  + Grapes[i] * parGrapes + mu[i]));)}
-
+·using Binomial rng= random number generator
+RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]));)
+}
+}
 '
 ```
 
