@@ -109,7 +109,7 @@ Year=White$Year
 Season=White$Season
 Station=White$Station
 ##Environmental variables include temperature and rainfall
-enviroselection = c(12:15) # to select environmental variables
+enviroselection = c(13:16) # to select environmental variables
 ```
 
 
@@ -123,7 +123,7 @@ dataList = list (
         
         Cor = White$Cor,
 
-        Environment = White[12:(12-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
+        Environment = White[13:(13-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
         nEnvi = length(enviroselection),
 
         Season = White$Season,
@@ -236,6 +236,14 @@ y_raw ~ normal(0, 1);
 #specification of the model-Binomial-logit model
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
+
+//Predictive Inference
+PrevalenceDiseasePredictions[nWP]; //vector to store predictions
+
+for (i in 1:nWP) {
+
+PrevalenceDiseasePredictions[i]<binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + Environment[i] * parEnviro  + Grapes[i] * parGrapes + mu[i]));)}
+
 '
 ```
 
