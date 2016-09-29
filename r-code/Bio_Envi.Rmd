@@ -38,7 +38,7 @@ library(ROCR)
 source('r-code/00_settings.R')
 
 # load data & libraries
-White <- read.csv("data/DeepSeasonEnviBio.csv", header = TRUE)
+White <- read.csv("data/rawdata.csv", header = TRUE)
 ```
 
 #Loading librarie
@@ -109,7 +109,7 @@ Year=White$Year
 Season=White$Season
 Station=White$Station
 ##Environmental variables include temperature and rainfall
-enviroselection = c(13:16) # to select environmental variables
+enviroselection = c(12:16) # to select environmental variables
 ```
 
 
@@ -123,7 +123,7 @@ dataList = list (
         
         Cor = White$Cor,
 
-        Environment = White[13:(13-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
+        Environment = White[12:(12-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
         nEnvi = length(enviroselection),
 
         Season = White$Season,
@@ -235,19 +235,24 @@ y_raw ~ normal(0, 1);
 
 #specification of the model-Binomial-logit model
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
-}
 
 //Predictive Inference
-DiseasePredictions[nWP]; //vector to store predictions
-
+RealDiseasePredictions [nWP]; //vector to store predictions
 for (i in 1:nWP) {
-
-·using Binomial rng= random number generator
-RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]));)
-}
+#using Binomial rng= random number generator
+RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]);
 }
 '
 ```
+
+```{Predictive inference}
+#//Predictive Inference
+#DiseasePredictions[nWP]; //vector to store predictions
+#for (i in 1:nWP) {
+#using Binomial rng= random number generator
+#RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * #parEnviro  + Cor[i] * parCor + mu[i]));)
+```
+
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
@@ -314,10 +319,10 @@ StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]', pars_labels = c("F
 #Seasons
 StanCat::stan_caterpillar(stan.season, pars = 'v_raw\\[.*\\]', pars_labels = c("Dry", "Dry-Wet", "Wet", "Wet Heat Stress"))
 #Biological Variables
-StanCat::stan_caterpillar(stan.season, pars = 'parBiological\\[.*\\]', pars_labels = "% Coral")
+StanCat::stan_caterpillar(stan.season, pars = 'parCor\\[.*\\]', pars_labels = "% Coral")
 #Environmental Variables
 
-StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("Chlorophyll", "Salinity", "Turbidity", "Temperature"))
+StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("DHW", "Chlorophyll", "Salinity", "Turbidity", "Temperature"))
 
 
 ```
