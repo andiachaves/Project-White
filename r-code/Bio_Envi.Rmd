@@ -240,29 +240,12 @@ Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 real RealDiseasePredictions [nWP]; //vector to store predictions
 for (i in 1:nWP) {
 #using Binomial rng= random number generator
-RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]));
+RealDiseasePredictions[i] <binomial_rng(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]));
 }
 }
 '
 ```
 
-```{Predictive inference}
-#//Predictive Inference
-#DiseasePredictions[nWP]; //vector to store predictions
-#for (i in 1:nWP) {
-#using Binomial rng= random number generator
-#RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * #parEnviro  + Cor[i] * parCor + mu[i]));)
-
-real RealDiseasePredictions [nWP]; //vector to store predictions
-for (i in 1:nWP) {
-#using Binomial rng= random number generator
-RealDiseasePredictions[i] <binomial(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]));
-}
-}
-
-
-
-```
 
 
 ## Running the model
