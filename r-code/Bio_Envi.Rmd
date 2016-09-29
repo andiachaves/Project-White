@@ -177,10 +177,10 @@ real <lower=0> tauSeason;
 vector[nSeason] v_raw;
 
 real <lower=0> tauStation;
-vector[nSeason] u_raw;
+vector[nStation] u_raw;
 
 real <lower=0> tauYear;
-vector[nSeason] y_raw;
+vector[nYear] y_raw;
 
 }
 
