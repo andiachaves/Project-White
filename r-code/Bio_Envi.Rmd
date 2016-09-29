@@ -242,7 +242,7 @@ generated quantities{
 real RealDiseasePredictions [nWP]; //vector to store predictions
 for (i in 1:nWP) {
 #using Binomial rng= random number generator
-RealDiseasePredictions[i] <- binomial_rng(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnvironment + Cor[i] * parCor + mu[i]));
+RealDiseasePredictions[i] = binomial_rng(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnvironment + Cor[i] * parCor + mu[i]));
 }
 }
 '
@@ -314,12 +314,18 @@ StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]', pars_labels = c("F
 
 #Seasons
 StanCat::stan_caterpillar(stan.season, pars = 'v_raw\\[.*\\]', pars_labels = c("Dry", "Dry-Wet", "Wet", "Wet Heat Stress"))
+
+#Year
+StanCat::stan_caterpillar(stan.season, pars = 'y_raw\\[.*\\]', pars_labels = c("2012", "2013"))
+
+#Station
+StanCat::stan_caterpillar(stan.season, pars = 'u_raw\\[.*\\]', pars_labels = c("CSE", "GKT","MSR","OGK"))
+
 #Biological Variables
 StanCat::stan_caterpillar(stan.season, pars = 'parCor\\[.*\\]', pars_labels = "% Coral")
+
 #Environmental Variables
-
-StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("DHW", "Chlorophyll", "Salinity", "Turbidity", "Temperature"))
-
+StanCat::stan_caterpillar(stan.season, pars = 'parEnvironment\\[.*\\]', pars_labels= c("DHW", "Temperature", "Chlorophyll", "Salinity", "Turbidity"))
 
 ```
 
