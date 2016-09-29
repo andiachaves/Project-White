@@ -235,12 +235,14 @@ y_raw ~ normal(0, 1);
 
 #specification of the model-Binomial-logit model
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
+}
 
+generated quantities{
 //Predictive Inference
 real RealDiseasePredictions [nWP]; //vector to store predictions
 for (i in 1:nWP) {
 #using Binomial rng= random number generator
-RealDiseasePredictions[i] <binomial_rng(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnviro  + Cor[i] * parCor + mu[i]));
+RealDiseasePredictions[i] <- binomial_rng(TotalObservedcolonies[i],inv_logit(b0+ Environment[i] * parEnvironment + Cor[i] * parCor + mu[i]));
 }
 }
 '
