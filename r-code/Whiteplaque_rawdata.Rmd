@@ -1,0 +1,49 @@
+---
+title: White plaque disease - Appendix A - Biological and Environmental Variables Included
+author: Andia Chaves Fonnegra, Bernd Panassiti
+date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
+output: 
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+header-includes: \usepackage{graphicx}
+email: \email{}
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+# Introduction
+Compilation of raw data. 
+
+
+# Data
+
+# Joint model
+## Loading data 
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+library(ROCR)
+source('r-code/00_settings.R')
+
+# load data & libraries
+White <- read.csv("data/rawdata.csv", header = TRUE)
+```
+
+
+```{r}
+library(R.matlab)
+data <- readMat("Data/TCMP.mat", header=TRUE)
+```
+
+
+
