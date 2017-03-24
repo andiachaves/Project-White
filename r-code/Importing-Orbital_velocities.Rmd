@@ -35,7 +35,7 @@ L1 <- unlist(lapply(11,function(x)
   sapply(1:length(x),
          function(y)do.call("[[",list(x,y)))))
 L1
-#obtion 2 try to sellect the specific rows(sites) in a vector, then use is.element to select the specific value of max orbital velocities. But, I get named list()
+#option 2 try to sellect the specific rows(sites) in a vector, then use is.element to select the specific value of max orbital velocities. But, I get named list()
 vc <- c('3', '5', '6', '8')
 d1 <-data[is.element(data$uorbomax, vc)]
 ```
