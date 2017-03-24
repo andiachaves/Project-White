@@ -1,0 +1,42 @@
+---
+title: "Orbital velocities"
+author: "Andia Chaves Fonnegra"
+date: "March 5, 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Importingorbital velocities from Matlab to R using the R.matlab Package
+
+Load R.Matlab library
+```{r}
+#Install R.matlab package first
+library(R.matlab)
+data <- readMat("Data/TCMP.mat", header=TRUE)
+head(data)
+
+
+```
+
+Select only the orbital velocities for the specific stations
+1. CSE	College Shoal East	College	St. Thomas-St. John	18.1856800	-65.0767700
+2. GKT	Grammanik Bank-Tiger	TigerFSA	St. Thomas-St. John	18.18884776	-64.95658682
+3. MSR	S. Fish	Sfish	St. Thomas-St. John	18.2443300	-64.7583200
+4. OGK	Hind Bank-FSA	HindFSA40m	St. Thomas-St. John	18.2021667	-65.0015833
+
+```{r}
+#Here I try to use lapply function and sapply to transform teh list in a data frame
+#but, it does not work
+data
+L1 <- unlist(lapply(11,function(x)
+  sapply(1:length(x),
+         function(y)do.call("[[",list(x,y)))))
+L1
+#obtion 2 try to sellect the specific rows(sites) in a vector, then use is.element to select the specific value of max orbital velocities. But, I get named list()
+vc <- c('3', '5', '6', '8')
+d1 <-data[is.element(data$uorbomax, vc)]
+```
+

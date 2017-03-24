@@ -39,6 +39,7 @@ source('r-code/00_settings.R')
 
 # load data & libraries
 White <- read.csv("data/rawdata.csv", header = TRUE)
+White
 ```
 
 #Loading librarie
