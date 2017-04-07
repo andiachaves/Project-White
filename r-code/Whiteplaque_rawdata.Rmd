@@ -1,5 +1,5 @@
 ---
-title: White plaque disease - Appendix A - Biological and Environmental Variables Included
+title: White plaque disease - Compilation of rawdata
 author: Andia Chaves Fonnegra, Bernd Panassiti
 date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: 
@@ -32,18 +32,19 @@ Compilation of raw data.
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-library(ROCR)
 source('r-code/00_settings.R')
-
-# load data & libraries
-White <- read.csv("data/rawdata.csv", header = TRUE)
 ```
 
 
 ```{r}
-library(R.matlab)
-data <- readMat("Data/TCMP.mat", header=TRUE)
+WhitePlaque <- read.table("data/Rawdata_WhitePlaque.csv",header=T,sep=",")
 ```
 
 
+```{r}
+save(
+  WhitePlaque,
+  file="data/whiteplaque_rawdata.RData"
+)
+```
 
