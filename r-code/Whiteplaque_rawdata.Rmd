@@ -58,8 +58,8 @@ row.has.na <- apply(White, 1, function(x){any(is.na(x))})
 sum(row.has.na)
 
 White.filtered <- White[!row.has.na,]
-#checking new lenght of the file, it should be 155 (double check excel files no NAs sheet)
-White
+#checking new lenght of the file, it should be 155 rows x 30 columns (double check excel files no NAs sheet)
+dim(White.filtered) #good 155rows  x 30 columns
 head(White.filtered, n=5)
 
 ```
