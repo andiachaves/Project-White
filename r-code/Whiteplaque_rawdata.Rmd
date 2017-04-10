@@ -44,7 +44,7 @@ dim(White)
 ```
 
 
-Clean data from NAs. I used the complete.cases function to get rid all of incomplete rows and columns
+Clean data from NAs. I used the NULL function to get rid of orbital Velocities column 
 ```{r}
 #Eliminate Orbital Velocites Variable due to too many NAs
 White$Orbital_Velocity <- NULL
@@ -57,10 +57,11 @@ row.has.na <- apply(White, 1, function(x){any(is.na(x))})
 #To see how many rows you'll have to drop:
 sum(row.has.na)
 
+#Eliminate the rows with NAs
 White.filtered <- White[!row.has.na,]
 #checking new lenght of the file, it should be 155 rows x 30 columns (double check excel files no NAs sheet)
 dim(White.filtered) #good 155rows  x 30 columns
-head(White.filtered, n=5)
+head(White.filtered, n=14)
 
 ```
 
