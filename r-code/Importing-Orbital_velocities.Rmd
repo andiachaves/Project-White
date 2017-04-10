@@ -38,5 +38,9 @@ L1
 #option 2 try to sellect the specific rows(sites) in a vector, then use is.element to select the specific value of max orbital velocities. But, I get named list()
 vc <- c('3', '5', '6', '8')
 d1 <-data[is.element(data$uorbomax, vc)]
+
+#to obtain a vector with data from station 3 CSE
+L2 <- sapply(data, 3, ']]')
+L2
 ```
 

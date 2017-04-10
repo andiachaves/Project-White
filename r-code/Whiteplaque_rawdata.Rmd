@@ -33,18 +33,48 @@ Compilation of raw data.
 rm(list=ls(all=TRUE))
 # Load settings
 source('r-code/00_settings.R')
+<<<<<<< Updated upstream
+=======
+
+# load data & libraries
+White <- read.csv("data/Rawdata_WP_forBayesian.csv", header = TRUE)
+ls(White)
+dim(White)
+>>>>>>> Stashed changes
 ```
 
 
+Clean data from NAs. I used the complete.cases function to get rid all of incomplete rows and columns
 ```{r}
+<<<<<<< Updated upstream
 WhitePlaque <- read.table("data/Rawdata_WhitePlaque.csv",header=T,sep=",")
 ```
+=======
+#Eliminate Orbital Velocites Variable due to too many NAs
+White <- White[!(is.na(White$Orbital_Velocity)) | !(is.na(White$Depth_disease_transect)),]
+head(White, n=5)
+#check how many rows have NAs
+row.has.na <- apply(White, 1, function(x){any(is.na(x))})
 
+#to obtain a logical vector with values denoting whether there is any NA in a row. 
+#To see how many rows you'll have to drop:
+sum(row.has.na)
+>>>>>>> Stashed changes
 
+White.filtered <- White[!row.has.na,]
+#checking new lenght of the file, it should be 155 (double check excel files no NAs sheet)
+White
+head(White.filtered, n=5)
+
+<<<<<<< Updated upstream
 ```{r}
 save(
   WhitePlaque,
   file="data/whiteplaque_rawdata.RData"
 )
+=======
+#Eliminate rows with NA
+dim(White.filtered)
+>>>>>>> Stashed changes
 ```
 
