@@ -65,7 +65,26 @@ head(White.filtered, n=14)
 ```
 
 
-#Loading libraries
+Check data for correlations
+```{r}
+#Eliminate Month-text column, as we have a Monthnumber column
+White.filtered$Month <- NULL
+
+#Subset the data for environmental variables
+White.filtered <- data.frame(White.filtered[,4:14])
+head(White.filtered)
+
+#Exploring data summary
+#summary(White.filtered)
+
+#use ggpairs to check possible correlations between all 11 environmental variables
+
+library(GGally)
+ggpairs(White.filtered)
+
+```
+
+Loading libraries
 ```{r load Libraries if required}
 
 if(!require(formatR))
@@ -122,16 +141,6 @@ if(!require(qtlcharts))
 ```
 
 
-Check data for correlations
-```{r}
-#Transform Month to a numeric variable
-
-
-#Subset the data, eliminate stations, lat and lot and reef year
-
-
-```
-
 
 
 Data preparation.All environmental data is scaled due to difference in units, this to avoid
@@ -152,6 +161,7 @@ White$Rain_sca    <- scale(White$Rainfall)
 
 
 Year=White$Year
+Month=White$Month_number
 Season=White$Season
 Station=White$Station_name
 Depth=White$Depth_disease_transect
