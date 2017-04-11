@@ -71,8 +71,12 @@ Check data for correlations
 White.filtered$Month <- NULL
 
 #Subset the data for environmental variables
-White.filtered <- data.frame(White.filtered[,4:14])
-head(White.filtered)
+Env1 <- data.frame(White.filtered[,4:9]) #Six Environmental variables at a time
+Env2<- data.frame(White.filtered[,10:14]) # Four more environmental variables
+Env3<- data.frame(White.filtered[c(4:6,10:14)]) #Three variables from Env1 and five from Env2
+Env4<- data.frame(White.filtered[c(7:9,10:14)]) #Other three variables from Env1 and five from Env2
+
+head(Env3)
 
 #Exploring data summary
 #summary(White.filtered)
@@ -80,7 +84,14 @@ head(White.filtered)
 #use ggpairs to check possible correlations between all 11 environmental variables
 
 library(GGally)
-ggpairs(White.filtered)
+ggpairs(Env1) # Fig Env1. correlated salinity with depth and density with depth
+ggpairs(Env2) # Fig En2. No correlation rain and turbidity not clear correlated when using all the stations shallow and deep
+ggpairs(Env3) #conductivity and temperature are correlated, and density and temperature
+
+ggpairs(Env4)
+
+#Correlated environmental variables include:
+
 
 ```
 
