@@ -35,7 +35,6 @@ rm(list=ls(all=TRUE))
 source('r-code/00_settings.R')
 
 
-
 # load data & libraries
 White <- read.csv("data/Rawdata_WP_forBayesian.csv", header = TRUE)
 ls(White)
@@ -45,7 +44,7 @@ dim(White)
 
 
 Clean data from NAs. I used the NULL function to get rid of orbital Velocities column 
-```{r}
+```{r cleaning NAs,  eliminating the minimum data}
 #Eliminate Orbital Velocites Variable due to too many NAs
 White$Orbital_Velocity <- NULL
 head(White)
@@ -65,4 +64,123 @@ head(White.filtered, n=14)
 
 ```
 
+
+#Loading libraries
+```{r load Libraries if required}
+
+if(!require(formatR))
+{
+  install.packages("formatR", repos = mir)
+  require(formatR)
+}
+
+if(!require(StanHeaders)) 
+{
+  install.packages("StanHeaders", repos = mir)
+  require(StanHeaders)
+}
+
+if(!require(rstan))
+{
+  install.packages("rstan", repos = mir)
+  require(rstan)
+}
+
+if(!require(MCMCpack)) # rwish function
+{
+  install.packages("MCMCpack", repos = mir)
+  require(MCMCpack)
+}
+
+if(!require(modeest)) 
+{
+  install.packages("modeest", repos = mir)
+  require(modeest)
+} 
+
+if(!require(IDPmisc))
+{
+  install.packages("IDPmisc", repos = mir)
+  require(IDPmisc)
+} 
+
+if(!require(ggplot2)) 
+{
+  install.packages("ggplot2", repos = mir)
+  require(ggplot2)
+}
+if(!require(shinystan))
+{
+  install.packages("shinystan", repos = mir)
+  require(shinystan)
+}
+if(!require(qtlcharts))
+{
+  install.packages("qtlcharts", repos = mir)
+  require(qtlcharts)
+}
+```
+
+
+Check data for correlations
+```{r}
+#Transform Month to a numeric variable
+
+
+#Subset the data, eliminate stations, lat and lot and reef year
+
+
+```
+
+
+
+Data preparation.All environmental data is scaled due to difference in units, this to avoid
+adding more variability in the analysis
+```{r data_preparation}
+
+White$Chl_sca   <- scale(White$Chlorophyll)
+White$Cond_sca    <- scale(White$Conductivity)
+White$Den_sca    <- scale(White$Density)
+White$DepCTD_sca    <- scale(White$Depth_CTD)
+White$Oxy_sca   <- scale(White$Oxygen)
+White$Sal_sca    <- scale(White$Salinity)
+White$Turb_sca    <- scale(White$Turbidity)
+White$Depth-tran_sca    <- scale(White$Depth_disease_transect)
+White$Temp_sca    <- scale(White$Temperature)
+White$DHW_sca    <- scale(White$Max_DHW)
+White$Rain_sca    <- scale(White$Rainfall)
+
+
+Year=White$Year
+Season=White$Season
+Station=White$Station_name
+Depth=White$Depth_disease_transect
+
+##Environmental variables include temperature and rainfall
+enviroselection = c(10:20) # to select environmental variables
+```
+
+
+# Data as a list
+```{r}
+Season=c(sort(rep(1:4,4)))
+dataList = list (
+        TotalObservedcolonies = White$Ntot,
+        Diseasedcolonies = White$ill,
+        nWP = length(White$Plague),
+        
+        Cor = White$Cor,
+
+        Environment = White[12:(12-1+length(enviroselection))], # Temp, Chlorophyll, Salinity, Turbidity
+        nEnvi = length(enviroselection),
+
+        Season = White$Season,
+        Year = White$Year,
+        Station = White$Station,
+        nSeason = length(unique(Season)),
+        nYear= length(unique(Year)),
+        nStation = length(unique(Station))
+        
+)
+```
 
