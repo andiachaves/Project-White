@@ -1,7 +1,7 @@
 ---
 title: White plaque disease - Compilation of rawdata
 author: Andia Chaves Fonnegra, Bernd Panassiti
-date: '08.23.2016; last modified:06.5.2017 `r format(Sys.Date(), format="%d.%m.%Y")`'
+date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: 
   pdf_document: 
     number_sections: yes
@@ -36,110 +36,36 @@ source('r-code/00_settings.R')
 
 
 # load data & libraries
-White <- read.csv("data/Rawdata_WP.csv", header = TRUE)
+White <- read.csv("data/Rawdata_WP_forBayesian.csv", header = TRUE)
 ls(White)
 dim(White)
+
+```
+
+
+Clean data from NAs. I used the NULL function to get rid of orbital Velocities column 
+```{r cleaning NAs,  eliminating the minimum data}
+#Eliminate Orbital Velocites Variable due to too many NAs
+White$Orbital_Velocity <- NULL
 head(White)
-White
-```
 
-Exploring data- Boxplots and linear regressions
+#check how many rows have NAs
+row.has.na <- apply(White, 1, function(x){any(is.na(x))})
 
-```{r}
-library(ggplot2)
-#first environmental variables per month
+#to obtain a logical vector with values denoting whether there is any NA in a row. 
+#To see how many rows you'll have to drop:
+sum(row.has.na)
 
-#Per month
-
-#Chlorophyll 
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p1 <- ggplot(White, aes(x=Month, y=Chlorophyll,stat="identity"))  + 
-        geom_boxplot()
-p1
-
-Ll#Conductivity
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p2 <- ggplot(White, aes(x = Month, y = Conductivity)) +
-        geom_boxplot()
-p2
-
-#Density
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p3 <- ggplot(White, aes(x = Month, y = Density)) +
-        geom_boxplot()
-p3
-
-#Max_DHW
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p4 <- ggplot(White, aes(x = Month, y = Max_DHW)) +
-        geom_boxplot()
-p4
-
-#Oxygen
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p5 <- ggplot(White, aes(x = Month, y = Oxygen)) +
-        geom_boxplot()
-p5
-
-#Rainfall
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p5 <- ggplot(White, aes(x = Month, y = Rainfall)) +
-        geom_boxplot()
-p5
-
-
-#Salinity
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p6 <- ggplot(White, aes(x = Month, y = Salinity)) +
-        geom_boxplot()
-p6
-
-#Temperature
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p7 <- ggplot(White, aes(x = Month, y = Temperature)) +
-        geom_boxplot()
-p7
-
-#Turbidity
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p8 <- ggplot(White, aes(x = Month, y = Turbidity)) +
-        geom_boxplot()
-p8
-
-#WP prevalence
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p9 <- ggplot(White, aes(x = Month, y = White_Plague_Pervalence)) +
-        geom_boxplot()
-p9
-
-
-#---------------------------------------------
-
-
-#Chlorophyll per Season
-White$Season<-factor(White$Season) #Convert Month into a labelled factor to use as a grouping variabel
-p2 <- ggplot(White, aes(x = Season, y = Chlorophyll)) +
-        geom_boxplot()
-p2
-#---------------------------------------------------------------
-#Chlorophyll per Depth
-White$Depth_disease_transect<-factor(White$Depth_disease_transect) #Convert Month into a labelled factor to use as a grouping variabel
-p2 <- ggplot(White, aes(x = Depth_disease_transect, y = Chlorophyll)) +
-        geom_boxplot()
-p2
-
-```
-
-Logistic Regressions 
-```{r}
-
-
+#Eliminate the rows with NAs
+White.filtered <- White[!row.has.na,]
+#checking new lenght of the file, it should be 155 rows x 30 columns (double check excel files no NAs sheet)
+dim(White.filtered) #good 155rows  x 30 columns
+head(White.filtered, n=14)
 
 ```
 
 
-
-Checking data for correlations
+Check data for correlations
 ```{r}
 #Eliminate Month-text column, as we have a Monthnumber column
 White.filtered$Month <- NULL
