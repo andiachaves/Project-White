@@ -49,20 +49,21 @@ library(ggplot2)
 
 #PER MONTH ENVIRONMENTAL VARIABLES
 #Chlorophyll
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p1 <- ggplot(White, aes(x = Month, y = Chlorophyll)) +
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p1 <- ggplot(White, aes(x = Month_12, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll (mg m^-3)") + scale_x_discrete(name = "Months") +
       geom_boxplot()
 p1
 
+
 #Conductivity
-White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p2 <- ggplot(White, aes(x = Month, y = Conductivity)) +
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p2 <- ggplot(White, aes(x = Month_12, y = Conductivity)) +
       geom_boxplot()
 p2
 
 #Density
 White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-p3 <- ggplot(White, aes(x = Month, y = Chlorophyll)) +
+p3 <- ggplot(White, aes(x = Month, y = Density)) +
         geom_boxplot()
 p3
 
