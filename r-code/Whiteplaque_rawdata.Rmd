@@ -45,50 +45,69 @@ head(White)
 
 Boxplots - figures
 ```{r}
+library(ggplot2)
 
- #Oxygen
+#PER MONTH ENVIRONMENTAL VARIABLES
+#Chlorophyll
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p1 <- ggplot(White, aes(x = Month, y = Chlorophyll)) +
++         geom_boxplot()
+p1
+
+#Conductivity
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p2 <- ggplot(White, aes(x = Month, y = Conductivity)) +
++         geom_boxplot()
+p2
+
+#Density
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p3 <- ggplot(White, aes(x = Month, y = Chlorophyll)) +
++         geom_boxplot()
+p3
+
+#MAX DHW
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p4 <- ggplot(White, aes(x = Month, y = Max_DHW)) +
++         geom_boxplot()
+p4
+
+#Oxygen
 White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
 p5 <- ggplot(White, aes(x = Month, y = Oxygen)) +
 +         geom_boxplot()
 p5
 
+#Rainfall
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p6 <- ggplot(White, aes(x = Month, y = Rainfall)) +
++ geom_boxplot()
+p6
 
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p5 <- ggplot(White, aes(x = Month, y = Rainfall)) +
+#Salinity
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p7 <- ggplot(White, aes(x = Month, y = Salinity)) +
 + geom_boxplot()
-> p5
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p5 <- ggplot(White, aes(x = Month, y = Salinity)) +
+p7
+
+#Temperature
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p8 <- ggplot(White, aes(x = Month, y = Temperature)) +
++         geom_boxplot()
+p8
+
+#Turbidity
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p9 <- ggplot(White, aes(x = Month, y = Turbidity)) +
 + geom_boxplot()
-> p5
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p7 <- ggplot(White, aes(x = Month, y = Temperature)) +
+p9
+
+#WP prevalence
+White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
+p10 <- ggplot(White, aes(x = Month, y = White_Plague_Prevalence)) +
 +         geom_boxplot()
-> p7
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p8 <- ggplot(White, aes(x = Month, y = Turbidity)) +
-+ geom_boxplot()
-> p8
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p9 <- ggplot(White, aes(x = Month, y = White_Plague_Prevalence)) +
-+         geom_boxplot()
-> p9
-Error in eval(expr, envir, enclos) : 
-  object 'White_Plague_Prevalence' not found
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p9 <- ggplot(White, aes(x = Month, y = White_Plague_Pervalence)) +
-+         geom_boxplot()
-> p9
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p9 <- ggplot(White, aes(x = Month, y = X.coral)) +
-+         geom_boxplot()
-> p9
-Error in eval(expr, envir, enclos) : object 'X.coral' not found
-> White$Month<-factor(White$Month) #Convert Month into a labelled factor to use as a grouping variabel
-> p9 <- ggplot(White, aes(x = Month, y = X.Coral)) +
-+         geom_boxplot()
-> p9
-> View(White)
+p10
+
 ```
 
 
