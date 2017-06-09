@@ -50,20 +50,20 @@ library(ggplot2)
 #PER MONTH ENVIRONMENTAL VARIABLES
 #Chlorophyll
 White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
-p1 <- ggplot(White, aes(x = Month_12, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll (mg "m"^"-3"")") + scale_x_discrete(name = "Months") +
+p1 <- ggplot(White, aes(x = Month_12, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll"~("mg"%*%"m"^{-3})) + scale_x_discrete(name = "Months") +
       geom_boxplot()
 p1
 
 
 #Conductivity
 White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
-p2 <- ggplot(White, aes(x = Month_12, y = Conductivity)) +scale_y_continuous(name = "Conductivity (COS/m)") + scale_x_discrete(name = "Months") +
+p2 <- ggplot(White, aes(x = Month_12, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS"%*%"m"^{-1})) + scale_x_discrete(name = "Months") +
       geom_boxplot()
 p2
 
 #Density
 White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
-p3 <- ggplot(White, aes(x = Month_12, y = Density)) +scale_y_continuous(name = "Density (Kg/m3)") + scale_x_discrete(name = "Months") +
+p3 <- ggplot(White, aes(x = Month_12, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Months") +
         geom_boxplot()
 p3
 
@@ -74,7 +74,7 @@ p4
 
 #Oxygen
 White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
-p5 <- ggplot(White, aes(x = Month_12, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen (mg/L)") + scale_x_discrete(name = "Months") + 
+p5 <- ggplot(White, aes(x = Month_12, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg"%*%"L"^{-1})) + scale_x_discrete(name = "Months") + 
      geom_boxplot()
 p5
 
@@ -92,9 +92,9 @@ p7
 
 #Temperature
 White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
-p8 <- ggplot(White, aes(x = Month_12, y = Temperature)) + scale_y_continuous(name = "Temperature (oC)") + scale_x_discrete(name = "Months") + 
+p01 <- ggplot(White, aes(x = Month_12, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Months") + 
      geom_boxplot()
-p8
+p01
 
 #Turbidity
 White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
