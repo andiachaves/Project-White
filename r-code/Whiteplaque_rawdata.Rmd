@@ -370,56 +370,157 @@ p51 <- ggplot(White, aes(x = Year, y = X.Orbicellids))+ scale_y_continuous(name 
 p51
 
 
-#Conductivity
+#% Sand
 White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p22 <- ggplot(White, aes(x = Year, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_discrete(name = "Years") +
+p52 <- ggplot(White, aes(x = Year, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Years") +
       geom_boxplot()
-p22
+p52
 
-#Density
+#% Coral
 White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p23 <- ggplot(White, aes(x = Year, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Years") +
+p53 <- ggplot(White, aes(x = Year, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Years") +
         geom_boxplot()
-p23
+p53
 
-#MAX DHW
+#% Sponges
 White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p24 <- ggplot(White, aes(x = Year, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Years") + geom_boxplot()
-p24
+p54 <- ggplot(White, aes(x = Year, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Years") + geom_boxplot()
+p54
 
-#Oxygen
+#% Macroalgae
 White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p25 <- ggplot(White, aes(x = Year, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Years") + 
+p55 <- ggplot(White, aes(x = Year, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Years") + 
      geom_boxplot()
-p25
+p55
 
-#Rainfall
+#% of Cyanobacteria
 White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p26 <- ggplot(White, aes(x = Year, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Years") + 
+p56 <- ggplot(White, aes(x = Year, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Years") + 
 geom_boxplot()
-p26
+p56
 
-#Salinity
-White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p27 <- ggplot(White, aes(x = Year, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Years") + geom_boxplot()
-p27
+```
 
-#Temperature
-White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p28 <- ggplot(White, aes(x = Year, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Years") + 
+BOX PLOTS BIOLOGICAL VARIABLES PER DEPTH
+
+```{r}
+#% Orbicellids
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p57 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Depth (m)") +
+      geom_boxplot()
+p57
+
+
+#% Sand
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p58 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Depth (m)") +
+      geom_boxplot()
+p58
+
+#% Coral
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p59 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Depth (m)") +
+        geom_boxplot()
+p59
+
+#% Sponges
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p60 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Depth (m)") + geom_boxplot()
+p60
+
+#% Macroalgae
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p61 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Depth (m)") + 
      geom_boxplot()
-p28
+p61
 
-#Turbidity
-White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p29 <- ggplot(White, aes(x = Year, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Years") + 
+#% of Cyanobacteria
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p62 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Depth (m)") + 
 geom_boxplot()
-p29
+p62
+```
 
-#WP prevalence
-White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
-p30 <- ggplot(White, aes(x = Year, y = White_Plague_Pervalence)) + scale_y_continuous(name = "WP Prevalence (diseased/total)") + scale_x_discrete(name = "Years") + geom_boxplot()
-p30
+BOX PLOTS BIOLOGICAL VARIABLES PER TYPE OF REEF
+```{r}
+
+#% Orbicellids
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p63 <- ggplot(White, aes(x = Reef.Type,  y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Reef Type") +
+      geom_boxplot()
+p63
+
+#% Sand
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p64 <- ggplot(White, aes(x = Reef.Type, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Reef Type (m)") +
+      geom_boxplot()
+p64
+
+#% Coral
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p65 <- ggplot(White, aes(x = Reef.Type, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Reef Type") +
+        geom_boxplot()
+p65
+
+#% Sponges
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p66 <- ggplot(White, aes(x = Reef.Type, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p66
+
+#% Macroalgae
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p64 <- ggplot(White, aes(x = Reef.Type, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Reef Type") + 
+     geom_boxplot()
+p64
+
+#% of Cyanobacteria
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p65 <- ggplot(White, aes(x = Reef.Type, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Reef Type") + 
+geom_boxplot()
+p65
+
+```
+
+BOXPLOTS BIOLOGICAL VARIABLES PER SEASON
+
+```{r}
+#BOX PLOTS BIOLOGICAL VARIABLESL PER SEASON
+#% Orbicellids
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p66 <- ggplot(White, aes(x = Season, y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Seasons") +
+      geom_boxplot()
+p66
+
+
+#% Sand
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p67 <- ggplot(White, aes(x = Season, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Seasons") +
+      geom_boxplot()
+p67
+
+#% Coral
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p68 <- ggplot(White, aes(x = Season, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Seasons") +
+        geom_boxplot()
+p68
+
+#% Sponges
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p69 <- ggplot(White, aes(x = Season, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Seasons") + geom_boxplot()
+p69
+
+#% Macroalgae
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p70 <- ggplot(White, aes(x = Season, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Seasons") + 
+     geom_boxplot()
+p70
+
+#% of Cyanobacteria
+White$Season<-factor(White$Season)#Convert reef type into a labelled factor to use as a grouping variabel
+p71 <- ggplot(White, aes(x = Season, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Seasons") + 
+geom_boxplot()
+p71
+
 ```
 
 
