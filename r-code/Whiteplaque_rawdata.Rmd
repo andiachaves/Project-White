@@ -35,8 +35,8 @@ rm(list=ls(all=TRUE))
 source('r-code/00_settings.R')
 
 
-# load data & libraries
-White <- read.csv("data/Rawdata_WP.csv", header = TRUE)
+# load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
+White <- read.csv("data/Rawdata_WP_No_average.csv", header = TRUE)
 ls(White)
 dim(White)
 head(White)
@@ -524,10 +524,98 @@ p71
 ```
 
 
+SIMPLE LINEAR REGRESSION PLOTS - ENVIRONMENTAL VARIABLES VS WHITE PLAGUE PREVALENCE
+
+```{r}
+#Chlorophyll vs WP Prevalence
+p72 <- ggplot(White, aes(x = White_Plague_Pervalence, y = Chlorophyll)) + scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_continuous(name = "WP Prevalence (diseased/total)") + geom_point(shape=1) + geom_smooth() #using method loess
+p72
+
+#Conductivity
+p73 <- ggplot(White, aes(x = White_Plague_Pervalence, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_continuous(name = "WP Prevalence (diseased/total)") + geom_point(shape=1) + geom_smooth() #using method loess
+p73
+
+#Density
+p43 <- ggplot(White, aes(x = Reef.Type, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Reef Type") +
+        geom_boxplot()
+p43
+
+#MAX DHW
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p44 <- ggplot(White, aes(x = Reef.Type, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p44
+
+#Oxygen
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p45 <- ggplot(White, aes(x = Reef.Type, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Reef type") + 
+     geom_boxplot()
+p45
+
+#Rainfall
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p46 <- ggplot(White, aes(x = Reef.Type, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Reef Type") + 
+geom_boxplot()
+p46
+
+#Salinity
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p47 <- ggplot(White, aes(x = Reef.Type, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p47
+
+#Temperature
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p48 <- ggplot(White, aes(x = Reef.Type, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Reef Type") + 
+     geom_boxplot()
+p48
+
+#Turbidity
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p49 <- ggplot(White, aes(x = Reef.Type, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Reef Type") + 
+geom_boxplot()
+p49
+
+```
+
+
+VARIABLES INTERACTIONS TESTING- Likelihood Ratio test using ANOVA/ANCOVA 
+
+```{r}
+# Using GLM (family= Binomial) # for White Plague Pervalence in relation to other environmental variables
+
+str(White)
+
+#Evaluating WP prevalence in relation to Depth and Turbidity
+White$Depth_disease_transect <-as.factor(White$Depth_disease_transect) # Change Depth as factor
+#Give number of corals with and without diseases for the binomial, as it needs both to run
+not.ill<- White$ntot-White$ill
+not.ill
+ill<-White$ill
+ill
+y<-cbind(ill,not.ill)
+
+m1<- glm(y~White$Depth_disease_transect+White$Turbidity,family= binomial)
+print(summary(m1))
+
+m2<-glm(y~White$Depth_disease_transect*White$Turbidity, family=binomial)
+print(summary(m2))
+anova(m1,m2, test="LRT")
+
+
+#Evaluating WP prevalence in relation to Turbidity and MAX degree Heating Weeks (MAX DHW)
+
+m3<- glm(y~White$Turbidity+White$Max_DHW,family= binomial)
+print(summary(m3)) #significant
+m4<-glm(y~White$Turbidity*White$Max_DHW, family= binomial)
+print(summary(m4)) # Significant
+anova(m3,m4, test="LRT") # Significant
+
+```
+
+
 Check data for correlations
 ```{r}
 #Eliminate Month-text column, as we have a Monthnumber column
-White.filtered$Month <- NULL
+#White.filtered$Month <- NULL
 
 #Subset the data for environmental variables
 Env1 <- data.frame(White.filtered[,4:9]) #Six Environmental variables at a time
