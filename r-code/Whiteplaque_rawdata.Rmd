@@ -36,7 +36,7 @@ source('r-code/00_settings.R')
 
 
 # load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
-White <- read.csv("data/Rawdata_WP_No_average.csv", header = TRUE)
+White <- read.csv("data/Rawdata_WP_No_average_Rainmm.csv", header = TRUE) #Rainfall in mm
 ls(White)
 dim(White)
 head(White)
@@ -524,60 +524,115 @@ p71
 ```
 
 
-SIMPLE LINEAR REGRESSION PLOTS - ENVIRONMENTAL VARIABLES VS WHITE PLAGUE PREVALENCE
+SIMPLE LINEAR REGRESSION/BINNOMIAL PLOTS - ENVIRONMENTAL VARIABLES VS WHITE PLAGUE PREVALENCE
 
 ```{r}
+library(ggplot2) 
+
+#using pairs to make scterrplots of specific variables
+White1<- White[,c(11:14,28)]
+White1
+pairs(White1,panel=panel.smooth, line.main= 1, font.labels = 1, col="black",cex.labels = 1.5)
+
+
 #Chlorophyll vs WP Prevalence
-p72 <- ggplot(White, aes(x = White_Plague_Pervalence, y = Chlorophyll)) + scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_continuous(name = "WP Prevalence (diseased/total)") + geom_point(shape=1) + geom_smooth() #using method loess
+p72 <- ggplot(White, aes(x = Chlorophyll, y = White_Plague_Pervalence)) + scale_x_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
 p72
 
 #Conductivity
-p73 <- ggplot(White, aes(x = White_Plague_Pervalence, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_continuous(name = "WP Prevalence (diseased/total)") + geom_point(shape=1) + geom_smooth() #using method loess
+p73 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Conductivity)) +scale_x_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
 p73
 
 #Density
-p43 <- ggplot(White, aes(x = Reef.Type, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Reef Type") +
-        geom_boxplot()
-p43
+p74 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Density)) +scale_x_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p74
 
 #MAX DHW
-White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
-p44 <- ggplot(White, aes(x = Reef.Type, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
-p44
+p75 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Max_DHW)) +  scale_x_continuous(name = "Max DHW") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p75
 
 #Oxygen
-White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
-p45 <- ggplot(White, aes(x = Reef.Type, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Reef type") + 
-     geom_boxplot()
-p45
+p76 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Oxygen)) + scale_x_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p76
 
 #Rainfall
-White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
-p46 <- ggplot(White, aes(x = Reef.Type, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Reef Type") + 
-geom_boxplot()
-p46
+p77 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Rainfall)) + scale_x_continuous(name = "Rainfall (mm)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p77
 
 #Salinity
-White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
-p47 <- ggplot(White, aes(x = Reef.Type, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
-p47
+p78 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Salinity)) + scale_x_continuous(name = "Salinity (PSU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p78
 
 #Temperature
-White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
-p48 <- ggplot(White, aes(x = Reef.Type, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Reef Type") + 
-     geom_boxplot()
-p48
+p79 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Temperature)) + scale_x_continuous(name = "Temperature"~(degree*C)) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p79
 
 #Turbidity
-White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
-p49 <- ggplot(White, aes(x = Reef.Type, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Reef Type") + 
-geom_boxplot()
-p49
+p80 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Turbidity)) +  scale_x_continuous(name = "Turbidity (NTU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p80
+
+#Depth
+p81 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Depth_disease_transect)) +  scale_x_continuous(name = "Depth (m)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p81
+
+dev.off()
+source("http://peterhaschke.com/Code/multiplot.R")
+multiplot(p72,p73,p74,p75,p76,p77,p78,p79,p80,p81, cols=3)
+
+#BINOMIAL LINE
+#Example from the web
+#ggplot(dat, aes(x=mpg, y=vs)) + geom_point() + 
+ # stat_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+
+#Chlorophyll vs WP Prevalence
+p82 <- ggplot(White, aes(x = Chlorophyll, y = White_Plague_Pervalence)) + scale_x_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p82
+
+#Conductivity
+p83 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Conductivity)) +scale_x_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_y_continuous(name = "WP Prevalence") +  geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p83
+
+#Density
+p84 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Density)) +scale_x_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_y_continuous(name = "WP Prevalence")+ geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p84
+
+#MAX DHW
+p85 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Max_DHW)) +  scale_x_continuous(name = "Max DHW") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p85
+
+#Oxygen
+p86 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Oxygen)) + scale_x_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p86
+
+#Rainfall
+p87 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Rainfall)) + scale_x_continuous(name = "Rainfall (mm)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p87
+
+#Salinity
+p88 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Salinity)) + scale_x_continuous(name = "Salinity (PSU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p88
+
+#Temperature
+p89 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Temperature)) + scale_x_continuous(name = "Temperature"~(degree*C)) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p89
+
+#Turbidity
+p90 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Turbidity)) +  scale_x_continuous(name = "Turbidity (NTU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p90
+
+#Depth
+p91 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Depth_disease_transect)) +  scale_x_continuous(name = "Depth (m)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p91
+
+dev.off()
+source("http://peterhaschke.com/Code/multiplot.R")
+multiplot(p82,p83,p84,p85,p86,p87,p88,p89,p90,p91, cols=3)
+
 
 ```
 
 
-VARIABLES INTERACTIONS TESTING- Likelihood Ratio test using ANOVA/ANCOVA 
+VARIABLES INTERACTIONS TESTING- Likelihood Ratio test using GLM
 
 ```{r}
 # Using GLM (family= Binomial) # for White Plague Pervalence in relation to other environmental variables
@@ -591,7 +646,7 @@ not.ill<- White$ntot-White$ill
 not.ill
 ill<-White$ill
 ill
-y<-cbind(ill,not.ill)
+y<-cbind(ill,not.ill) # binding both vectors of ill and no.ill corals - binomial
 
 m1<- glm(y~White$Depth_disease_transect+White$Turbidity,family= binomial)
 print(summary(m1))
@@ -608,6 +663,68 @@ print(summary(m3)) #significant
 m4<-glm(y~White$Turbidity*White$Max_DHW, family= binomial)
 print(summary(m4)) # Significant
 anova(m3,m4, test="LRT") # Significant
+
+
+
+#Check for optimum for Temperature, Oxygen and Salinity?
+#optimum :  y = x+x2
+
+m5<- glm(y~(White$Temperature+(White$Temperature)^2)+(White$Oxygen+(White$Oxygen)^2)+(White$Salinity+(White$Salinity)^2),family= binomial)
+print(summary(m5)) #significant
+m6<-glm(y~(White$Temperature+(White$Temperature)^2)*(White$Oxygen+(White$Oxygen)^2)*(White$Salinity+(White$Salinity)^2), family= binomial)
+print(summary(m6)) # Significant
+anova(m5,m6, test="LRT") # Significant
+
+#Check for optimum for Temperature, Oxygen and Salinity?
+#y=x, 
+
+m9<- glm(y~White$Temperature+White$Oxygen+White$Salinity,family= binomial)
+print(summary(m9)) #significant
+m10<-glm(y~White$Temperature*White$Oxygen*White$Salinity, family= binomial)
+print(summary(m10)) # Significant
+anova(m9,m10, test="LRT") # Significant
+
+#Turbidity, Depth and MAx DHW in one model
+
+m7<- glm(y~(White$Turbidity)+(White$Max_DHW)+(White$Depth_disease_transect),family= binomial)
+print(summary(m7)) #significant
+m8<-glm(y~(White$Turbidity)*(White$Max_DHW)*(White$Depth_disease_transect), family= binomial)
+print(summary(m8)) # Significant
+anova(m7,m8, test="LRT") # Significant
+
+#Clorophyll, disolved oxygen 
+
+m11<- glm(y~White$Chlorophyll+White$Oxygen,family= binomial)
+print(summary(m11)) #significant
+m12<-glm(y~White$Chlorophyll*White$Oxygen,family= binomial)
+print(summary(m12)) # Significant
+anova(m11,m12, test="LRT") # Significant
+
+#Rain and Turbidity
+
+m13<- glm(y~White$Turbidity+White$Rainfall,family= binomial)
+print(summary(m13)) #significant
+m14<-glm(y~White$Turbidity*White$Rainfall,family= binomial)
+print(summary(m14)) # Significant
+anova(m13,m14, test="LRT") # Significant
+
+
+#Only Rain
+m15<- glm(y~White$Rainfall,family= binomial)
+print(summary(m15)) #significant
+
+#Only Salinityy
+m16<-glm(y~White$Salinity,family= binomial)
+print(summary(m16)) # NO Significant
+
+#Only Conductivity
+m17<-glm(y~White$Conductivity,family= binomial)
+print(summary(m17)) #  Significant
+
+#Only Density
+m18<-glm(y~White$Density,family= binomial)
+print(summary(m18)) # Significant
+
 
 ```
 
