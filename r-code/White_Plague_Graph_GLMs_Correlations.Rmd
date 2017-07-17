@@ -1,0 +1,772 @@
+---
+title: "Graphs, GLMS, Correlations-Checking Data"
+author: "Andia Chaves Fonnegra"
+date: "7/17/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+# Data
+
+# Joint model
+## Loading data 
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+source('r-code/00_settings.R')
+
+
+# load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
+White <- read.csv("data/Rawdata_WP_No_average_Rainmm.csv", header = TRUE) #Rainfall in mm
+ls(White)
+dim(White)
+head(White)
+```
+
+
+Boxplots - figures
+```{r}
+library(ggplot2) 
+
+#BOX-PLOTS PER MONTH ENVIRONMENTAL VARIABLES
+#Chlorophyll
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p1 <- ggplot(White, aes(x = Month_12, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_discrete(name = "Months") +
+      geom_boxplot()
+p1
+
+
+#Conductivity
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p2 <- ggplot(White, aes(x = Month_12, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_discrete(name = "Months") +
+      geom_boxplot()
+p2
+
+#Density
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p3 <- ggplot(White, aes(x = Month_12, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Months") +
+        geom_boxplot()
+p3
+
+#MAX DHW
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p4 <- ggplot(White, aes(x = Month_12, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Months") + geom_boxplot()
+p4
+
+#Oxygen
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p5 <- ggplot(White, aes(x = Month_12, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Months") + 
+     geom_boxplot()
+p5
+
+#Rainfall
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p6 <- ggplot(White, aes(x = Month_12, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Months") + 
+geom_boxplot()
+p6
+
+#Salinity
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p7 <- ggplot(White, aes(x = Month_12, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Months") + 
+geom_boxplot()
+p7
+
+#Temperature
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p01 <- ggplot(White, aes(x = Month_12, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Months") + 
+     geom_boxplot()
+p01
+
+#Turbidity
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p9 <- ggplot(White, aes(x = Month_12, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Months") + 
+geom_boxplot()
+p9
+
+#WP prevalence
+White$Month_12<-factor(White$Month_12)  #Convert Month into a labelled factor to use as a grouping variabel
+p10 <- ggplot(White, aes(x = Month_12, y = White_Plague_Pervalence)) + scale_y_continuous(name = "WP Prevalence (diseased/total)") + scale_x_discrete(name = "Months") + geom_boxplot()
+p10
+
+
+```
+
+BOX PLOTS ENVIRONMENTAL PER SEASON
+
+```{r}
+#BOX PLOTS ENVIRONMENTAL PER SEASON
+#Chlorophyll
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p11 <- ggplot(White, aes(x = Season, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_discrete(name = "Seasons") +
+      geom_boxplot()
+p11
+
+
+#Conductivity
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p12 <- ggplot(White, aes(x = Season, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_discrete(name = "Seasons") +
+      geom_boxplot()
+p12
+
+#Density
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p13 <- ggplot(White, aes(x = Season, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Seasons") +
+        geom_boxplot()
+p13
+
+#MAX DHW
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p14 <- ggplot(White, aes(x = Season, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Seasons") + geom_boxplot()
+p14
+
+#Oxygen
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p15 <- ggplot(White, aes(x = Season, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Seasons") + 
+     geom_boxplot()
+p15
+
+#Rainfall
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p16 <- ggplot(White, aes(x = Season, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Seasons") + 
+geom_boxplot()
+p16
+
+#Salinity
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p17 <- ggplot(White, aes(x = Season, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Seasons") + 
+geom_boxplot()
+p17
+
+#Temperature
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p18 <- ggplot(White, aes(x = Season, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Seasons") + 
+     geom_boxplot()
+p18
+
+#Turbidity
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p19 <- ggplot(White, aes(x = Season, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Seasons") + 
+geom_boxplot()
+p19
+
+#WP prevalence
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p20 <- ggplot(White, aes(x = Season, y = White_Plague_Pervalence)) + scale_y_continuous(name = "WP Prevalence (diseased/total)") + scale_x_discrete(name = "Seasons") + geom_boxplot()
+p20
+```
+
+BOX PLOTS ENVIRONMENTAL PER YEAR
+
+```{r}
+#Chlorophyll
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p21 <- ggplot(White, aes(x = Year, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_discrete(name = "Years") +
+      geom_boxplot()
+p21
+
+
+#Conductivity
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p22 <- ggplot(White, aes(x = Year, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_discrete(name = "Years") +
+      geom_boxplot()
+p22
+
+#Density
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p23 <- ggplot(White, aes(x = Year, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Years") +
+        geom_boxplot()
+p23
+
+#MAX DHW
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p24 <- ggplot(White, aes(x = Year, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Years") + geom_boxplot()
+p24
+
+#Oxygen
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p25 <- ggplot(White, aes(x = Year, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Years") + 
+     geom_boxplot()
+p25
+
+#Rainfall
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p26 <- ggplot(White, aes(x = Year, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Years") + 
+geom_boxplot()
+p26
+
+#Salinity
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p27 <- ggplot(White, aes(x = Year, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Years") + geom_boxplot()
+p27
+
+#Temperature
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p28 <- ggplot(White, aes(x = Year, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Years") + 
+     geom_boxplot()
+p28
+
+#Turbidity
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p29 <- ggplot(White, aes(x = Year, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Years") + 
+geom_boxplot()
+p29
+
+#WP prevalence
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p30 <- ggplot(White, aes(x = Year, y = White_Plague_Pervalence)) + scale_y_continuous(name = "WP Prevalence (diseased/total)") + scale_x_discrete(name = "Years") + geom_boxplot()
+p30
+```
+
+BOX PLOTS ENVIRONMENTAL PER DEPTH
+
+```{r}
+#Chlorophyll
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p31 <- ggplot(White, aes(x = Depth_disease_transect, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_discrete(name = "Depth (m)") +
+      geom_boxplot()
+p31
+
+
+#Conductivity
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p32 <- ggplot(White, aes(x = Depth_disease_transect, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_discrete(name = "Depth (m)") +
+      geom_boxplot()
+p32
+
+#Density
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p33 <- ggplot(White, aes(x = Depth_disease_transect, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Depth (m)") +
+        geom_boxplot()
+p33
+
+#MAX DHW
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p34 <- ggplot(White, aes(x = Depth_disease_transect, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Depth (m)") + geom_boxplot()
+p34
+
+#Oxygen
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p35 <- ggplot(White, aes(x = Depth_disease_transect, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Depth (m)") + 
+     geom_boxplot()
+p35
+
+#Rainfall
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p36 <- ggplot(White, aes(x = Depth_disease_transect, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Depth (m)") + 
+geom_boxplot()
+p36
+
+#Salinity
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p37 <- ggplot(White, aes(x = Depth_disease_transect, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Depth (m)") + geom_boxplot()
+p37
+
+#Temperature
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p38 <- ggplot(White, aes(x = Depth_disease_transect, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Depth (m)") + 
+     geom_boxplot()
+p38
+
+#Turbidity
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p39 <- ggplot(White, aes(x = Depth_disease_transect, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Depth (m)") + 
+geom_boxplot()
+p39
+
+#WP prevalence
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p40 <- ggplot(White, aes(x = Depth_disease_transect, y = White_Plague_Pervalence)) + scale_y_continuous(name = "WP Prevalence (diseased/total)") + scale_x_discrete(name = "Depth (m)") + geom_boxplot()
+p40
+```
+
+ENVIRONMENTAL PER REEF TYPE
+
+```{r}
+#Chlorophyll
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p41 <- ggplot(White, aes(x = Reef.Type, y = Chlorophyll))+ scale_y_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_x_discrete(name = "Reef Type") +
+      geom_boxplot()
+p41
+
+
+#Conductivity
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p42 <- ggplot(White, aes(x = Reef.Type, y = Conductivity)) +scale_y_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_x_discrete(name = "Reef Type") +
+      geom_boxplot()
+p42
+
+#Density
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p43 <- ggplot(White, aes(x = Reef.Type, y = Density)) +scale_y_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_x_discrete(name = "Reef Type") +
+        geom_boxplot()
+p43
+
+#MAX DHW
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p44 <- ggplot(White, aes(x = Reef.Type, y = Max_DHW)) +  scale_y_continuous(name = "Max DHW") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p44
+
+#Oxygen
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p45 <- ggplot(White, aes(x = Reef.Type, y = Oxygen)) + scale_y_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_x_discrete(name = "Reef type") + 
+     geom_boxplot()
+p45
+
+#Rainfall
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p46 <- ggplot(White, aes(x = Reef.Type, y = Rainfall)) + scale_y_continuous(name = "Rainfall (inches)") + scale_x_discrete(name = "Reef Type") + 
+geom_boxplot()
+p46
+
+#Salinity
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p47 <- ggplot(White, aes(x = Reef.Type, y = Salinity)) + scale_y_continuous(name = "Salinity (PSU)") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p47
+
+#Temperature
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p48 <- ggplot(White, aes(x = Reef.Type, y = Temperature)) + scale_y_continuous(name = "Temperature"~(degree*C)) + scale_x_discrete(name = "Reef Type") + 
+     geom_boxplot()
+p48
+
+#Turbidity
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p49 <- ggplot(White, aes(x = Reef.Type, y = Turbidity)) +  scale_y_continuous(name = "Turbidity (NTU)") + scale_x_discrete(name = "Reef Type") + 
+geom_boxplot()
+p49
+
+#WP prevalence
+White$Reef.Type<-factor(White$Reef.Type)  #Convert depth into a labelled factor to use as a grouping variabel
+p50 <- ggplot(White, aes(x = Reef.Type, y = White_Plague_Pervalence)) + scale_y_continuous(name = "WP Prevalence (diseased/total)") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p50
+```
+
+BOX PLOTS BIOLOGICAL VARIABLES PER YEAR
+
+```{r}
+#% Orbicellids
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p51 <- ggplot(White, aes(x = Year, y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Years") +
+      geom_boxplot()
+p51
+
+
+#% Sand
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p52 <- ggplot(White, aes(x = Year, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Years") +
+      geom_boxplot()
+p52
+
+#% Coral
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p53 <- ggplot(White, aes(x = Year, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Years") +
+        geom_boxplot()
+p53
+
+#% Sponges
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p54 <- ggplot(White, aes(x = Year, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Years") + geom_boxplot()
+p54
+
+#% Macroalgae
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p55 <- ggplot(White, aes(x = Year, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Years") + 
+     geom_boxplot()
+p55
+
+#% of Cyanobacteria
+White$Year<-factor(White$Year)  #Convert Month into a labelled factor to use as a grouping variabel
+p56 <- ggplot(White, aes(x = Year, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Years") + 
+geom_boxplot()
+p56
+
+```
+
+BOX PLOTS BIOLOGICAL VARIABLES PER DEPTH
+
+```{r}
+#% Orbicellids
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p57 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Depth (m)") +
+      geom_boxplot()
+p57
+
+
+#% Sand
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p58 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Depth (m)") +
+      geom_boxplot()
+p58
+
+#% Coral
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p59 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Depth (m)") +
+        geom_boxplot()
+p59
+
+#% Sponges
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p60 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Depth (m)") + geom_boxplot()
+p60
+
+#% Macroalgae
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p61 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Depth (m)") + 
+     geom_boxplot()
+p61
+
+#% of Cyanobacteria
+White$Depth_disease_transect<-factor(White$Depth_disease_transect)  #Convert depth into a labelled factor to use as a grouping variabel
+p62 <- ggplot(White, aes(x = Depth_disease_transect, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Depth (m)") + 
+geom_boxplot()
+p62
+```
+
+BOX PLOTS BIOLOGICAL VARIABLES PER TYPE OF REEF
+```{r}
+
+#% Orbicellids
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p63 <- ggplot(White, aes(x = Reef.Type,  y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Reef Type") +
+      geom_boxplot()
+p63
+
+#% Sand
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p64 <- ggplot(White, aes(x = Reef.Type, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Reef Type (m)") +
+      geom_boxplot()
+p64
+
+#% Coral
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p65 <- ggplot(White, aes(x = Reef.Type, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Reef Type") +
+        geom_boxplot()
+p65
+
+#% Sponges
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p66 <- ggplot(White, aes(x = Reef.Type, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Reef Type") + geom_boxplot()
+p66
+
+#% Macroalgae
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p64 <- ggplot(White, aes(x = Reef.Type, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Reef Type") + 
+     geom_boxplot()
+p64
+
+#% of Cyanobacteria
+White$Reef.Type<-factor(White$Reef.Type)  #Convert reef type into a labelled factor to use as a grouping variabel
+p65 <- ggplot(White, aes(x = Reef.Type, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Reef Type") + 
+geom_boxplot()
+p65
+
+```
+
+BOXPLOTS BIOLOGICAL VARIABLES PER SEASON
+
+```{r}
+#BOX PLOTS BIOLOGICAL VARIABLESL PER SEASON
+#% Orbicellids
+White$Season<-factor(White$Season)  #Convert Month into a labelled factor to use as a grouping variabel
+p66 <- ggplot(White, aes(x = Season, y = X.Orbicellids))+ scale_y_continuous(name = "% of Orbicellids") + scale_x_discrete(name = "Seasons") +
+      geom_boxplot()
+p66
+
+
+#% Sand
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p67 <- ggplot(White, aes(x = Season, y = X.Sand)) +scale_y_continuous(name = "% of Sand") + scale_x_discrete(name = "Seasons") +
+      geom_boxplot()
+p67
+
+#% Coral
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p68 <- ggplot(White, aes(x = Season, y = X.Coral)) +scale_y_continuous(name = "% of Coral") + scale_x_discrete(name = "Seasons") +
+        geom_boxplot()
+p68
+
+#% Sponges
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p69 <- ggplot(White, aes(x = Season, y = X.Sponges)) +  scale_y_continuous(name = "% of Sponges") + scale_x_discrete(name = "Seasons") + geom_boxplot()
+p69
+
+#% Macroalgae
+White$Season<-factor(White$Season)  #Convert reef type into a labelled factor to use as a grouping variabel
+p70 <- ggplot(White, aes(x = Season, y = X.Macroalgae)) + scale_y_continuous(name = "% of Macroalgae") + scale_x_discrete(name = "Seasons") + 
+     geom_boxplot()
+p70
+
+#% of Cyanobacteria
+White$Season<-factor(White$Season)#Convert reef type into a labelled factor to use as a grouping variabel
+p71 <- ggplot(White, aes(x = Season, y = X.Cyanobacteria)) + scale_y_continuous(name = "% of Cyanobacteria") + scale_x_discrete(name = "Seasons") + 
+geom_boxplot()
+p71
+
+```
+
+
+SIMPLE LINEAR REGRESSION/BINNOMIAL PLOTS - ENVIRONMENTAL VARIABLES VS WHITE PLAGUE PREVALENCE
+
+```{r}
+library(ggplot2) 
+
+#using pairs to make scterrplots of specific variables
+White1<- White[,c(11:14,28)]
+White1
+pairs(White1,panel=panel.smooth, line.main= 1, font.labels = 1, col="black",cex.labels = 1.5)
+
+
+#Chlorophyll vs WP Prevalence
+p72 <- ggplot(White, aes(x = Chlorophyll, y = White_Plague_Pervalence)) + scale_x_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p72
+
+#Conductivity
+p73 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Conductivity)) +scale_x_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p73
+
+#Density
+p74 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Density)) +scale_x_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p74
+
+#MAX DHW
+p75 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Max_DHW)) +  scale_x_continuous(name = "Max DHW") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p75
+
+#Oxygen
+p76 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Oxygen)) + scale_x_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p76
+
+#Rainfall
+p77 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Rainfall)) + scale_x_continuous(name = "Rainfall (mm)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p77
+
+#Salinity
+p78 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Salinity)) + scale_x_continuous(name = "Salinity (PSU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p78
+
+#Temperature
+p79 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Temperature)) + scale_x_continuous(name = "Temperature"~(degree*C)) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p79
+
+#Turbidity
+p80 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Turbidity)) +  scale_x_continuous(name = "Turbidity (NTU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p80
+
+#Depth
+p81 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Depth_disease_transect)) +  scale_x_continuous(name = "Depth (m)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method=lm) #adds a linear regression line (95% confidence region)
+p81
+
+dev.off()
+source("http://peterhaschke.com/Code/multiplot.R")
+multiplot(p72,p73,p74,p75,p76,p77,p78,p79,p80,p81, cols=3)
+
+#BINOMIAL LINE
+#Example from the web
+#ggplot(dat, aes(x=mpg, y=vs)) + geom_point() + 
+ # stat_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+
+#Chlorophyll vs WP Prevalence
+p82 <- ggplot(White, aes(x = Chlorophyll, y = White_Plague_Pervalence)) + scale_x_continuous(name = "Chlorophyll"~("mg m"^{-3})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p82
+
+#Conductivity
+p83 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Conductivity)) +scale_x_continuous(name = "Conductivity"~("COS m"^{-1})) + scale_y_continuous(name = "WP Prevalence") +  geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p83
+
+#Density
+p84 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Density)) +scale_x_continuous(name = "Density"~("Kg"%*%"m"^{-3})) + scale_y_continuous(name = "WP Prevalence")+ geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p84
+
+#MAX DHW
+p85 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Max_DHW)) +  scale_x_continuous(name = "Max DHW") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p85
+
+#Oxygen
+p86 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Oxygen)) + scale_x_continuous(name = "Dissolved Oxygen"~("mg L"^{-1})) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p86
+
+#Rainfall
+p87 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Rainfall)) + scale_x_continuous(name = "Rainfall (mm)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p87
+
+#Salinity
+p88 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Salinity)) + scale_x_continuous(name = "Salinity (PSU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p88
+
+#Temperature
+p89 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Temperature)) + scale_x_continuous(name = "Temperature"~(degree*C)) + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p89
+
+#Turbidity
+p90 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Turbidity)) +  scale_x_continuous(name = "Turbidity (NTU)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p90
+
+#Depth
+p91 <- ggplot(White, aes(y = White_Plague_Pervalence, x = Depth_disease_transect)) +  scale_x_continuous(name = "Depth (m)") + scale_y_continuous(name = "WP Prevalence") + geom_point(shape=1) + geom_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+p91
+
+dev.off()
+source("http://peterhaschke.com/Code/multiplot.R")
+multiplot(p82,p83,p84,p85,p86,p87,p88,p89,p90,p91, cols=3)
+
+
+```
+
+
+VARIABLES INTERACTIONS TESTING- Likelihood Ratio test using GLM
+
+```{r}
+# Using GLM (family= Binomial) # for White Plague Pervalence in relation to other environmental variables
+
+str(White)
+
+#Evaluating WP prevalence in relation to Depth and Turbidity
+White$Depth_disease_transect <-as.factor(White$Depth_disease_transect) # Change Depth as factor
+#Give number of corals with and without diseases for the binomial, as it needs both to run
+not.ill<- White$ntot-White$ill
+not.ill
+ill<-White$ill
+ill
+y<-cbind(ill,not.ill) # binding both vectors of ill and no.ill corals - binomial
+
+m1<- glm(y~White$Depth_disease_transect+White$Turbidity,family= binomial)
+print(summary(m1))
+
+m2<-glm(y~White$Depth_disease_transect*White$Turbidity, family=binomial)
+print(summary(m2))
+anova(m1,m2, test="LRT")
+
+
+#Evaluating WP prevalence in relation to Turbidity and MAX degree Heating Weeks (MAX DHW)
+
+m3<- glm(y~White$Turbidity+White$Max_DHW,family= binomial)
+print(summary(m3)) #significant
+m4<-glm(y~White$Turbidity*White$Max_DHW, family= binomial)
+print(summary(m4)) # Significant
+anova(m3,m4, test="LRT") # Significant
+
+
+
+#Check for optimum for Temperature, Oxygen and Salinity?
+#optimum :  y = x+x2
+
+m5<- glm(y~(White$Temperature+(White$Temperature)^2)+(White$Oxygen+(White$Oxygen)^2)+(White$Salinity+(White$Salinity)^2),family= binomial)
+print(summary(m5)) #significant
+m6<-glm(y~(White$Temperature+(White$Temperature)^2)*(White$Oxygen+(White$Oxygen)^2)*(White$Salinity+(White$Salinity)^2), family= binomial)
+print(summary(m6)) # Significant
+anova(m5,m6, test="LRT") # Significant
+
+#Check for optimum for Temperature, Oxygen and Salinity?
+#y=x, 
+
+m9<- glm(y~White$Temperature+White$Oxygen+White$Salinity,family= binomial)
+print(summary(m9)) #significant
+m10<-glm(y~White$Temperature*White$Oxygen*White$Salinity, family= binomial)
+print(summary(m10)) # Significant
+anova(m9,m10, test="LRT") # Significant
+
+#Turbidity, Depth and MAx DHW in one model
+
+m7<- glm(y~(White$Turbidity)+(White$Max_DHW)+(White$Depth_disease_transect),family= binomial)
+print(summary(m7)) #significant
+m8<-glm(y~(White$Turbidity)*(White$Max_DHW)*(White$Depth_disease_transect), family= binomial)
+print(summary(m8)) # Significant
+anova(m7,m8, test="LRT") # Significant
+
+#Clorophyll, disolved oxygen 
+
+m11<- glm(y~White$Chlorophyll+White$Oxygen,family= binomial)
+print(summary(m11)) #significant
+m12<-glm(y~White$Chlorophyll*White$Oxygen,family= binomial)
+print(summary(m12)) # Significant
+anova(m11,m12, test="LRT") # Significant
+
+#Rain and Turbidity
+
+m13<- glm(y~White$Turbidity+White$Rainfall,family= binomial)
+print(summary(m13)) #significant
+m14<-glm(y~White$Turbidity*White$Rainfall,family= binomial)
+print(summary(m14)) # Significant
+anova(m13,m14, test="LRT") # Significant
+
+
+#Only Rain
+m15<- glm(y~White$Rainfall,family= binomial)
+print(summary(m15)) #significant
+
+#Only Salinityy
+m16<-glm(y~White$Salinity,family= binomial)
+print(summary(m16)) # NO Significant
+
+#Only Conductivity
+m17<-glm(y~White$Conductivity,family= binomial)
+print(summary(m17)) #  Significant
+
+#Only Density
+m18<-glm(y~White$Density,family= binomial)
+print(summary(m18)) # Significant
+
+
+```
+
+
+Check data for correlations
+```{r}
+#Eliminate Month-text column, as we have a Monthnumber column
+#White.filtered$Month <- NULL
+
+#Subset the data for environmental variables
+Env1 <- data.frame(White[,c(11:13,15:17)]) #First six Environmental variables at a time
+Env2<- data.frame(White[,18:21]) # Four more environmental variables
+Env3<- data.frame(White[,c(11:13,18:19)]) #Three variables from Env1 and two from Env2
+Env4<- data.frame(White[,c(11:13,20:21)]) #Other three variables from Env1 and three from Env2
+Env5<- data.frame(White[,c(15:17,18:19)])# Last three env variables fro, Env1 and  two of Env2
+Env6<- data.frame(White[,c(15:17,20:21)])# Last three env variables fro, Env1 and  three of Env2
+
+Env7<- data.frame((White[,c(18:19)]))
+head(Env2)
+
+#Exploring data summary
+#summary(White.filtered)
+
+#use ggpairs to check possible correlations between all 11 environmental variables
+
+library(GGally)
+ggpairs(Env1) # Fig Env1. correlated salinity with depth and density with depth
+ggpairs(Env2) # Fig En2. No correlation rain and turbidity not clear correlated when using all the stations shallow and deep
+ggpairs(Env3) #conductivity and temperature are correlated, and density and temperature
+
+ggpairs(Env4)
+ggpairs(Env5)
+ggpairs(Env6)
+ggpairs(Env7)
+
+pairs(Env1)
+pairs(Env2)
+
+
+cor.test(White$Temperature, White$Temperature)
+
+#Correlated environmental variables include:
+White$Depth_disease_transect <-as.numeric(White$Depth_disease_transect) # Change Depth as factor
+mean(White$Temperature[White$Depth_disease_transect=="Depth_disease_transect"])
+mean(White$Temperature)
+White$Depth_disease_transect
+
+#Correlations found:
+
+#temperature- conductivity
+#temperature-Density
+#Turbidity and Rainfall as not too much correlated when including shallow sites.
+#We decided to keep all variables for Bayesian Model. 
+```

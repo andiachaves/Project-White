@@ -1,0 +1,5 @@
+-Examine the priors for s2 under both models.  Adjust as necessary. 
+-Choose a different prior for s2 (e.g., uniform, gamma).  
+	-Write down model. 
+	-Modify M-H step in MCMC algorithm.
+	-Compare results.

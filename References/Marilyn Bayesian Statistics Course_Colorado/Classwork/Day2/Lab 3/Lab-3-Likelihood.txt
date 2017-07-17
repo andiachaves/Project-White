@@ -1,0 +1,241 @@
+LAB 3. LIKELIHOOOD
+
+setwd("C:/Bayesian Course/Day 2_Likelihood and probability/Lab likelihood")
+
+#####################################################
+# PART I.
+####################################################
+
+mu.true<-1
+k.true<-0.4
+x<-rnbinom(50,mu=mu.true,size=k.true)
+
+#Take a look at the data using some graphics. 
+
+plot (table(factor(x,levels=0:max(x))),ylab="Frequency",xlab="x")
+
+#Now we will build a function that calculates the negative log-likelihood for this distribution given a set a parameters. Arguments for this function are p, the vector of parameters, and dat the vector of data: 
+
+NLLfun1 <- function (mu, k) {
+	  -sum(dnbinom(x, mu = mu, size = k, log = TRUE))
+ }
+
+# First we will calculate the negative log-likelihood with the true values 
+# of the distribution. 
+
+nll.true = NLLfun1(mu = mu.true, k = k.true)
+
+nll.true
+
+
+ m = mean(x)
+ v = var(x)
+ mu.mom = m
+ k.mom = m/(v/m - 1)
+
+# And then obtain the MLE using mle2
+
+sol1<-mle2(NLLfun1,start=list(mu=mu.mom,k=k.mom),hessian=TRUE)
+summary(sol1)
+
+#value is the likelihood number. 
+
+sol1@details$value
+
+
+###############################################################
+
+# EXERCISE 1. SEE SPREADSHEET.
+
+################################################################
+# EXERCISE 2: HEMLOCK WITH NLS
+
+data<-read.csv("Hemlock-light-data.csv")
+
+attach(data)
+
+
+# Process model=a*(Light-c)/((a/b)+(Light-c)) 
+
+start<-list(a=40, b=2, c=6)
+m1<-nls(Observed.growth.rate~a*(Light-c)/((a/b)+(Light-c)), start=start)
+
+a<-coef(m1)["a"]
+b<-coef(m1)["b"]
+c<-coef(m1)["c"]
+plot(Light,Observed.growth.rate)
+x<-Light
+curve(a*(x-c)/((a/b)+(x-c)), add=TRUE, col="blue")
+
+pred<-fitted(m1)
+plot(Observed.growth.rate, pred, xlim=c(0,50), ylim=c(0,50))
+abline(0,1)
+
+
+# Just for fun....you might also try
+
+pred.growth<-function(a,b,c){a*(Light-c)/((a/b)+(x-c))}
+
+
+NLLfun3<-function(a,b,c,sd)
+	{
+	pred<-pred.growth(a,b,c)
+	-sum(dnorm(Observed.growth.rate,mean=pred,sd=sd,log=TRUE),na.rm=TRUE)
+	}
+
+
+m6<-mle2(NLLfun3,start=list(a=30,b=2, c=6,sd=sd(Observed.growth.rate)),method="L-BFGS-B",lower=0.01)
+
+summary(m6)
+a<-coef(m6)["a"]
+b<-coef(m6)["b"]
+c<-coef(m6)["c"]
+plot(Light,Observed.growth.rate)
+pred.grow<-pred.growth(a,b,c)
+x<-Light
+curve(a*(x-c)/((a/b)+(x-c)), add=TRUE, col="blue")
+plot(Observed.growth.rate, pred.grow, xlim=c(0,50), ylim=c(0,50))
+abline(0,1)
+
+# Let's try a gamma. The trick here is to link the predicted to the parameters
+# of the pdf using the method of moments.
+
+# Recall that for the gamma pdf
+# E(x)=shape*scale therefore shape=pred/scale
+# Var(x)=shape*scale^2
+
+# we obtain a reasonable starting value for scale by:
+
+m=mean(Observed.growth.rate)
+v=var(Observed.growth.rate)
+
+scale=v/m #then shape=m/scale
+
+NLLfun4<-function(a,b,c, scale)
+	{
+	pred<-pred.growth(a,b,c)# Same scientific model
+	-sum(dgamma(Observed.growth.rate,shape=pred/scale,scale=scale,log=TRUE),na.rm=TRUE)
+	}
+
+start=list(a=30,b=2, c=6,scale=6)
+lower=c(10,1,4,1)
+upper=c(60,10,10,10)
+
+m4<-mle2(NLLfun4,start=start,lower=lower,upper=upper,method="L-BFGS-B")
+summary(m4)
+
+# So this has a worse (higher) likelihood relative to m6.
+a<-coef(m4)["a"]
+b<-coef(m4)["b"]
+c<-coef(m4)["c"]
+plot(Light,Observed.growth.rate)
+x<-Light
+curve(a*(x-c)/((a/b)+(x-c)), add=TRUE, col="blue")
+
+# Check the fit.
+ Pred.Growth<-a*(x-c)/((a/b)+(x-c))
+ plot(Observed.growth.rate,Pred.Growth,xlim=c(0,50),ylim=c(0,50))
+ abline(a=0,b=1) # Note that these a and b have nothing to do with the estimation.
+
+# Use likelihood to compare but also plot
+par(mfrow=c(1,2))
+a<-coef(m4)["a"]
+b<-coef(m4)["b"]
+c<-coef(m4)["c"]
+plot(Light,Observed.growth.rate,main="Gamma")
+x<-Light
+curve(a*(x-c)/((a/b)+(x-c)), add=TRUE, col="blue")
+
+a<-coef(m6)["a"]
+b<-coef(m6)["b"]
+c<-coef(m6)["c"]
+plot(Light,Observed.growth.rate,main="Normal")
+pred.grow<-pred.growth(a,b,c)
+x<-Light
+curve(a*(x-c)/((a/b)+(x-c)), add=TRUE, col="blue")
+
+detach(data)
+
+#########################################################################
+
+# EXERCISE 3: REEF FISH 
+
+library(bbmle)
+data<-read.table("Reef_fish.txt", header=T, sep="\t")
+attach(data)
+
+plot(settlers, recruits)
+# so that you can guess starting values for a and b
+
+hist(settlers)
+
+#For the exercise
+adult.recruits<-function(a,b,settlers){a*settlers/(1+(a/b)*settlers)}
+
+
+#likelihood function for a binomial:
+
+NLLfun<-function(a,b)
+	{
+	recprob=a/(1+(a/b)*settlers)
+	-sum(dbinom (recruits, prob=recprob, size=settlers,log=TRUE), na.rm=TRUE)
+	}
+
+m4<-mle2(minuslogl=NLLfun,start=list(a=0.5,b=10),method="L-BFGS-B",lower=0.003)
+
+fish.data<-cbind(recruits,settlers)
+
+# we get rid of the zeros because you cannot have recruits if there
+# are no settlers although the code still works..
+
+recruits=recruits[settlers>0]
+settlers=settlers[settlers>0]
+
+m4<-mle2(minuslogl=NLLfun,start=list(a=0.5,b=10),method="L-BFGS-B",lower=0.003)
+summary(m4)
+
+# You can now plot the fits that you got from the analyses:
+
+a<-coef(m4)["a"]
+b<-coef(m4)["b"]
+plot(settlers,recruits)
+curve(a*x/(1+(a/b)*x), add=TRUE, col="blue")
+
+# Looks like a pretty good fit.
+
+# and calculate the likelihod
+NL<-NLLfun(a,b)
+
+## Is there another option. You may want to try a negative binomial.
+# Let's see.
+
+NLLfun2<-function(a,b,size)
+	{
+	pred.rec=a*settlers/(1+(a/b)*settlers)
+	-sum(dnbinom (recruits, mu=pred.rec, size=size,log=TRUE), na.rm=TRUE)
+	}
+
+# Let's get starting values for the k in the neg binomial.
+m = mean(recruits)
+v = var(recruits)
+
+# So variance is greater than mean.
+# We use the method of moments to generate starting values
+
+mu.mom = m
+k.mom = m/(v/m - 1)
+
+m5<-mle(NLLfun2,start=list(a=0.5,b=10,size=k.mom),method="L-BFGS-B",lower=0.003)
+summary(m5)
+
+a<-coef(m5)["a"]
+b<-coef(m5)["b"]
+plot(settlers,recruits)
+curve(a*x/(1+(a/b)*x), add=TRUE, col="blue")
+
+# Results are similar to those obtained with m4 parameterization.
+
+detach(data)
+
+#############################################################
+
