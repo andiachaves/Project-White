@@ -1,4 +1,0 @@
--Write out a specific model for each extension (from slides).
--Draw DAG
--Write out proportional posterior. 
--What would be required to find necessary full-conditionals?
