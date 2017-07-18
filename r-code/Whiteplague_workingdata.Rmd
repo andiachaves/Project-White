@@ -1,0 +1,76 @@
+---
+title: "white_working_data"
+author: "Andia Chaves Fonnegra"
+date: "7/18/2017"
+output: pdf_document
+---
+
+This file is to prepare the data before feeding it into the model.
+Here I scaled data and do shanges on the working data
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+
+Loading Whiteplague_rawdata.rdata
+```{r}
+
+# load data & libraries - Loading Raw data file as r.data
+white.env <-environment() # here I am trying to save it to an specific environment and not a global environment
+load('~/Documents/Project-White/Data/Whiteplague-rawdata.rdata', envir = white.env)
+ls()
+#check data
+ls(White)
+dim(White)
+head(White)
+
+```
+
+
+Data preparation.All environmental data is scaled due to difference in units, this to avoid
+adding more variability in the analysis
+```{r data_preparation}
+
+White$Chl_sca   <- scale(White$Chlorophyll)
+White$Cond_sca    <- scale(White$Conductivity)
+White$Den_sca    <- scale(White$Density)
+White$DepCTD_sca    <- scale(White$Depth_CTD)
+White$Oxy_sca   <- scale(White$Oxygen)
+White$Sal_sca    <- scale(White$Salinity)
+White$Turb_sca    <- scale(White$Turbidity)
+White$Depth_tran_sca  <- scale(White$Depth_disease_transect)
+White$Temp_sca    <- scale(White$Temperature)
+White$DHW_sca    <- scale(White$Max_DHW)
+White$Rain_sca    <- scale(White$Rainfall)
+
+#Simplifying syntax of factors (Year, Depth, Month, Season, Station) to use in the model
+Year=White$Year
+Month=White$Month_number
+Season=White$Season
+Station=White$Station_name
+Depth=White$Depth_disease_transect
+
+
+##Selecting Environmental variables to use in the model
+enviroselection = c(32:34) # to select all 11 environmental variables. ``{r}
+
+#Save working data  file with data already scaled/ and or transformed to be used by the model
+save(White,file="data/Whiteplague-workingdata.rdata")
+ls()
+#check data
+ls(White)
+dim(White)
+head(White)
+
+#grep("^White$grep("^bar$", colnames(x))", colnames(x))
+```
+
+
