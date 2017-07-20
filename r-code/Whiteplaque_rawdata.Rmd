@@ -43,7 +43,7 @@ dim(White)
 head(White)
 
 #Save data as rdata file to avoid changing this data in the future
-save(White,file="data/White.rdata")
+save(White,file="data/White_rawdata1.rdata")
 ```
 
 Once this file is saved, I used in the Whiteplague_working data Rmarkdown script to modify it and sclae/ transform data without

@@ -95,33 +95,37 @@ Loading Whiteplague_workeddata.rdata
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-load('~/Documents/Project-White/Data/Whiteplague-workingdata.rdata', envir = white.env)
+White1<- load('~/Documents/Project-White/Data/Whiteplague_sorted_data.rdata')
 ls()
 
 #check data
-ls(White)
-dim(White)
-head(White)
+ls(White1)
+dim(White1)
+head(White1)
 ##grep("^White$Chl_sca", colnames(x))
 
 ##Selecting Environmental variables to use in the model
-enviroselection = c(32:34) # to select all 11 environmental variables. ``{r}
+enviroselection = White1[c(32:34)] # to select all 11 environmental variables. ``{r}
 enviroselection
+
+#count how many months we have in total
+library(plyr)
+count(White1$Month_12)
 ```
 
 
 
 # Data as a list, using Month as factor
 ```{r}
-Month=c(sort(rep(1:26,13))) # Total of 26 months (2012-2015) max, for 13 stations
+Month=rep(1:12,c(3,25,26,29,22,4,7,29,30,14,25,25))  # Total of 12 months, 
 dataList = list(
-        TotalObservedcolonies = White$ntot,
-        Diseasedcolonies = White$ill,
-        nWP = length(White$White_Plague_Prevalence),
+        TotalObservedcolonies = White1$Ntot,
+        Diseasedcolonies = White1$ill,
+        nWP = length(White1$Plague),
         
-                  Chlorophyll = White$Chl_sca,
-                  Conductivity = White$Cond_sca,
-                  Density = White$Den_sca,
+                  Chlorophyll = White1$Chl_sca,
+                  Conductivity = White1$Cond_sca,
+                  Density = White1$Den_sca,
                   #CTD_Depth = White$DepCTD_sca,    
                   #Oxygen = White$Oxy_sca,   
                   #Salinity = White$Sal_sca,    
@@ -131,7 +135,7 @@ dataList = list(
                   #Max_DHW = White$DHW_sca  , 
                   #Rainfall = White$Rain_sca,   
         
-        Environment = White[32:(32-1+length(enviroselection))],
+        Environment = White1[32:(32-1+length(enviroselection))],
         nEnvi = length(enviroselection),
 
         Month = Month,
@@ -231,109 +235,35 @@ Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
 ```
 
-
-```{r rmd2r,echo=FALSE,eval=FALSE}
-# export to .r format
-if(!require(stringi)) # stri_sub function
-{
-  install.packages("stringi", repos = mir)
-  require(stringi)
-}
-#' ## script for converting .Rmd files to .R scripts.
-
-#' #### Kevin Keenan 2014
-#' http://rstudio-pubs-static.s3.amazonaws.com/12734_0a38887f19a34d92b7311a2c9cb15022.html
-#' 
-#' This function will read a standard R markdown source file and convert it to 
-#' an R script to allow the code to be run using the "source" function.
-#' 
-#' The function is quite simplisting in that it reads a .Rmd file and adds 
-#' comments to non-r code sections, while leaving R code without comments
-#' so that the interpreter can run the commands.
-#' 
-#' 
-# library "stringi" needs to be loaded
-rmd2rscript <- function(infile){
-  # read the file
-  flIn <- readLines(infile)
-  # identify the start of code blocks
-  cdStrt <- which(grepl(flIn, pattern = "```{r*", perl = TRUE))
-  # identify the end of code blocks
-  cdEnd <- sapply(cdStrt, function(x){
-    preidx <- which(grepl(flIn[-(1:x)], pattern = "```", perl = TRUE))[1]
-    return(preidx + x)
-  })
-  # define an expansion function
-  # strip code block indacators
-  flIn[c(cdStrt, cdEnd)] <- ""
-  expFun <- function(strt, End){
-    strt <- strt+1
-    End <- End-1
-    return(strt:End)
-  }
-  idx <- unlist(mapply(FUN = expFun, strt = cdStrt, End = cdEnd, 
-                       SIMPLIFY = FALSE))
-  # add comments to all lines except code blocks
-  comIdx <- 1:length(flIn)
-  comIdx <- comIdx[-idx]
-  for(i in comIdx){
-    flIn[i] <- paste("#' ", flIn[i], sep = "")
-  }
-  # create an output file
-  #nm <- strsplit(infile, split = "\\.")[[1]][1]
-  nm <- stri_sub(infile,1,-5)
-  flOut <- file(paste(nm, "_rmd2r.R", sep = ""), "w")
-  for(i in 1:length(flIn)){
-    cat(flIn[i], "\n", file = flOut, sep = "\t")
-  }
-  close(flOut)
-}
-
-rmd2rscript("r-code/Simple.Hierarchical.WP.Rmd")
-unloadNamespace("evaluate")
-unloadNamespace("stringr")
-detach("package:stringi", unload=TRUE)
-```
-
-
 ```{r model_run,eval=FALSE}
 time <- proc.time()
 set.seed(2016)
-stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+stan.white2 <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 
 
+# Session info
+```{r}
+devtools::session_info()
+```
 
 
 ```{r ploting from stan to ggmcmc}
-if(!require(ggmcmc))
-{
-  install.packages("ggmcmc", repos = mir)
-  require(ggmcmc)
-}
-if(!require(coda))
-{
-  install.packages("coda", repos = mir)
-  require(coda)
-}
+print(stan.white2)
+plot(stan.white2)
 
+library(ggmcmc)
+library(coda)
 
 #This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
 #devtools::install_github('christophergandrud/StanCat')
-StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]')
+StanCat::stan_caterpillar(stan.white2, pars = 'v_raw\\[.*\\]')
 
-#To use ggmcmc
-#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
-
-if(!require(plyr))
-{
-  install.packages("plyr", repos = mir)
-  require(plyr)
-}
-
+#To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
+library(plyr)
 #this one extracts everything but is not plotting histograms properly
-s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
+s <- rstan::extract(stan.white2, inc_warmup=FALSE, permuted=FALSE) 
 #this one extracts only some functions
 
 s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))
@@ -347,25 +277,30 @@ ggs_caterpillar(S)
 s <- rstan::extract(stan.white, pars = 'v_raw', permuted = TRUE)$parEnvironment 
 s <- do.call(mcmc.list, alply(s[,,-4], 2, mcmc))
 
-detach("package:ggmcmc")
-detach("package:coda")
-detach("package:plyr")
 ```
 
 ```{r-To save the r markdown file}
-# note: folder figures synchronized in cloud (dropbox) but not results folder
 
-save(dataList, stan.white, file = paste("results/", today, "_fit.fullModel.Rdata",sep = ""))
-save(dataList, file = paste("results/", today, "_fit.fullModel_data.Rdata",sep = ""))
-
+save(dataList, stan.white, file = paste("Figures/", today, "_fit.fullModel.pdf",
+sep = ""))
+save(dataList, file = paste("Figures/", today, "_fit.fullModel_data.Rdata",
+sep = ""))
 library(lattice)
-trellis.device("pdf", file = paste("figures/", today, "_Output_rstan.pdf",
+trellis.device("pdf", file = paste("Figures/", today, "_Output_rstan.pdf",
 sep = ""), width = 14, height = 7)
 plot(stan.white)
 dev.off()
+
+
+library(lattice)
+trellis.device("pdf")
+file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
+plot(stan.white)
 ```
 
-# Session info
-```{r}
-devtools::session_info()
+```{r extract with shiny}
+library(shiny)
+library(shinystan)
+launch_shinystan(stan.white2)
 ```
+
