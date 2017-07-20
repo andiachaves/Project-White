@@ -237,7 +237,7 @@ stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, 
 
 ```{r model_run,eval=FALSE}
 time <- proc.time()
-set.seed(2016)
+set.seed(2017)
 stan.white2 <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
