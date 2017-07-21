@@ -25,7 +25,7 @@ Loading Whiteplague_rawdata.rdata
 
 # load data & libraries - Loading Raw data file as r.data
 white.env <-environment() # here I am trying to save it to an specific environment and not a global environment
-load('~/Documents/Project-White/Data/White_rawdata1.rdata', envir = white.env)
+load('~/Documents/Project-White/Data/White_rawdata1.rdata')
 ls()
 #check data
 ls(White)
@@ -46,7 +46,7 @@ White$DepCTD_sca    <- scale(White$Depth_CTD)
 White$Oxy_sca   <- scale(White$Oxygen)
 White$Sal_sca    <- scale(White$Salinity)
 White$Turb_sca    <- scale(White$Turbidity)
-White$Depth_tran_sca  <- scale(White$Depth_disease_transect)
+White$Depth_tran_sca  <- scale(White$Depth_transect)
 White$Temp_sca    <- scale(White$Temperature)
 White$DHW_sca    <- scale(White$Max_DHW)
 White$Rain_sca    <- scale(White$Rainfall)
@@ -60,22 +60,20 @@ Depth=White$Depth_disease_transect
 
 
 ##Selecting Environmental variables to use in the model
-enviroselection = c(32:34) # to select environmental variables. ``{r}
-
-#Save working data  file with data already scaled/ and or transformed to be used by the model
-save(White,file="data/Whiteplague-workingdata1.rdata")
-ls()
-#check data
-ls(White)
-dim(White)
-head(White)
+enviroselection = c(32:42) # to select environmental variables. ``{r}
+enviroselection
 
 #Sorting the data frame so Months can be in numerical order
 
 White1<-White[order(White$Month_12),]
-
+White1
+#Save working data  file with data already scaled/ and or transformed to be used by the model
 save(White1,file="data/Whiteplague_sorted_data.rdata")
-
+ls()
+#check data
+ls(White1)
+dim(White1)
+head(White)
 #grep("^White$grep("^bar$", colnames(x))", colnames(x))
 #Once the Data is scaled and /or transformed, it can be used in the rstanModel.Rmd file to run Model
 ```

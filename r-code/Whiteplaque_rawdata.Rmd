@@ -31,8 +31,6 @@ Loading data
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-source('r-code/00_settings.R')
-
 
 # load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
 White <- read.csv("data/Rawdata_WP_No_average_Rainmm.csv", header = TRUE) #Rainfall in mm and not average data for diseased (ill or ntot, this to avoid adding more variability, as we discuss with Bernd)

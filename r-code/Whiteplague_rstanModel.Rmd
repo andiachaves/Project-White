@@ -104,8 +104,8 @@ dim(White1)
 head(White1)
 ##grep("^White$Chl_sca", colnames(x))
 
-##Selecting Environmental variables to use in the model
-enviroselection = White1[c(32:34)] # to select all 11 environmental variables. ``{r}
+##Selecting Environmental variables alrready SCALED to use in the model
+enviroselection = White1[c(32:42)] # to select all 11 environmental variables. ``{r}
 enviroselection
 
 #count how many months we have in total
@@ -126,14 +126,14 @@ dataList = list(
                   Chlorophyll = White1$Chl_sca,
                   Conductivity = White1$Cond_sca,
                   Density = White1$Den_sca,
-                  #CTD_Depth = White$DepCTD_sca,    
-                  #Oxygen = White$Oxy_sca,   
-                  #Salinity = White$Sal_sca,    
-                  #Turbidity = White$Turb_sca,    
-                  #Depth = White$Depth_tran_sca,  
-                  #Temperature = White$Temp_sca,   
-                  #Max_DHW = White$DHW_sca  , 
-                  #Rainfall = White$Rain_sca,   
+                  CTD_Depth = White1$DepCTD_sca,    
+                  Oxygen = White1$Oxy_sca,   
+                  Salinity = White1$Sal_sca,    
+                  Turbidity = White1$Turb_sca,    
+                  Depth = White1$Depth_tran_sca,  
+                  Temperature = White1$Temp_sca,   
+                  Max_DHW = White1$DHW_sca  , 
+                  Rainfall = White1$Rain_sca,   
         
         Environment = White1[32:(32-1+length(enviroselection))],
         nEnvi = length(enviroselection),
