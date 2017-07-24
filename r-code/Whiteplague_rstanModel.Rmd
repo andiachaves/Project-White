@@ -335,7 +335,7 @@ Extraction of median model predictions on the response scale
 # transformed in a 2. step to be on the response scale (inv.logit()))
 modelPredictions <- NULL
 modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^realPathogen2012[\\[]",names(draw))])
+draw[grepl("^Real White Plague Prevalence Predictions[\\[]",names(draw))])
 # combine 4 chains
 predictionsLinearWP <- NULL
 predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
