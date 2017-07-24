@@ -68,12 +68,12 @@ enviroselection
 White1<-White[order(White$Month_12),]
 White1
 #Save working data  file with data already scaled/ and or transformed to be used by the model
-save(White1,file="data/Whiteplague_sorted_data.rdata")
+save(White1,file="Data/Whiteplague_sorted_data.rdata")
 ls()
 #check data
 ls(White1)
 dim(White1)
-head(White)
+head(White1)
 #grep("^White$grep("^bar$", colnames(x))", colnames(x))
 #Once the Data is scaled and /or transformed, it can be used in the rstanModel.Rmd file to run Model
 ```
