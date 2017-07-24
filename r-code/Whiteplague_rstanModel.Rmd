@@ -254,6 +254,8 @@ save(stan.white2, file ="Data/stan.white2")
 print(stan.white2)
 plot(stan.white2)
 
+str(stan.white2)
+
 library(ggmcmc)
 library(coda)
 
@@ -320,7 +322,7 @@ Extraction of posterior predictive simulations.
 # real White Plague Prevalence Predictions are simulated (predictions generated in the
 # Generated quantities block of the model code)
 modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^Real White Plague Prevalence Predictions[\\[]",names(draw))])
+draw[grepl("^RealDisease[\\[]",names(draw))])
 
 # combine 4 chains
 simulatedPredictedWP <- NULL
@@ -331,17 +333,20 @@ modelPredictions[,,3], modelPredictions[,,4]) # combining chains
 
 Extraction of median model predictions on the response scale
 ```{r}
+#library(LaplacesDemon)
+#library(arm) 
+#library(boot)
+
 # Real WP prevalence Predictions (are the predictions on the linear scale which are
 # transformed in a 2. step to be on the response scale (inv.logit()))
 modelPredictions <- NULL
 modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^Real White Plague Prevalence Predictions[\\[]",names(draw))])
+draw[grepl("^RealDisease[\\[]",names(draw))])
 # combine 4 chains
 predictionsLinearWP <- NULL
 predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
 modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-predictionsResponseWPMedian <-
-inv.logit(as.vector(apply(predictionsLinearPathogen, 1, median)))*trapsResponse$HoTotal
+predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*White1$Plague # I think is WP prevalence and not ill here for White1$Plague..mmm? This one worked
 ```
 
 Residual diagnosis
@@ -349,12 +354,18 @@ Residual diagnosis
 #devtools::install_github(repo = "DHARMa", username = "florianhartig",
 #subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
 library(DHARMa)
+
+
 WP_DHARMaResponse <- createDHARMa(
 simulatedResponse = simulatedPredictedWP,
-observedResponse = observedWP,
+observedResponse = White1$Plague,
 fittedPredictedResponse = predictionsResponseWPMedian,
 integerResponse = T) # interger correction function
+
+#Plots
 plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse)
+
+#test Spatial autocorrelation Moran's I
 testSpatialAutocorrelation(WP_DHARMaResponse , x = trapCoords$st_x,
 y = trapCoords$st_y)
 
