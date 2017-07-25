@@ -1,7 +1,7 @@
 ---
-title: "Whiteplague_rstanModel"
-author: "Andia Chaves Fonnegra"
-date: "7/18/2017"
+title: "Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands - Appendix A"
+author: "Andia Chaves-Fonnegra, Bernd Panassiti, Tyler B. Smith, Elizabeth Brown, Elizabeth Clemens, Moriah Sevier, and Marilyn Brandt"
+date: 'created: 7/18/2017, last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: pdf_document
 ---
 
@@ -17,11 +17,29 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 ```
 
 
+# Introduction
 
-Install Packages to run rstan in R if necessary
+
+# Data
+
+
+# Model
+
+
+## Loading data
+```{r}
+rm(list=ls(all=TRUE))
+load(file="data/whiteplaque_workingdata.Rdata")
+```
+
+
+
+## Loading required packages
 ```{r Install apckages if required}
 
 #Install packages and load libraries to run Stan and graphing results from Stan
+
+mir <- "http://cran.us.r-project.org" # define R repository
 if(!require(formatR))
 {
   install.packages("formatR", repos = mir)
@@ -73,31 +91,17 @@ if(!require(qtlcharts))
   install.packages("qtlcharts", repos = mir)
   require(qtlcharts)
 }
+
+if(!require(plyr))
+{
+  install.packages("plyr", repos = mir)
+  require(plyr)
+}
 ```
 
-Load libraries if required
-
-```{r}
-# load libraries
-library(formatR)
-library(StanHeaders)
-library(rstan)
-library(MCMCpack) # rwish function
-library(modeest)
-library(IDPmisc)
-library(ggplot2)
-# create directory if not existing
-suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
-
-```
 
 Loading Whiteplague_workeddata.rdata 
 ```{r}
-rm(list=ls(all=TRUE))
-# Load settings
-#White1<- load('~/Documents/Project-White/Data/Whiteplague_sorted_data.rdata')
-#ls()
-
 #check data
 ls(White1)
 dim(White1)
@@ -109,7 +113,6 @@ enviroselection = White1[c(32:42)] # to select all 11 environmental variables. `
 enviroselection
 
 #count how many months we have in total
-library(plyr)
 count(White1$Month_12)
 ```
 
