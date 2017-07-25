@@ -1,12 +1,16 @@
 ---
-title: "white_working_data"
+title: "Creation of white_working_data"
 author: "Andia Chaves Fonnegra"
 date: "7/18/2017"
 output: pdf_document
 ---
 
+# Introduction
 This file is to prepare the data before feeding it into the model.
 Here I scaled data and do shanges on the working data
+
+
+# Data preparation
 
 ```{r setup, include=FALSE, warnings=FALSE}
 library(knitr)
@@ -20,22 +24,32 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 ```
 
 
-Loading Whiteplague_rawdata.rdata
+## Loading data
 ```{r}
-
 # load data & libraries - Loading Raw data file as r.data
+<<<<<<< HEAD
 load(file="Data/Whiteplague_rawdata.rdata")
 ls()
 #check data
 dim(Whiteplague_rawdata)
 head(Whiteplague_rawdata)
 
+=======
+load('data/whiteplaque_rawdata.RData')
+
+#check data
+White <- WhitePlaque
+ls(White)
+dim(White)
+head(White)
+>>>>>>> origin/master
 ```
 
 
-Data preparation.All environmental data is scaled due to difference in units, this to avoid
-adding more variability in the analysis
+## Data preparation
+All environmental data is scaled due to difference in units, this to avoid adding more variability in the analysis
 ```{r data_preparation}
+<<<<<<< HEAD
 
 Whiteplague_rawdata$Chl_sca   <- scale(Whiteplague_rawdata$Chlorophyll)
 Whiteplague_rawdata$Cond_sca    <- scale(Whiteplague_rawdata$Conductivity)
@@ -48,6 +62,19 @@ Whiteplague_rawdata$Depth_tran_sca  <- scale(Whiteplague_rawdata$Depth_transect)
 Whiteplague_rawdata$Temp_sca    <- scale(Whiteplague_rawdata$Temperature)
 Whiteplague_rawdata$DHW_sca    <- scale(Whiteplague_rawdata$Max_DHW)
 Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
+=======
+White$Chl_sca   <- scale(White$Chlorophyll)
+White$Cond_sca    <- scale(White$Conductivity)
+White$Den_sca    <- scale(White$Density)
+White$DepCTD_sca    <- scale(White$Depth_CTD)
+White$Oxy_sca   <- scale(White$Oxygen)
+White$Sal_sca    <- scale(White$Salinity)
+White$Turb_sca    <- scale(White$Turbidity)
+White$Depth_tran_sca  <- scale(White$Depth_transect)
+White$Temp_sca    <- scale(White$Temperature)
+White$DHW_sca    <- scale(White$Max_DHW)
+White$Rain_sca    <- scale(White$Rainfall)
+>>>>>>> origin/master
 
 #Simplifying syntax of factors (Year, Depth, Month, Season, Station) to use in the model
 Year=Whiteplague_rawdata$Year
@@ -62,6 +89,7 @@ enviroselection = c(32:42) # to select environmental variables. ``{r}
 enviroselection
 
 #Sorting the data frame so Months can be in numerical order
+<<<<<<< HEAD
 
 Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
 Whiteplague_working_data
@@ -78,6 +106,22 @@ library(plyr)
 count(Whiteplague_working_data$Month_12)
 
 #Once the Data is scaled and /or transformed, it can be used in the rstanModel.Rmd file to run Model
+=======
+White1<-White[order(White$Month_12),]
+White1
+#check data
+ls(White1)
+dim(White1)
+head(White1)
+>>>>>>> origin/master
 ```
 
+
+
+
+## Saving data
+```{r}
+#Save working data  file with data already scaled/ and or transformed to be used by the model
+save(White1,file="data/Whiteplague_workingdata.rdata")
+```
 

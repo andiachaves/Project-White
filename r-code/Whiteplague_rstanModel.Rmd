@@ -139,6 +139,9 @@ match("Chl_sca",names(Whiteplague_working_data))
 #Selection of all 11 scaled environmental variables. 
 enviroselection = White1[c(32:42)] # 
 enviroselection
+
+#Selection of Biological variables.
+
 ```
 
 
