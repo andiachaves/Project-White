@@ -5,12 +5,6 @@ date: "7/18/2017"
 output: pdf_document
 ---
 
-# Introduction
-This file is to prepare the data before feeding it into the model.
-Here I scaled data and do shanges on the working data
-
-
-# Data preparation
 
 ```{r setup, include=FALSE, warnings=FALSE}
 library(knitr)
@@ -23,6 +17,10 @@ opts_chunk$set(fig.align='center',                # aligns all figures
                 dev='pdf')                        # pdf device
 ```
 
+# Introduction
+This file is to prepare the data before feeding it into the model.
+Data was scaled and saved as working_data file to feed into the model
+
 
 ## Loading data
 ```{r}
@@ -32,20 +30,12 @@ ls()
 #check data
 dim(Whiteplague_rawdata)
 head(Whiteplague_rawdata)
-
-load('data/whiteplaque_rawdata.RData')
-
-#check data
-White <- WhitePlaque
-ls(White)
-dim(White)
-head(White)
 ```
 
 
 ## Data preparation
-All environmental data is scaled due to difference in units, this to avoid adding more variability in the analysis
 ```{r data_preparation}
+#All environmental data is scaled due to difference in units, this to avoid adding more variability in the analysis
 Whiteplague_rawdata$Chl_sca   <- scale(Whiteplague_rawdata$Chlorophyll)
 Whiteplague_rawdata$Cond_sca    <- scale(Whiteplague_rawdata$Conductivity)
 Whiteplague_rawdata$Den_sca    <- scale(Whiteplague_rawdata$Density)
@@ -60,7 +50,7 @@ Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
 
 #Sorting the data frame so Months can be in numerical order
 Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
-Whiteplague_working_data
+head(Whiteplague_working_data)
 
 ```
 
@@ -74,7 +64,7 @@ ls(Whiteplague_working_data)
 dim(Whiteplague_working_data)
 head(Whiteplague_working_data)
 
-#count how many samples per month we have in total
+#count how many samples per month we have in total this is to later define in the model
 library(plyr)
 count(Whiteplague_working_data$Month_12)
 ```

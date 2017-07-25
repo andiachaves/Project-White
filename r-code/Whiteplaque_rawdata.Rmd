@@ -26,7 +26,7 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 ```
 
 # Introduction
-Compilation of raw data from the csv file compiled and prepared by Andia Chaves Fonnegra based on several excel files that included disease data and environmental and biological data. Disease data were obtained by Marilyn Brandt, Biological data obtained by Tyler Smith. Oceanographic-Environmental Data collected in the field by Marilyn Brandt and Tyler Smith, and downloaded and cleaned in the lab by Vanessa Wrigh and Jonathan Jossart.
+Compilation of raw data from the csv file compiled and prepared by Andia Chaves Fonnegra based on several excel files that included disease data and environmental and biological data. Disease data were obtained by Marilyn Brandt, and Biological data obtained by Tyler Smith. Oceanographic-Environmental Data collected in the field by Marilyn Brandt and Tyler Smith, and downloaded and cleaned in the lab by Vanessa Wrigh and Jonathan Jossart. Loading Raw data file without average of ill a ntot of White Plague - made July 11-. Rainfall was changed to mm and rows with average data for diseased (ill or ntot) was eliminated , this to avoid adding more variability as we discussed with Bernd)
 
 # Data
 
@@ -35,8 +35,8 @@ Compilation of raw data from the csv file compiled and prepared by Andia Chaves 
 rm(list=ls(all=TRUE))
 # Load settings
 
-# load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
-Whiteplague_rawdata <- read.csv("data/Whiteplague_rawdata.csv", header = TRUE) #Rainfall was changed to mm and rows with average data for diseased (ill or ntot) was eliminated , this to avoid adding more variability as we discussed with Bernd)
+# load data & libraries 
+Whiteplague_rawdata <- read.csv("data/Whiteplague_rawdata.csv", header = TRUE) 
 
 #check data
 ls(Whiteplague_rawdata)

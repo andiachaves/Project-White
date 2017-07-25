@@ -131,17 +131,13 @@ head(Whiteplague_working_data)
 
 ## Data preparation
 ```{r}
-##Selecting only Environmental variables from the file already SCALED to use in the model.
+##Selecting Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
 match("Chl_sca",names(Whiteplague_working_data))
 
 #Selection of all 11 scaled environmental variables. 
 enviroselection = Whiteplague_working_data[c(32:42)] 
 enviroselection
-
-#Selection of Biological variables.
-biological = Whiteplague_working_data[c(22:27)] 
-biological
 
 # Predictors environmental data
 Chlorophyll = Whiteplague_working_data$Chl_sca
@@ -156,6 +152,10 @@ Temperature = Whiteplague_working_data$Temp_sca
 Max_DHW = Whiteplague_working_data$DHW_sca 
 Rainfall = Whiteplague_working_data$Rain_sca   
 
+#Selection of Biological variables.
+#biological = Whiteplague_working_data[c(22:27)] 
+#biological
+
 # Predictors biological data, all are % of cover in transects. No need to scale?
 #Orbicellids = Whiteplague_working_data$Orbicellids
 #Sand = Whiteplague_working_data$Sand
@@ -164,12 +164,14 @@ Rainfall = Whiteplague_working_data$Rain_sca
 #Macroalgae = Whiteplague_working_data$Macroalgae
 #Cyanobacteria = Whiteplague_working_data$Cyanobacteria    
 
-#Time and location factors (Year, Depth, Month, Season, Station) to use in the model
+#Time and location factors 
 Year=Whiteplague_working_data$Year
-Month=Whiteplague_working_data$Month_number
+Month=Whiteplague_working_data$Month_12
 Season=Whiteplague_working_data$Season
 Station=Whiteplague_working_data$Station_name
-Depth=Whiteplague_working_data$Depth_disease_transect
+Reef.Type=Whiteplague_working_data$Reef.Type
+Latitude=Whiteplague_working_data$Latitude
+Longitude=Whiteplague_working_data$Longitude
 
 ```
 
@@ -179,26 +181,26 @@ Depth=Whiteplague_working_data$Depth_disease_transect
 #data as a list
 Month=rep(1:12,c(3,25,26,29,22,4,7,29,30,14,25,25))  # Total of 12 months, with different sampling per month over 2-4 years
 dataList = list(
-        TotalObservedcolonies = White1$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
-        Diseasedcolonies = White1$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
-        nWP = length(White1$Plague), #White Plague prevalence total number of rows
-        observedWpPrevalence = White1$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
+        TotalObservedcolonies = Whiteplague_working_data$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
+        Diseasedcolonies = Whiteplague_working_data$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
+        nWP = length(Whiteplague_working_data$Plague), #White Plague prevalence total number of rows
+        observedWpPrevalence = Whiteplague_working_data$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
         
         #Environment
         
-                  Chlorophyll = White1$Chl_sca, 
-                  Conductivity = White1$Cond_sca,
-                  Density = White1$Den_sca,
-                  CTD_Depth = White1$DepCTD_sca,    
-                  Oxygen = White1$Oxy_sca,   
-                  Salinity = White1$Sal_sca,    
-                  Turbidity = White1$Turb_sca,    
-                  Depth = White1$Depth_tran_sca,  
-                  Temperature = White1$Temp_sca,   
-                  Max_DHW = White1$DHW_sca  , 
-                  Rainfall = White1$Rain_sca,   
+                  Chlorophyll,
+                  Conductivity,
+                  Density,
+                  CTD_Depth,    
+                  Oxygen,
+                  Salinity,    
+                  Turbidity,   
+                  Depth,  
+                  Temperature,   
+                  Max_DHW, 
+                  Rainfall,   
         
-        Environment = White1[32:(32-1+length(enviroselection))],
+        Environment = Whiteplague_working_data[32:(32-1+length(enviroselection))],
         nEnvi = length(enviroselection),
 
         Month = Month,
