@@ -313,9 +313,9 @@ stan.white2 <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000
 devtools::session_info()
 ```
 
-
+#Saving results and plotting the model
 ```{r ploting from stan to ggmcmc}
-save(stan.white2, file ="Data/stan.white2")
+save(stan.white2, file ="Data/stan.white2_Jul25")
 print(stan.white2)
 plot(stan.white2)
 
@@ -398,9 +398,9 @@ modelPredictions[,,3], modelPredictions[,,4]) # combining chains
 
 Extraction of median model predictions on the response scale
 ```{r}
-#library(LaplacesDemon)
-#library(arm) 
-#library(boot)
+library(LaplacesDemon)
+library(arm) 
+library(boot)
 
 # Real WP prevalence Predictions (are the predictions on the linear scale which are
 # transformed in a 2. step to be on the response scale (inv.logit()))
@@ -411,7 +411,7 @@ draw[grepl("^RealDisease[\\[]",names(draw))])
 predictionsLinearWP <- NULL
 predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
 modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*White1$Plague # I think is WP prevalence and not ill here for White1$Plague..mmm? This one worked
+predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*Whiteplague_working_data$Plague #  WP prevalence and not ill 
 ```
 
 Residual diagnosis
@@ -421,20 +421,19 @@ Residual diagnosis
 library(DHARMa)
 library(optimx)
 
-ObservedWP<-White1$Plague
-
 WP_DHARMaResponse <- createDHARMa(
 simulatedResponse = simulatedPredictedWP,
-observedResponse = ObservedWP,
+observedResponse = Whiteplague_working_data$Plague,
 fittedPredictedResponse = predictionsResponseWPMedian,
 integerResponse = T) # interger correction function
 
 #Plots
-plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse)
+plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse, quantreg = FALSE)
 
 #test Spatial autocorrelation Moran's I
-testSpatialAutocorrelation(WP_DHARMaResponse , x = White1$Latitude,
-y = White1$Longitude)
+
+testSpatialAutocorrelation(WP_DHARMaResponse , x = Whiteplague_working_data$Latitude,
+y = Whiteplague_working_data$Longitude)
 
 ```
 
