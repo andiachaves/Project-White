@@ -24,13 +24,11 @@ Loading Whiteplague_rawdata.rdata
 ```{r}
 
 # load data & libraries - Loading Raw data file as r.data
-white.env <-environment() # here I am trying to save it to an specific environment and not a global environment
-load('~/Documents/Project-White/Data/White_rawdata1.rdata')
+load(file="Data/Whiteplague_rawdata.rdata")
 ls()
 #check data
-ls(White)
-dim(White)
-head(White)
+dim(Whiteplague_rawdata)
+head(Whiteplague_rawdata)
 
 ```
 
@@ -39,24 +37,24 @@ Data preparation.All environmental data is scaled due to difference in units, th
 adding more variability in the analysis
 ```{r data_preparation}
 
-White$Chl_sca   <- scale(White$Chlorophyll)
-White$Cond_sca    <- scale(White$Conductivity)
-White$Den_sca    <- scale(White$Density)
-White$DepCTD_sca    <- scale(White$Depth_CTD)
-White$Oxy_sca   <- scale(White$Oxygen)
-White$Sal_sca    <- scale(White$Salinity)
-White$Turb_sca    <- scale(White$Turbidity)
-White$Depth_tran_sca  <- scale(White$Depth_transect)
-White$Temp_sca    <- scale(White$Temperature)
-White$DHW_sca    <- scale(White$Max_DHW)
-White$Rain_sca    <- scale(White$Rainfall)
+Whiteplague_rawdata$Chl_sca   <- scale(Whiteplague_rawdata$Chlorophyll)
+Whiteplague_rawdata$Cond_sca    <- scale(Whiteplague_rawdata$Conductivity)
+Whiteplague_rawdata$Den_sca    <- scale(Whiteplague_rawdata$Density)
+Whiteplague_rawdata$DepCTD_sca    <- scale(Whiteplague_rawdata$Depth_CTD)
+Whiteplague_rawdata$Oxy_sca   <- scale(Whiteplague_rawdata$Oxygen)
+Whiteplague_rawdata$Sal_sca    <- scale(Whiteplague_rawdata$Salinity)
+Whiteplague_rawdata$Turb_sca    <- scale(Whiteplague_rawdata$Turbidity)
+Whiteplague_rawdata$Depth_tran_sca  <- scale(Whiteplague_rawdata$Depth_transect)
+Whiteplague_rawdata$Temp_sca    <- scale(Whiteplague_rawdata$Temperature)
+Whiteplague_rawdata$DHW_sca    <- scale(Whiteplague_rawdata$Max_DHW)
+Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
 
 #Simplifying syntax of factors (Year, Depth, Month, Season, Station) to use in the model
-Year=White$Year
-Month=White$Month_number
-Season=White$Season
-Station=White$Station_name
-Depth=White$Depth_disease_transect
+Year=Whiteplague_rawdata$Year
+Month=Whiteplague_rawdata$Month_number
+Season=Whiteplague_rawdata$Season
+Station=Whiteplague_rawdata$Station_name
+Depth=Whiteplague_rawdata$Depth_disease_transect
 
 
 ##Selecting Environmental variables to use in the model
@@ -65,16 +63,20 @@ enviroselection
 
 #Sorting the data frame so Months can be in numerical order
 
-White1<-White[order(White$Month_12),]
-White1
+Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
+Whiteplague_working_data
 #Save working data  file with data already scaled/ and or transformed to be used by the model
-save(White1,file="Data/Whiteplague_sorted_data.rdata")
+save(Whiteplague_working_data,file="Data/Whiteplague_working_data.rdata")
 ls()
 #check data
-ls(White1)
-dim(White1)
-head(White1)
-#grep("^White$grep("^bar$", colnames(x))", colnames(x))
+ls(Whiteplague_working_data)
+dim(Whiteplague_working_data)
+head(Whiteplague_working_data)
+
+#count how many sampling per month we have in total
+library(plyr)
+count(Whiteplague_working_data$Month_12)
+
 #Once the Data is scaled and /or transformed, it can be used in the rstanModel.Rmd file to run Model
 ```
 

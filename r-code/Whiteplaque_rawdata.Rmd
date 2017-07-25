@@ -1,6 +1,10 @@
 ---
-title: White plaque disease - Compilation of rawdata
-author: Andia Chaves Fonnegra, Bernd Panassiti
+title: "Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands"
+author: 
+-name:"Andia Chaves Fonnegra and Bernd Panassiti"
+  affiliation: University of the Virgin Islands (US.VI) and Laimburg Research Center (Italy)
+  abstract: "This document takes the the raw data file (.csv) and save it as as .rdata used on the article:"Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands"."
+  keywords: rawdata
 date: '08.23.2016; last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: 
   pdf_document: 
@@ -22,29 +26,28 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 ```
 
 # Introduction
-Compilation of raw data. 
+Compilation of raw data from the csv file prepared by Andia Chaves Fonnegra based on several excel files that included disease data and environmental and biological data. Disease data were obtained by Marilyn Brandt, Biological data obtained by Tyler Smith. Oceanographic-Environmental Data collected in the field by Marilyn Brandt and Tyler Smith, and downloaded and cleaned in the lab by Vanessa Wrigh and Jonathan Jossart.
 
 # Data
-# Joint model
 
-Loading data 
+##Loading data 
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
 
 # load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
-White <- read.csv("data/Rawdata_WP_No_average_Rainmm.csv", header = TRUE) #Rainfall in mm and not average data for diseased (ill or ntot, this to avoid adding more variability, as we discuss with Bernd)
+Whiteplague_rawdata <- read.csv("data/Whiteplague_rawdata.csv", header = TRUE) #Rainfall was changed to mm and rows with average data for diseased (ill or ntot) was eliminated , this to avoid adding more variability as we discussed with Bernd)
 
 #check data
-ls(White)
-dim(White)
-head(White)
+ls(Whiteplague_rawdata)
+dim(Whiteplague_rawdata)
+head(Whiteplague_rawdata)
 
 #Save data as rdata file to avoid changing this data in the future
-save(White,file="data/White_rawdata1.rdata")
+save(Whiteplague_rawdata,file="Data/Whiteplague_rawdata.rdata")
 ```
 
-Once this file is saved, I used in the Whiteplague_working data Rmarkdown script to modify it and sclae/ transform data without
+Once this file is saved, I used in the Whiteplague_working data Rmarkdown script to modify it and scaled/ transformed data without
 changing the original rawdata.
 
 
