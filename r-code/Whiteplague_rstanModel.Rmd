@@ -134,13 +134,42 @@ head(Whiteplague_working_data)
 ##Selecting only Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
 match("Chl_sca",names(Whiteplague_working_data))
-#32-42
 
 #Selection of all 11 scaled environmental variables. 
-enviroselection = White1[c(32:42)] # 
+enviroselection = Whiteplague_working_data[c(32:42)] 
 enviroselection
 
 #Selection of Biological variables.
+biological = Whiteplague_working_data[c(22:27)] 
+biological
+
+# Predictors environmental data
+Chlorophyll = Whiteplague_working_data$Chl_sca
+Conductivity = Whiteplague_working_data$Cond_sca
+Density = Whiteplague_working_data$Den_sca
+CTD_Depth = Whiteplague_working_data$DepCTD_sca    
+Oxygen = Whiteplague_working_data$Oxy_sca
+Salinity = Whiteplague_working_data$Sal_sca    
+Turbidity = Whiteplague_working_data$Turb_sca   
+Depth = Whiteplague_working_data$Depth_tran_sca  
+Temperature = Whiteplague_working_data$Temp_sca   
+Max_DHW = Whiteplague_working_data$DHW_sca 
+Rainfall = Whiteplague_working_data$Rain_sca   
+
+# Predictors biological data, all are % of cover in transects. No need to scale?
+#Orbicellids = Whiteplague_working_data$Orbicellids
+#Sand = Whiteplague_working_data$Sand
+#Coral = Whiteplague_working_data$Coral
+#Sponges = Whiteplague_working_data$Sponges    
+#Macroalgae = Whiteplague_working_data$Macroalgae
+#Cyanobacteria = Whiteplague_working_data$Cyanobacteria    
+
+#Time and location factors (Year, Depth, Month, Season, Station) to use in the model
+Year=Whiteplague_working_data$Year
+Month=Whiteplague_working_data$Month_number
+Season=Whiteplague_working_data$Season
+Station=Whiteplague_working_data$Station_name
+Depth=Whiteplague_working_data$Depth_disease_transect
 
 ```
 

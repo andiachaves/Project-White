@@ -58,29 +58,6 @@ Whiteplague_rawdata$Temp_sca    <- scale(Whiteplague_rawdata$Temperature)
 Whiteplague_rawdata$DHW_sca    <- scale(Whiteplague_rawdata$Max_DHW)
 Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
 
-White$Chl_sca   <- scale(White$Chlorophyll)
-White$Cond_sca    <- scale(White$Conductivity)
-White$Den_sca    <- scale(White$Density)
-White$DepCTD_sca    <- scale(White$Depth_CTD)
-White$Oxy_sca   <- scale(White$Oxygen)
-White$Sal_sca    <- scale(White$Salinity)
-White$Turb_sca    <- scale(White$Turbidity)
-White$Depth_tran_sca  <- scale(White$Depth_transect)
-White$Temp_sca    <- scale(White$Temperature)
-White$DHW_sca    <- scale(White$Max_DHW)
-White$Rain_sca    <- scale(White$Rainfall)
-
-#Simplifying syntax of factors (Year, Depth, Month, Season, Station) to use in the model
-Year=Whiteplague_rawdata$Year
-Month=Whiteplague_rawdata$Month_number
-Season=Whiteplague_rawdata$Season
-Station=Whiteplague_rawdata$Station_name
-Depth=Whiteplague_rawdata$Depth_disease_transect
-
-##Selecting Environmental variables to use in the model
-enviroselection = c(32:42) # to select environmental variables. ``{r}
-enviroselection
-
 #Sorting the data frame so Months can be in numerical order
 Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
 Whiteplague_working_data
@@ -97,7 +74,7 @@ ls(Whiteplague_working_data)
 dim(Whiteplague_working_data)
 head(Whiteplague_working_data)
 
-#count how many sampling per month we have in total
+#count how many samples per month we have in total
 library(plyr)
 count(Whiteplague_working_data$Month_12)
 ```
