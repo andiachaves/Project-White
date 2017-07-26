@@ -379,6 +379,7 @@ launch_shinystan(stan.white2)
 
 ```{r}
 library(rstan)
+load(file="Data/stan.white2") 
 posterior<-extract(stan.white2,inc_warmup=F,permute=F) # extraction of posterior
 ```
 
@@ -430,6 +431,9 @@ integerResponse = T) # interger correction function
 #Plots
 plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse, quantreg = FALSE)
 
+Observed_Response_WP<-Whiteplague_working_data$Plague
+Predicted_Response_WPMedian <- predictionsResponseWPMedian
+plot(Predicted_Response_WPMedian,Observed_Response_WP)
 #test Spatial autocorrelation Moran's I
 
 testSpatialAutocorrelation(WP_DHARMaResponse , x = Whiteplague_working_data$Latitude,
