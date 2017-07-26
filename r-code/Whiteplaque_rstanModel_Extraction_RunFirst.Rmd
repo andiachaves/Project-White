@@ -108,7 +108,7 @@ posterior<-extract(stan.white2,inc_warmup=F,permute=F)
 
 
 modelPredictions <- NULL
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw) draw[grepl("^RealDisease[\\[]",names(draw))])
+modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw) draw[grepl("^DiseasePredictions[\\[]",names(draw))])
 
 # combine 4 chains
 simulatedPredictedWhitePlague <- NULL
