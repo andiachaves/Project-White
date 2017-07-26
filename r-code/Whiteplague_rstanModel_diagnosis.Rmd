@@ -39,7 +39,7 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 rm(list=ls(all=TRUE))
 load(file="data/Whiteplague_workingdata.rdata")
 
-NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
+NameOfModelRun <- "stan.white2"
 load(file=paste("data/",NameOfModelRun,sep=""))
 
 #devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
