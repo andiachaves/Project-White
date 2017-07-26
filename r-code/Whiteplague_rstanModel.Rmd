@@ -97,7 +97,7 @@ if(!require(qtlcharts))
 ```{r}
 # Date format - forms part of names of created files or graphs
 today <- format(Sys.time(), "%Y.%m.%d")
-set.seed(123)
+
 
 # load libraries
 library(formatR)
@@ -120,12 +120,12 @@ library(ggplot2) # for graphs
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-load(file="Data/Whiteplague_working_data.rdata")
+load(file="data/Whiteplague_workingdata.rdata")
 ls()
 
 #check data
-dim(Whiteplague_working_data)
-head(Whiteplague_working_data)
+dim(Whiteplague_workingdata)
+head(Whiteplague_workingdata)
 
 ```
 
@@ -133,9 +133,11 @@ head(Whiteplague_working_data)
 ```{r}
 ##Selecting only Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
-match("Chl_sca",names(Whiteplague_working_data))
+match("Chl_sca",names(Whiteplague_workingdata))
 #32-42
 
+
+White1 <- Whiteplague_workingdata
 #Selection of all 11 scaled environmental variables. 
 enviroselection = White1[c(32:42)] # 
 enviroselection
@@ -183,7 +185,7 @@ dataList = list(
 ```{r define_model}
 # Define model
 
-model.bn.Wplague <- '
+model.Wplague <- '
 data {
 // counters
 int<lower=0> nWP;    //number of White Plague cases, int=integer  and non negative >0 
@@ -252,29 +254,34 @@ Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
 
 
-#predictive inference
-#generated quantities
-#{
-#real DiseasePredictions[nWP]; //vector to store predictions
+//predictive inference
+generated quantities
+{
+real DiseasePredictions[nWP]; //vector to store predictions
 
-#for( i in 1:nWP ) {
-#DiseasePredictions [i] <- binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + Environment[i] * parEnvironment + mu[i]));
-#}
-#}
+for( i in 1:nWP ) {
+DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + Environment[i] * parEnvironment + mu[i]));
+}
+}
 '
 ```
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
-stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
+stan(model_code = model.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
 ```
 
 ```{r model_run,eval=FALSE}
 time <- proc.time()
 set.seed(2017)
-stan.white2 <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
+
+```{r}
+save(stan.white, file =paste("data/",today,"_Whiteplaque_model_result.Rdata",sep=""))
+```
+
 
 
 # Session info
@@ -284,23 +291,23 @@ devtools::session_info()
 
 
 ```{r ploting from stan to ggmcmc}
-save(stan.white2, file ="Data/stan.white2")
-print(stan.white2)
-plot(stan.white2)
 
-str(stan.white2)
+print(stan.white)
+plot(stan.white)
+
+str(stan.white)
 
 library(ggmcmc)
 library(coda)
 
 #This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
 #devtools::install_github('christophergandrud/StanCat')
-StanCat::stan_caterpillar(stan.white2, pars = 'v_raw\\[.*\\]')
+StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]')
 
 #To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
 library(plyr)
 #this one extracts everything but is not plotting histograms properly
-s <- rstan::extract(stan.white2, inc_warmup=FALSE, permuted=FALSE) 
+s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
 #this one extracts only some functions
 
 s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))
@@ -338,72 +345,6 @@ plot(stan.white)
 ```{r extract with shiny}
 library(shiny)
 library(shinystan)
-launch_shinystan(stan.white2)
-```
-
-
-#From Panassiti et al., 2016
-#Extraction of residuals from the posterior of a stan-object
-#At first rstan package is loaded and the entire posterior with all parameters extracted
-
-```{r}
-library(rstan)
-posterior<-extract(stan.white2,inc_warmup=F,permute=F) # extraction of posterior
-```
-
-Extraction of posterior predictive simulations.
-```{r}
-# real White Plague Prevalence Predictions are simulated (predictions generated in the
-# Generated quantities block of the model code)
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^RealDisease[\\[]",names(draw))])
-
-# combine 4 chains
-simulatedPredictedWP <- NULL
-simulatedPredictedWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
-modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-```
-
-
-Extraction of median model predictions on the response scale
-```{r}
-#library(LaplacesDemon)
-#library(arm) 
-#library(boot)
-
-# Real WP prevalence Predictions (are the predictions on the linear scale which are
-# transformed in a 2. step to be on the response scale (inv.logit()))
-modelPredictions <- NULL
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^RealDisease[\\[]",names(draw))])
-# combine 4 chains
-predictionsLinearWP <- NULL
-predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
-modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*White1$Plague # I think is WP prevalence and not ill here for White1$Plague..mmm? This one worked
-```
-
-Residual diagnosis
-```{r}
-#devtools::install_github(repo = "DHARMa", username = "florianhartig",
-#subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
-library(DHARMa)
-library(optimx)
-
-ObservedWP<-White1$Plague
-
-WP_DHARMaResponse <- createDHARMa(
-simulatedResponse = simulatedPredictedWP,
-observedResponse = ObservedWP,
-fittedPredictedResponse = predictionsResponseWPMedian,
-integerResponse = T) # interger correction function
-
-#Plots
-plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse)
-
-#test Spatial autocorrelation Moran's I
-testSpatialAutocorrelation(WP_DHARMaResponse , x = White1$Latitude,
-y = White1$Longitude)
-
+launch_shinystan(stan.white)
 ```
 
