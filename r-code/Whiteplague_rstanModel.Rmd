@@ -30,7 +30,7 @@ opts_chunk$set(fig.align='center',                # aligns all figures
  This document provides the r-code for the white plague disease model described on the article.The model address to the objectives of this study: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental factors on WP disease prevalence using Bayesian inference. We use rstan for statistical inference (http://mc-stan.org/about/). 
 
 #Data
-The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplaque_working.RData" needs to be placed in a folder called "data".
+The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplaque_working.RData" needs to be placed in a folder called "Data".
 "
 
 #Model
@@ -133,12 +133,12 @@ head(Whiteplague_workingdata)
 ```{r}
 ##Selecting Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
-<<<<<<< HEAD
+
 match("Chl_sca",names(Whiteplague_working_data))
-=======
+
 match("Chl_sca",names(Whiteplague_workingdata))
 #32-42
->>>>>>> origin/master
+
 
 
 White1 <- Whiteplague_workingdata
@@ -327,12 +327,12 @@ devtools::session_info()
 
 #Saving results and plotting the model
 ```{r ploting from stan to ggmcmc}
-<<<<<<< HEAD
+
 save(stan.white2, file ="Data/stan.white2_Jul25")
 print(stan.white2)
 plot(stan.white2)
-=======
->>>>>>> origin/master
+
+
 
 print(stan.white)
 plot(stan.white)
@@ -387,14 +387,15 @@ plot(stan.white)
 ```{r extract with shiny}
 library(shiny)
 library(shinystan)
-<<<<<<< HEAD
+
 launch_shinystan(stan.white2)
 ```
 
 
-#From Panassiti et al., 2016
+
 #Extraction of residuals from the posterior of a stan-object
-#At first rstan package is loaded and the entire posterior with all parameters extracted
+##From Panassiti et al., 2016
+##At first rstan package is loaded and the entire posterior with all parameters extracted
 
 ```{r}
 library(rstan)
