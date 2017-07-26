@@ -18,74 +18,69 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 ```
 
 
-# Introduction
+# Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands - Residual analysis
+
+## Introduction
+This document provides residual diagnosis for the logistic regression model using Bayesian inference for the White plaque disease on corals described in the article: ``Identifying local drivers of a vector-pathogen-disease system using Bayesian modeling''.
+The Skript is based on the residuals analysis provided in Panassiti et al., 2016.
+
+## Data
 
 
-# Data
 
 
-# Model
 
 
-## Loading data
+## Residual analysis
+
+
+#### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
 load(file="data/whiteplaque_workingdata.Rdata")
-```
 
+NameOfModelRun <- "2017.07.26_Whiteplaque_model_result"
+load(file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
 
-
-#From Panassiti et al., 2016
-#Extraction of residuals from the posterior of a stan-object
-#At first rstan package is loaded and the entire posterior with all parameters extracted
-
-```{r}
-library(rstan)
-posterior<-extract(stan.white2,inc_warmup=F,permute=F) # extraction of posterior
-```
-
-Extraction of posterior predictive simulations.
-```{r}
-# real White Plague Prevalence Predictions are simulated (predictions generated in the
-# Generated quantities block of the model code)
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^Real White Plague Prevalence Predictions[\\[]",names(draw))])
-
-# combine 4 chains
-simulatedPredictedWP <- NULL
-simulatedPredictedWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
-modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-```
-
-
-Extraction of median model predictions on the response scale
-```{r}
-# Real WP prevalence Predictions (are the predictions on the linear scale which are
-# transformed in a 2. step to be on the response scale (inv.logit()))
-modelPredictions <- NULL
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^Real White Plague Prevalence Predictions[\\[]",names(draw))])
-# combine 4 chains
-predictionsLinearWP <- NULL
-predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
-modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-predictionsResponseWPMedian <-
-inv.logit(as.vector(apply(predictionsLinearPathogen, 1, median)))*trapsResponse$HoTotal
-```
-
-Residual diagnosis
-```{r}
-#devtools::install_github(repo = "DHARMa", username = "florianhartig",
-#subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
+#devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
 library(DHARMa)
-WP_DHARMaResponse <- createDHARMa(
-simulatedResponse = simulatedPredictedWP,
-observedResponse = observedWP,
-fittedPredictedResponse = predictionsResponseWPMedian,
-integerResponse = T) # interger correction function
-plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse)
-testSpatialAutocorrelation(WP_DHARMaResponse , x = trapCoords$st_x,
-y = trapCoords$st_y)
-
 ```
 
+
+#### Create DHARMa object
+```{r,echo=FALSE}
+# Symptomatic corals - Response scale - inv.logit
+WhitePlaqueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlaque,
+  observedResponse = observedWhitePlaque,fittedPredictedResponse = predictionsResponseMedianWhitePlaque,integerResponse = T)
+```
+
+
+
+#### Plot DHARMa object
+```{r}
+plotSimulatedResiduals(simulationOutput = WhitePlaqueDHARMaResponse)
+```
+
+#### Spatial autocorrelation
+```{r}
+#test Spatial autocorrelation Moran's I
+
+# Problem repeating sites result in 0 distances!
+library(dplyr)
+df <- data.frame(scaledResiduals=WhitePlaqueDHARMaResponse$scaledResiduals,x=White1$Latitude,y=White1$Longitude)
+
+# 1 option - group and mean
+
+dfNew <- as.data.frame(df %>%
+  group_by(x, y) %>%
+  summarize(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
+testSpatialAutocorrelation(simulationOutput = dfNew, x = dfNew$x,y = dfNew$y)
+
+# 2. option - random noise
+df$x_new <- rnorm(df$x,df$x,0.001)
+df$y_new <- rnorm(df$y,df$y,0.001)
+
+testSpatialAutocorrelation(simulationOutput = df, x = df$x_new,y = df$y_new)
+```
+
+Both tests indicate that we should reject the null of no spatial auto-correlation.

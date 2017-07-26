@@ -97,7 +97,7 @@ if(!require(qtlcharts))
 ```{r}
 # Date format - forms part of names of created files or graphs
 today <- format(Sys.time(), "%Y.%m.%d")
-set.seed(123)
+
 
 # load libraries
 library(formatR)
@@ -120,12 +120,12 @@ library(ggplot2) # for graphs
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-load(file="Data/Whiteplague_working_data.rdata")
+load(file="data/Whiteplague_workingdata.rdata")
 ls()
 
 #check data
-dim(Whiteplague_working_data)
-head(Whiteplague_working_data)
+dim(Whiteplague_workingdata)
+head(Whiteplague_workingdata)
 
 ```
 
@@ -133,8 +133,15 @@ head(Whiteplague_working_data)
 ```{r}
 ##Selecting Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
+<<<<<<< HEAD
 match("Chl_sca",names(Whiteplague_working_data))
+=======
+match("Chl_sca",names(Whiteplague_workingdata))
+#32-42
+>>>>>>> origin/master
 
+
+White1 <- Whiteplague_workingdata
 #Selection of all 11 scaled environmental variables. 
 enviroselection = Whiteplague_working_data[c(32:42)] 
 enviroselection
@@ -214,7 +221,7 @@ dataList = list(
 ```{r define_model}
 # Define model
 
-model.bn.Wplague <- '
+model.Wplague <- '
 data {
 // counters
 int<lower=0> nWP;    //number of White Plague cases, int=integer  and non negative >0 
@@ -283,29 +290,34 @@ Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
 
 
-#predictive inference
-#generated quantities
-#{
-#real DiseasePredictions[nWP]; //vector to store predictions
+//predictive inference
+generated quantities
+{
+real DiseasePredictions[nWP]; //vector to store predictions
 
-#for( i in 1:nWP ) {
-#DiseasePredictions [i] <- binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + Environment[i] * parEnvironment + mu[i]));
-#}
-#}
+for( i in 1:nWP ) {
+DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + Environment[i] * parEnvironment + mu[i]));
+}
+}
 '
 ```
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
-stan.white <- stan(model_code = model.bn.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
+stan(model_code = model.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
 ```
 
 ```{r model_run,eval=FALSE}
 time <- proc.time()
 set.seed(2017)
-stan.white2 <- stan(model_code = model.bn.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
+
+```{r}
+save(stan.white, file =paste("data/",today,"_Whiteplaque_model_result.Rdata",sep=""))
+```
+
 
 
 # Session info
@@ -315,23 +327,29 @@ devtools::session_info()
 
 #Saving results and plotting the model
 ```{r ploting from stan to ggmcmc}
+<<<<<<< HEAD
 save(stan.white2, file ="Data/stan.white2_Jul25")
 print(stan.white2)
 plot(stan.white2)
+=======
+>>>>>>> origin/master
 
-str(stan.white2)
+print(stan.white)
+plot(stan.white)
+
+str(stan.white)
 
 library(ggmcmc)
 library(coda)
 
 #This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
 #devtools::install_github('christophergandrud/StanCat')
-StanCat::stan_caterpillar(stan.white2, pars = 'v_raw\\[.*\\]')
+StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]')
 
 #To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
 library(plyr)
 #this one extracts everything but is not plotting histograms properly
-s <- rstan::extract(stan.white2, inc_warmup=FALSE, permuted=FALSE) 
+s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
 #this one extracts only some functions
 
 s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))
@@ -369,6 +387,7 @@ plot(stan.white)
 ```{r extract with shiny}
 library(shiny)
 library(shinystan)
+<<<<<<< HEAD
 launch_shinystan(stan.white2)
 ```
 
@@ -439,5 +458,8 @@ plot(Predicted_Response_WPMedian,Observed_Response_WP)
 testSpatialAutocorrelation(WP_DHARMaResponse , x = Whiteplague_working_data$Latitude,
 y = Whiteplague_working_data$Longitude)
 
+=======
+launch_shinystan(stan.white)
+>>>>>>> origin/master
 ```
 
