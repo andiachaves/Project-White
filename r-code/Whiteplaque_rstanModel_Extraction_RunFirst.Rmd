@@ -43,9 +43,10 @@ library(zoo) # rollapply
 #devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
 library(DHARMa)
 
-load(file="data/Whiteplaque_workingdata.Rdata")
+#Load files workingdata and stan file with the results of the model
+load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "2017.07.26_Whiteplaque_model_result"
+NameOfModelRun <- ""
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 ```
 
@@ -53,14 +54,14 @@ load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 
 ### Define Observed data
 ```{r ObsPred,,echo=FALSE}
-observedWhitePlaque<-White1$Plague
+observedWhitePlaque<-Whiteplague_workingdata$Plague
 ```
 
 
 
 ### Extraction of coefficients from stan object
 ```{r Whiteplaque_graph_input}
-GraphInput<-stanGraphInput(stan.white) # reguires libraries: rstan, MCMCpack, plyr
+GraphInput<-stanGraphInput(stan.white2) # reguires libraries: rstan, MCMCpack, plyr
 ```
 
 

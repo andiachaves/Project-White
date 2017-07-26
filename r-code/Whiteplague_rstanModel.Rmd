@@ -432,7 +432,7 @@ draw[grepl("^RealDisease[\\[]",names(draw))])
 predictionsLinearWP <- NULL
 predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
 modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*Whiteplague_working_data$Plague #  WP prevalence and not ill 
+predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*Whiteplague_workingdata$Plague #  WP prevalence and not ill 
 ```
 
 Residual diagnosis
@@ -444,7 +444,7 @@ library(optimx)
 
 WP_DHARMaResponse <- createDHARMa(
 simulatedResponse = simulatedPredictedWP,
-observedResponse = Whiteplague_working_data$Plague,
+observedResponse = Whiteplague_workingdata$Plague,
 fittedPredictedResponse = predictionsResponseWPMedian,
 integerResponse = T) # interger correction function
 
