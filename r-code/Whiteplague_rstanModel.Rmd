@@ -459,8 +459,8 @@ plot(Predicted_Response_WPMedian,Observed_Response_WP)
 testSpatialAutocorrelation(WP_DHARMaResponse , x = Whiteplague_working_data$Latitude,
 y = Whiteplague_working_data$Longitude)
 
-=======
+
 launch_shinystan(stan.white)
->>>>>>> origin/master
+
 ```
 
