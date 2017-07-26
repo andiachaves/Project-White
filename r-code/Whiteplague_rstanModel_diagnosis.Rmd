@@ -37,10 +37,10 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 #### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
-load(file="data/whiteplaque_workingdata.Rdata")
+load(file="data/Whiteplague_workingdata.rdata")
 
-NameOfModelRun <- "2017.07.26_Whiteplaque_model_result"
-load(file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
+NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
+load(file=paste("data/",NameOfModelRun,sep=""))
 
 #devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
 library(DHARMa)
@@ -50,15 +50,14 @@ library(DHARMa)
 #### Create DHARMa object
 ```{r,echo=FALSE}
 # Symptomatic corals - Response scale - inv.logit
-WhitePlaqueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlaque,
-  observedResponse = observedWhitePlaque,fittedPredictedResponse = predictionsResponseMedianWhitePlaque,integerResponse = T)
+WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlague,
+  observedResponse = observedWhitePlague,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)
 ```
-
 
 
 #### Plot DHARMa object
 ```{r}
-plotSimulatedResiduals(simulationOutput = WhitePlaqueDHARMaResponse)
+plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 ```
 
 #### Spatial autocorrelation
@@ -67,7 +66,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlaqueDHARMaResponse)
 
 # Problem repeating sites result in 0 distances!
 library(dplyr)
-df <- data.frame(scaledResiduals=WhitePlaqueDHARMaResponse$scaledResiduals,x=White1$Latitude,y=White1$Longitude)
+df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata$Latitude,y=Whiteplague_workingdata$Longitude)
 
 # 1 option - group and mean
 
