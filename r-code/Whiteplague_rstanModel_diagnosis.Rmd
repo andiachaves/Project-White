@@ -64,8 +64,23 @@ plotSimulatedResiduals(simulationOutput = WhitePlaqueDHARMaResponse)
 #### Spatial autocorrelation
 ```{r}
 #test Spatial autocorrelation Moran's I
-scaledResiduals <- WhitePlaqueDHARMaResponse$scaledResiduals
 
-testSpatialAutocorrelation(simulationOutput = WhitePlaqueDHARMaResponse, x = White1$Latitude,y = White1$Longitude)
+# Problem repeating sites result in 0 distances!
+library(dplyr)
+df <- data.frame(scaledResiduals=WhitePlaqueDHARMaResponse$scaledResiduals,x=White1$Latitude,y=White1$Longitude)
+
+# 1 option - group and mean
+
+dfNew <- as.data.frame(df %>%
+  group_by(x, y) %>%
+  summarize(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
+testSpatialAutocorrelation(simulationOutput = dfNew, x = dfNew$x,y = dfNew$y)
+
+# 2. option - random noise
+df$x_new <- rnorm(df$x,df$x,0.001)
+df$y_new <- rnorm(df$y,df$y,0.001)
+
+testSpatialAutocorrelation(simulationOutput = df, x = df$x_new,y = df$y_new)
 ```
 
+Both tests indicate that we should reject the null of no spatial auto-correlation.
