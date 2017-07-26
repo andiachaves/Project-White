@@ -46,8 +46,8 @@ library(DHARMa)
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "stan.white2"
-load(file=paste("data/",NameOfModelRun,sep=""))
+NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
+load(file=paste("data/",NameOfModelRun,".RData",sep=""))
 ```
 
 ## Data preparation for graphs
@@ -152,16 +152,16 @@ save(
 posterior,GraphInput,
 
 # Observations
-observedWhitePlaque,
+observedWhitePlague,
 # Predictions
 # 1. Posterior predictive simulations
-simulatedPredictedWhitePlaque,
+simulatedPredictedWhitePlague,
 
 
 # 2. Median model predictions on the linear / response scale
-predictionsLinearWhitePlaque,
+predictionsLinearWhitePlague,
 
-predictionsResponseMedianWhitePlaque,
+predictionsResponseMedianWhitePlague,
 
 
 
@@ -170,7 +170,7 @@ predictionsResponseMedianWhitePlaque,
 #ParameterNamesWhitePlaque,
 
 # Coefficients
-varMedianPlotWhitePlaque,datqPlotWhitePlaque,
+#varMedianPlotWhitePlaque,datqPlotWhitePlaque,
 
 file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
 ```
