@@ -133,51 +133,51 @@ head(Whiteplague_workingdata)
 ##Selecting Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
 
-match("Chl_sca",names(Whiteplague_working_data))
+match("Chl_sca",names(Whiteplague_workingdata))
 
 match("Chl_sca",names(Whiteplague_workingdata))
 #32-42
 
 
 
-White1 <- Whiteplague_workingdata
+
 #Selection of all 11 scaled environmental variables. 
-enviroselection = Whiteplague_working_data[c(32:42)] 
+enviroselection = Whiteplague_workingdata[c(32:42)] 
 enviroselection
 
 # Predictors environmental data
-Chlorophyll = Whiteplague_working_data$Chl_sca
-Conductivity = Whiteplague_working_data$Cond_sca
-Density = Whiteplague_working_data$Den_sca
-CTD_Depth = Whiteplague_working_data$DepCTD_sca    
-Oxygen = Whiteplague_working_data$Oxy_sca
-Salinity = Whiteplague_working_data$Sal_sca    
-Turbidity = Whiteplague_working_data$Turb_sca   
-Depth = Whiteplague_working_data$Depth_tran_sca  
-Temperature = Whiteplague_working_data$Temp_sca   
-Max_DHW = Whiteplague_working_data$DHW_sca 
-Rainfall = Whiteplague_working_data$Rain_sca   
+Chlorophyll = Whiteplague_workingdata$Chl_sca
+Conductivity = Whiteplague_workingdata$Cond_sca
+Density = Whiteplague_workingdata$Den_sca
+CTD_Depth = Whiteplague_workingdata$DepCTD_sca    
+Oxygen = Whiteplague_workingdata$Oxy_sca
+Salinity = Whiteplague_workingdata$Sal_sca    
+Turbidity = Whiteplague_workingdata$Turb_sca   
+Depth = Whiteplague_workingdata$Depth_tran_sca  
+Temperature = Whiteplague_workingdata$Temp_sca   
+Max_DHW = Whiteplague_workingdata$DHW_sca 
+Rainfall = Whiteplague_workingdata$Rain_sca   
 
 #Selection of Biological variables.
-#biological = Whiteplague_working_data[c(22:27)] 
+#biological = Whiteplague_workingdata[c(22:27)] 
 #biological
 
 # Predictors biological data, all are % of cover in transects. No need to scale?
-#Orbicellids = Whiteplague_working_data$Orbicellids
-#Sand = Whiteplague_working_data$Sand
-#Coral = Whiteplague_working_data$Coral
-#Sponges = Whiteplague_working_data$Sponges    
-#Macroalgae = Whiteplague_working_data$Macroalgae
-#Cyanobacteria = Whiteplague_working_data$Cyanobacteria    
+#Orbicellids = Whiteplague_workingdata$Orbicellids
+#Sand = Whiteplague_workingdata$Sand
+#Coral = Whiteplague_workingdata$Coral
+#Sponges = Whiteplague_workingdata$Sponges    
+#Macroalgae = Whiteplague_workingdata$Macroalgae
+#Cyanobacteria = Whiteplague_workingdata$Cyanobacteria    
 
 #Time and location factors 
-Year=Whiteplague_working_data$Year
-Month=Whiteplague_working_data$Month_12
-Season=Whiteplague_working_data$Season
-Station=Whiteplague_working_data$Station_name
-Reef.Type=Whiteplague_working_data$Reef.Type
-Latitude=Whiteplague_working_data$Latitude
-Longitude=Whiteplague_working_data$Longitude
+Year=Whiteplague_workingdata$Year
+Month=Whiteplague_workingdata$Month_12
+Season=Whiteplague_workingdata$Season
+Station=Whiteplague_workingdata$Station_name
+Reef.Type=Whiteplague_workingdata$Reef.Type
+Latitude=Whiteplague_workingdata$Latitude
+Longitude=Whiteplague_workingdata$Longitude
 
 ```
 
@@ -187,10 +187,10 @@ Longitude=Whiteplague_working_data$Longitude
 #data as a list
 Month=rep(1:12,c(3,25,26,29,22,4,7,29,30,14,25,25))  # Total of 12 months, with different sampling per month over 2-4 years
 dataList = list(
-        TotalObservedcolonies = Whiteplague_working_data$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
-        Diseasedcolonies = Whiteplague_working_data$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
-        nWP = length(Whiteplague_working_data$Plague), #White Plague prevalence total number of rows
-        observedWpPrevalence = Whiteplague_working_data$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
+        TotalObservedcolonies = Whiteplague_workingdata$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
+        Diseasedcolonies = Whiteplague_workingdata$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
+        nWP = length(Whiteplague_workingdata$Plague), #White Plague prevalence total number of rows
+        observedWpPrevalence = Whiteplague_workingdata$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
         
         #Environment
         
@@ -206,7 +206,7 @@ dataList = list(
                   Max_DHW, 
                   Rainfall,   
         
-        Environment = Whiteplague_working_data[32:(32-1+length(enviroselection))],
+        Environment = Whiteplague_workingdata[32:(32-1+length(enviroselection))],
         nEnvi = length(enviroselection),
 
         Month = Month,
@@ -304,7 +304,7 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + E
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
 #This is a short test I run before running the full model, just to check its ok. I do not save this one.
-stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
+stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 100, chains = 1,refresh=1,thin=1)
 ```
 
 ```{r model_run,eval=FALSE}

@@ -40,8 +40,6 @@ library(rstan) # extraction of posterior, function:stanGraphInput
 library(MCMCpack) # rwish function, to create mmcmc list, function:stanGraphInput
 library(zoo) # rollapply
 
-#devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
-library(DHARMa)
 
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
@@ -54,7 +52,7 @@ load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 ## Data preparation for graphs
 
 ### Define Observed data
-<<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
+
 ```{r ObsPred,,echo=FALSE}
 observedWhitePlague<-Whiteplague_workingdata$Plague
 ```
@@ -176,6 +174,6 @@ predictionsResponseMedianWhitePlague,
 varMedianPlotWhitePlague,datqPlotWhitePlague,
 
 
-file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
+file=paste("data/",NameOfModelRun,"_graphinput.Rdata",sep=""))
 ```
 
