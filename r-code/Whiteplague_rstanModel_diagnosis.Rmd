@@ -67,7 +67,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 # Problem repeating sites result in 0 distances!
 library(dplyr)
-df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=White1$Latitude,y=White1$Longitude)
+df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata$Latitude,y=Whiteplague_workingdata$Longitude)
 
 # 1 option - group and mean
 

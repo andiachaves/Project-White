@@ -53,7 +53,7 @@ load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 ## Data preparation for graphs
 
 ### Define Observed data
-```{r ObsPred,,echo=FALSE}
+```{r ObsPred,echo=FALSE}
 observedWhitePlague<-Whiteplague_workingdata$Plague
 ```
 
@@ -78,7 +78,7 @@ posterior<-extract(stan.white,inc_warmup=F,permute=F)
 
 ### Rename axis-labels
 ```{r Parameter_names}
-#dnam <- GraphInput$parameters
+dnam <- GraphInput$parameters
  # [1] "b0"                      "parEnvironment[1]"       "parEnvironment[2]"       "parEnvironment[3]"       "parEnvironment[4]"      
  #  [6] "parEnvironment[5]"       "parEnvironment[6]"       "parEnvironment[7]"       "parEnvironment[8]"       "parEnvironment[9]"      
  # [11] "parEnvironment[10]"      "parEnvironment[11]"    
@@ -128,7 +128,7 @@ modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw) draw[grepl("
 # combine 4 chains
 predictionsLinearWhitePlague <- NULL
 predictionsLinearWhitePlague <- cbind(modelPredictions[,,1], modelPredictions[,,2], modelPredictions[,,3], modelPredictions[,,4]) #  combining chains, see also: combine.mcmc from runjags package
-predictionsResponseMedianWhitePlague <- inv.logit(as.vector(apply(predictionsLinearWhitePlague, 1, median)))*White1$Ntot
+predictionsResponseMedianWhitePlague <- inv.logit(as.vector(apply(predictionsLinearWhitePlague, 1, median)))*Whiteplague_workingdata$Ntot
 ```
 
 
