@@ -62,7 +62,7 @@ observedWhitePlague<-Whiteplague_workingdata$Plague
 
 ### Extraction of coefficients from stan object
 ```{r WhitePlague_graph_input}
-GraphInput<-stanGraphInput(stan.white2) # reguires libraries: rstan, MCMCpack, plyr
+GraphInput<-stanGraphInput(stan.white) # reguires libraries: rstan, MCMCpack, plyr
 ```
 
 
