@@ -120,7 +120,7 @@ library(ggplot2) # for graphs
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-load(file="data/Whiteplague_workingdata.rdata")
+load(file="data/Whiteplague_workingdata.Rdata")
 ls()
 
 #check data
@@ -304,34 +304,33 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(b0  + E
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
-stan(model_code = model.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
+#This is a short test I run before running the full model, just to check its ok. I do not save this one.
+stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 1000, chains = 1,refresh=1,thin=1)
 ```
 
 ```{r model_run,eval=FALSE}
+#This is the run of the model.
 time <- proc.time()
 set.seed(2017)
 stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 
+#Save the model run results
 ```{r}
 save(stan.white, file =paste("data/",today,"_Whiteplaque_model_result.Rdata",sep=""))
 ```
 
-
-
-# Session info
+# Session information for model run
 ```{r}
 devtools::session_info()
 ```
 
-#Saving results and plotting the model
+#Plotting the model
 ```{r ploting from stan to ggmcmc}
 
-save(stan.white2, file ="Data/stan.white2_Jul25")
 print(stan.white2)
 plot(stan.white2)
-
 
 
 print(stan.white)
@@ -365,6 +364,16 @@ ggs_caterpillar(S)
 
 ```
 
+#Check model output with Shiny
+```{r extract with shiny}
+library(shiny)
+library(shinystan)
+
+launch_shinystan(stan.white2)
+```
+
+
+#Save r markdown file
 ```{r-To save the r markdown file}
 
 save(dataList, stan.white, file = paste("Figures/", today, "_fit.fullModel.pdf",
@@ -384,83 +393,4 @@ file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=
 plot(stan.white)
 ```
 
-```{r extract with shiny}
-library(shiny)
-library(shinystan)
-
-launch_shinystan(stan.white2)
-```
-
-
-
-#Extraction of residuals from the posterior of a stan-object
-##From Panassiti et al., 2016
-##At first rstan package is loaded and the entire posterior with all parameters extracted
-
-```{r}
-library(rstan)
-load(file="Data/stan.white2") 
-posterior<-extract(stan.white2,inc_warmup=F,permute=F) # extraction of posterior
-```
-
-Extraction of posterior predictive simulations.
-```{r}
-# real White Plague Prevalence Predictions are simulated (predictions generated in the
-# Generated quantities block of the model code)
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^RealDisease[\\[]",names(draw))])
-
-# combine 4 chains
-simulatedPredictedWP <- NULL
-simulatedPredictedWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
-modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-```
-
-
-Extraction of median model predictions on the response scale
-```{r}
-library(LaplacesDemon)
-library(arm) 
-library(boot)
-
-# Real WP prevalence Predictions (are the predictions on the linear scale which are
-# transformed in a 2. step to be on the response scale (inv.logit()))
-modelPredictions <- NULL
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw)
-draw[grepl("^RealDisease[\\[]",names(draw))])
-# combine 4 chains
-predictionsLinearWP <- NULL
-predictionsLinearWP <- cbind(modelPredictions[,,1], modelPredictions[,,2],
-modelPredictions[,,3], modelPredictions[,,4]) # combining chains
-predictionsResponseWPMedian <-inv.logit(as.vector(apply(predictionsLinearWP, 1, median)))*Whiteplague_workingdata$Plague #  WP prevalence and not ill 
-```
-
-Residual diagnosis
-```{r}
-#devtools::install_github(repo = "DHARMa", username = "florianhartig",
-#subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
-library(DHARMa)
-library(optimx)
-
-WP_DHARMaResponse <- createDHARMa(
-simulatedResponse = simulatedPredictedWP,
-observedResponse = Whiteplague_workingdata$Plague,
-fittedPredictedResponse = predictionsResponseWPMedian,
-integerResponse = T) # interger correction function
-
-#Plots
-plotSimulatedResiduals(simulationOutput = WP_DHARMaResponse, quantreg = FALSE)
-
-Observed_Response_WP<-Whiteplague_working_data$Plague
-Predicted_Response_WPMedian <- predictionsResponseWPMedian
-plot(Predicted_Response_WPMedian,Observed_Response_WP)
-#test Spatial autocorrelation Moran's I
-
-testSpatialAutocorrelation(WP_DHARMaResponse , x = Whiteplague_working_data$Latitude,
-y = Whiteplague_working_data$Longitude)
-
-
-launch_shinystan(stan.white)
-
-```
 

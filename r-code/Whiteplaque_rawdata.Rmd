@@ -36,7 +36,7 @@ rm(list=ls(all=TRUE))
 # Load settings
 
 # load data & libraries 
-Whiteplague_rawdata <- read.csv("Data/Whiteplague_rawdata.csv", header = TRUE) 
+Whiteplague_rawdata <- read.csv("data/Whiteplague_rawdata.csv", header = TRUE) 
 
 #check data
 ls(Whiteplague_rawdata)
@@ -44,7 +44,7 @@ dim(Whiteplague_rawdata)
 head(Whiteplague_rawdata)
 
 #Save data as rdata file to avoid changing this data in the future
-save(Whiteplague_rawdata,file="Data/Whiteplague_rawdata.rdata")
+save(Whiteplague_rawdata,file="data/Whiteplague_rawdata.Rdata")
 ```
 
 Once this file is saved, we used in the Whiteplague_working data Rmarkdown script to modify it and scaled/ transformed data without
