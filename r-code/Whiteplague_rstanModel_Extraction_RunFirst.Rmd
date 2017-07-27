@@ -46,13 +46,9 @@ library(DHARMa)
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
-<<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
 NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
 load(file=paste("data/",NameOfModelRun,".RData",sep=""))
-=======
-NameOfModelRun <- "2017.07.26_WhitePlague_model_result"
-load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
->>>>>>> origin/master:r-code/Whiteplague_rstanModel_Extraction_RunFirst.Rmd
+
 ```
 
 ## Data preparation for graphs
@@ -60,12 +56,8 @@ load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 ### Define Observed data
 <<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
 ```{r ObsPred,,echo=FALSE}
-=======
-```{r ObsPred,echo=FALSE}
->>>>>>> origin/master:r-code/Whiteplague_rstanModel_Extraction_RunFirst.Rmd
 observedWhitePlague<-Whiteplague_workingdata$Plague
 ```
-
 
 
 ### Extraction of coefficients from stan object
@@ -82,7 +74,6 @@ posterior<-extract(stan.white2,inc_warmup=F,permute=F)
 # s.coda <- do.call(mcmc.list, alply(s, 2, mcmc)) # create coda object
 # combinedchains <- lumpchains(s.coda) # lumpchains combines the chains in mcmc.list
 ```
-
 
 
 ### Rename axis-labels
@@ -155,7 +146,7 @@ datqPlotWhitePlague <- GraphInput$datq
 ```
 
 
-### 
+##Save files
 ```{r save}
 save(
 posterior,GraphInput,
@@ -179,11 +170,11 @@ predictionsResponseMedianWhitePlague,
 #ParameterNamesWhitePlague,
 
 # Coefficients
-<<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
+
 #varMedianPlotWhitePlaque,datqPlotWhitePlaque,
-=======
+
 varMedianPlotWhitePlague,datqPlotWhitePlague,
->>>>>>> origin/master:r-code/Whiteplague_rstanModel_Extraction_RunFirst.Rmd
+
 
 file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
 ```
