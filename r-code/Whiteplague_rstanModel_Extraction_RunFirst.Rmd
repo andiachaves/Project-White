@@ -7,7 +7,7 @@ header-includes: \usepackage{graphicx}
 ---
 
 ## Introduction
-Script extracts necessary data to create diagnositic plots for the RStan model for White plaque disease.
+Script extracts necessary data to create diagnositic plots for the RStan model for White Plague disease.
 Needs as input the stan.white object.  
 
 
@@ -46,22 +46,31 @@ library(DHARMa)
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
+<<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
 NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
 load(file=paste("data/",NameOfModelRun,".RData",sep=""))
+=======
+NameOfModelRun <- "2017.07.26_WhitePlague_model_result"
+load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
+>>>>>>> origin/master:r-code/Whiteplague_rstanModel_Extraction_RunFirst.Rmd
 ```
 
 ## Data preparation for graphs
 
 ### Define Observed data
+<<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
 ```{r ObsPred,,echo=FALSE}
+=======
+```{r ObsPred,echo=FALSE}
+>>>>>>> origin/master:r-code/Whiteplague_rstanModel_Extraction_RunFirst.Rmd
 observedWhitePlague<-Whiteplague_workingdata$Plague
 ```
 
 
 
 ### Extraction of coefficients from stan object
-```{r Whiteplaque_graph_input}
-GraphInput<-stanGraphInput(stan.white2) # reguires libraries: rstan, MCMCpack, plyr
+```{r WhitePlague_graph_input}
+GraphInput<-stanGraphInput(stan.white) # reguires libraries: rstan, MCMCpack, plyr
 ```
 
 
@@ -78,7 +87,7 @@ posterior<-extract(stan.white2,inc_warmup=F,permute=F)
 
 ### Rename axis-labels
 ```{r Parameter_names}
-#dnam <- GraphInput$parameters
+dnam <- GraphInput$parameters
  # [1] "b0"                      "parEnvironment[1]"       "parEnvironment[2]"       "parEnvironment[3]"       "parEnvironment[4]"      
  #  [6] "parEnvironment[5]"       "parEnvironment[6]"       "parEnvironment[7]"       "parEnvironment[8]"       "parEnvironment[9]"      
  # [11] "parEnvironment[10]"      "parEnvironment[11]"    
@@ -140,9 +149,9 @@ Nrows<-c(1:length(rep(seq(1:modelParameterLength),each=4)))
 
 
 # Medians
-varMedianPlotWhitePlaque <- GraphInput$var.median[Nrows,]
+varMedianPlotWhitePlague <- GraphInput$var.median[Nrows,]
 
-datqPlotWhitePlaque <- GraphInput$datq
+datqPlotWhitePlague <- GraphInput$datq
 ```
 
 
@@ -167,10 +176,14 @@ predictionsResponseMedianWhitePlague,
 
 # Parameter names
 #dnam,
-#ParameterNamesWhitePlaque,
+#ParameterNamesWhitePlague,
 
 # Coefficients
+<<<<<<< HEAD:r-code/Whiteplaque_rstanModel_Extraction_RunFirst.Rmd
 #varMedianPlotWhitePlaque,datqPlotWhitePlaque,
+=======
+varMedianPlotWhitePlague,datqPlotWhitePlague,
+>>>>>>> origin/master:r-code/Whiteplague_rstanModel_Extraction_RunFirst.Rmd
 
 file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
 ```

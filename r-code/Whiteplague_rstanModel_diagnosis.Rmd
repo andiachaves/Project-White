@@ -21,7 +21,7 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 # Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands - Residual analysis
 
 ## Introduction
-This document provides residual diagnosis for the logistic regression model using Bayesian inference for the White plaque disease on corals described in the article: ``Identifying local drivers of a vector-pathogen-disease system using Bayesian modeling''.
+This document provides residual diagnosis for the logistic regression model using Bayesian inference for the White Plague disease on corals described in the article: ``Identifying local drivers of a vector-pathogen-disease system using Bayesian modeling''.
 The Skript is based on the residuals analysis provided in Panassiti et al., 2016.
 
 ## Data
@@ -37,11 +37,18 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 #### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
+<<<<<<< HEAD
 
 load(file="data/Whiteplague_workingdata.RData)
 
 NameOfModelRun <- "2017.07.26_Whiteplague_model_result_graphinput"
 load(file=paste("data/",NameOfModelRun,".RData",sep=""))
+=======
+load(file="data/Whiteplague_workingdata.Rdata")
+
+NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
+load(file=paste("data/",NameOfModelRun,"_graphinput.Rdata",sep=""))
+>>>>>>> origin/master
 
 #devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
 library(DHARMa)
