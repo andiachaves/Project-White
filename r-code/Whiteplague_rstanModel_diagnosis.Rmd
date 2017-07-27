@@ -82,4 +82,23 @@ df$y_new <- rnorm(df$y,df$y,0.001)
 testSpatialAutocorrelation(simulationOutput = df, x = df$x_new,y = df$y_new)
 ```
 
-Both tests indicate that we should reject the null of no spatial auto-correlation.
+Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
+
+### Test for temporal autocorrelation
+```{r}
+# test temporal autocorrelation Durbin-Watson test in the residuals
+#Month
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Month_12)
+#Year
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Year)
+#Seasons
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Season)
+#Time points
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Time_point)
+#Random time
+testTemporalAutocorrelation(simulationOutput = df, time = "random")
+
+```
+
+
+
