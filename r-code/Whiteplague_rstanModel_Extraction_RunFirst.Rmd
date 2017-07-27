@@ -68,7 +68,7 @@ GraphInput<-stanGraphInput(stan.white) # reguires libraries: rstan, MCMCpack, pl
 
 ```{r Extract_posterior}
 # # extract entire posterior; all parameters
-posterior<-extract(stan.white2,inc_warmup=F,permute=F)
+posterior<-extract(stan.white,inc_warmup=F,permute=F)
 
 # the normal procedure to lump chains not applicable, since hierachical model:
 # s.coda <- do.call(mcmc.list, alply(s, 2, mcmc)) # create coda object
