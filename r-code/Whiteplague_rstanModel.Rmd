@@ -1,0 +1,394 @@
+---
+title: "Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands"
+author: 
+-name:"Andia Chaves Fonnegra and Bernd Panassiti"
+  affiliation: University of the Virgin Islands (US.VI) and Laimburg Research Center (Italy)
+  abstract: "This document provides the r-code for the white plague disease model described on the article:"Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands" Description of the model in terms of data collection, white plague disease, parameter estimations and fitting of the model can be found in Appendix A."
+  keywords: white plague, coral reefs, bayesian model, environment
+date: "7/18/2017"
+output: pdf_document
+number_sections: yes
+    toc: yes
+header-includes: \usepackage{graphicx}
+email: \email{}
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+#Introduction
+
+This document provides the r-code for the white plague disease model described on the article.The model address to the objectives of this study: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental factors on WP disease prevalence using Bayesian inference. We use rstan for statistical inference (http://mc-stan.org/about/). 
+
+#Data
+The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplague_working.RData" needs to be placed in a folder called "Data".
+"
+
+#Model
+
+## Install Packages to run rstan in R if necessary
+```{r Install apckages if required}
+
+#Install packages and load libraries to run Stan and graphing results from Stan
+if(!require(formatR))
+{
+  install.packages("formatR", repos = mir)
+  require(formatR)
+}
+
+if(!require(StanHeaders)) 
+{
+  install.packages("StanHeaders", repos = mir)
+  require(StanHeaders)
+}
+
+if(!require(rstan))
+{
+  install.packages("rstan", repos = mir)
+  require(rstan)
+}
+
+if(!require(MCMCpack)) # rwish function
+{
+  install.packages("MCMCpack", repos = mir)
+  require(MCMCpack)
+}
+
+if(!require(modeest)) 
+{
+  install.packages("modeest", repos = mir)
+  require(modeest)
+} 
+
+if(!require(IDPmisc))
+{
+  install.packages("IDPmisc", repos = mir)
+  require(IDPmisc)
+} 
+
+if(!require(ggplot2)) 
+{
+  install.packages("ggplot2", repos = mir)
+  require(ggplot2)
+}
+if(!require(shinystan))
+{
+  install.packages("shinystan", repos = mir)
+  require(shinystan)
+}
+if(!require(qtlcharts))
+{
+  install.packages("qtlcharts", repos = mir)
+  require(qtlcharts)
+}
+```
+
+
+##Load libraries and create directory for results
+```{r}
+# Date format - forms part of names of created files or graphs
+today <- format(Sys.time(), "%Y.%m.%d")
+
+
+# load libraries
+library(formatR)
+library(StanHeaders)
+library(rstan)
+rstan_options(auto_write = TRUE) # automatically save the compilied Stan program
+options(mc.cores = parallel::detectCores()) # execute multiple Markov chains in paral
+
+library(MCMCpack) # rwish function
+library(modeest)
+library(IDPmisc)
+library(ggplot2) # for graphs
+
+# create directory if not existing
+#suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
+
+```
+
+## Load data
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+load(file="data/Whiteplague_workingdata.Rdata")
+ls()
+
+#check data
+dim(Whiteplague_workingdata)
+head(Whiteplague_workingdata)
+
+```
+
+## Data preparation
+```{r}
+##Selecting Environmental variables from the file already SCALED to use in the model.
+#Check in which column scaled environmental variables start.
+
+
+match("Chl_sca",names(Whiteplague_workingdata))
+
+#Selection of all 11 scaled environmental variables. 
+enviroselection = Whiteplague_workingdata[c(32:42)] 
+enviroselection
+
+# Predictors environmental data
+Chlorophyll = Whiteplague_workingdata$Chl_sca
+Conductivity = Whiteplague_workingdata$Cond_sca
+Density = Whiteplague_workingdata$Den_sca
+CTD_Depth = Whiteplague_workingdata$DepCTD_sca    
+Oxygen = Whiteplague_workingdata$Oxy_sca
+Salinity = Whiteplague_workingdata$Sal_sca    
+Turbidity = Whiteplague_workingdata$Turb_sca   
+Depth = Whiteplague_workingdata$Depth_tran_sca  
+Temperature = Whiteplague_workingdata$Temp_sca   
+Max_DHW = Whiteplague_workingdata$DHW_sca 
+Rainfall = Whiteplague_workingdata$Rain_sca   
+
+#Selection of Biological variables.
+#biological = Whiteplague_workingdata[c(22:27)] 
+#biological
+
+# Predictors biological data, all are % of cover in transects. No need to scale?
+#Orbicellids = Whiteplague_workingdata$Orbicellids
+#Sand = Whiteplague_workingdata$Sand
+#Coral = Whiteplague_workingdata$Coral
+#Sponges = Whiteplague_workingdata$Sponges    
+#Macroalgae = Whiteplague_workingdata$Macroalgae
+#Cyanobacteria = Whiteplague_workingdata$Cyanobacteria    
+
+#Time and location factors 
+Year=Whiteplague_workingdata$Year
+Month=Whiteplague_workingdata$Month_12
+Season=Whiteplague_workingdata$Season
+Station=Whiteplague_workingdata$Station_name
+Reef.Type=Whiteplague_workingdata$Reef.Type
+Latitude=Whiteplague_workingdata$Latitude
+Longitude=Whiteplague_workingdata$Longitude
+Site <- as.numeric(Whiteplague_workingdata$Station_name)
+```
+
+
+## Model definition
+```{r}
+#data as a list
+Month=rep(1:12,c(3,25,26,29,22,4,7,29,30,14,25,25))  # Total of 12 months, with different sampling per month over 2-4 years
+dataList = list(
+        TotalObservedcolonies = Whiteplague_workingdata$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
+        Diseasedcolonies = Whiteplague_workingdata$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
+        nWP = length(Whiteplague_workingdata$Plague), #White Plague prevalence total number of rows
+        observedWpPrevalence = Whiteplague_workingdata$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
+        
+        #Environment
+        
+                  Chlorophyll,
+                  Conductivity,
+                  Density,
+                  CTD_Depth,    
+                  Oxygen,
+                  Salinity,    
+                  Turbidity,   
+                  Depth,  
+                  Temperature,   
+                  Max_DHW, 
+                  Rainfall,   
+        
+        Environment = Whiteplague_workingdata[32:(32-1+length(enviroselection))],
+        nEnvi = length(enviroselection),
+
+        Month = Month,
+        nMonth = length(unique(Month)), #number of months of WP observations Shallow (2 years) Deep (4 years)
+        Site = Site,
+        nSite =length(unique(Site))
+        )
+```
+
+
+## Model definition
+
+```{r define_model}
+# Define model
+
+model.Wplague <- '
+data {
+// counters
+int<lower=0> nWP;    // number of White Plague cases, int=integer  and non negative >0 
+int<lower=1> nEnvi;  // number of environmental variables
+int<lower=1> nMonth; // number of Months sampled
+int<lower=1> nSite;  // number of Sites sampled
+
+// predictors
+matrix[nWP, nEnvi] Environment;
+int<lower=1> Month[nWP];
+int<lower=1,upper=nSite> Site[nWP];// site id for each observation
+
+
+// response
+int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
+int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
+}
+
+parameters {
+// parameters that will be used in the model should be defined here
+// these will be saved and printed with the output
+
+real b0; // intercept
+// Fixed effects
+vector[nEnvi] parEnvironment;   // Environmental-level
+real parMonth;                  // Month
+
+// Random Effects
+vector[nSite] site_raw;
+real<lower=0> tauSite;
+
+}
+
+transformed parameters {
+// generation of derived parameters from parameters above should be defined here
+// these will be saved and printed with the output
+
+real RealDisease[nWP];
+
+for( i in 1:nWP ) {
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Month[i]*parMonth 
+                  + site_raw[Site[i]]
+                  );
+}
+}
+
+
+model{
+// This is area for describing the model including the priors and likelihood
+// This is the only place where sampling can be done within Stan
+// All data and parameters used in this section must be defined above
+
+// Fixed effects priors
+b0             ~ normal(0, 100 ); //
+parEnvironment ~ normal(0, 100 );
+parMonth       ~ normal(0, 100 );
+
+
+//Hyperpriors
+tauSite    ~ inv_gamma(0.001, 0.001);
+
+//Random effects priors
+site_raw  ~ normal(0, tauSite);
+
+
+
+
+
+Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
+}
+
+
+//predictive inference
+generated quantities
+{
+real DiseasePredictions[nWP]; //vector to store predictions
+
+for( i in 1:nWP ) {
+DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDisease[i]));
+}
+}
+
+'
+```
+
+## Running the model
+```{r test_run,echo=FALSE,eval=FALSE}
+stan(model_code = model.Wplague, data = dataList, iter = 50, chains = 1,refresh=1,thin=1)
+```
+
+```{r model_run,eval=FALSE}
+#This is the run of the model.
+time <- proc.time()
+set.seed(2017)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+(proc.time() - time)/60/60
+```
+
+#Save the model run results
+```{r}
+save(stan.white, file =paste("data/",today,"_Whiteplague_model_result.Rdata",sep=""))
+```
+
+# Session information for model run
+```{r}
+devtools::session_info()
+```
+
+#Plotting the model
+```{r ploting from stan to ggmcmc}
+
+print(stan.white2)
+plot(stan.white2)
+
+print(stan.white)
+plot(stan.white)
+
+str(stan.white)
+
+library(ggmcmc)
+library(coda)
+
+#This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan
+#devtools::install_github('christophergandrud/StanCat')
+StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]')
+
+#To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr
+library(plyr)
+#this one extracts everything but is not plotting histograms properly
+s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 
+#this one extracts only some functions
+
+s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))
+S <- ggs(s) 
+ggmcmc(S)
+ggs_traceplots(S)
+ggs_caterpillar(S)
+
+
+#for specific parameters. But is not runing
+#s <- rstan::extract(stan.white, pars = 'v_raw', permuted = TRUE)$parEnvironment 
+#s <- do.call(mcmc.list, alply(s[,,-4], 2, mcmc))
+
+```
+
+#Check model output with Shiny
+```{r extract with shiny}
+library(shiny)
+library(shinystan)
+
+launch_shinystan(stan.white2)
+```
+
+
+#Save r markdown file
+```{r-To save the r markdown file}
+
+save(dataList, stan.white, file = paste("Figures/", today, "_fit.fullModel.pdf",
+sep = ""))
+save(dataList, file = paste("Figures/", today, "_fit.fullModel_data.Rdata",
+sep = ""))
+library(lattice)
+trellis.device("pdf", file = paste("Figures/", today, "_Output_rstan.pdf",
+sep = ""), width = 14, height = 7)
+plot(stan.white)
+dev.off()
+
+
+library(lattice)
+trellis.device("pdf")
+file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
+plot(stan.white)
+```
+
