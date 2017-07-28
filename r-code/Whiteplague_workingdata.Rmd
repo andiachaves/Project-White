@@ -25,7 +25,7 @@ Data was scaled and saved as working_data file to feed into the model
 ## Loading data
 ```{r}
 # load data & libraries - Loading Raw data file as r.data
-load(file="Data/Whiteplague_rawdata.rdata")
+load(file="data/Whiteplague_rawdata.Rdata")
 ls()
 #check data
 dim(Whiteplague_rawdata)
@@ -49,6 +49,15 @@ Whiteplague_rawdata$DHW_sca    <- scale(Whiteplague_rawdata$Max_DHW)
 Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
 
 #Sorting the data frame so Months can be in numerical order
+
+
+Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
+head(Whiteplague_working_data)
+
+Whiteplague_workingdata<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
+Whiteplague_workingdata
+
+
 Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
 head(Whiteplague_working_data)
 

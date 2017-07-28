@@ -40,23 +40,22 @@ library(rstan) # extraction of posterior, function:stanGraphInput
 library(MCMCpack) # rwish function, to create mmcmc list, function:stanGraphInput
 library(zoo) # rollapply
 
-#devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
-library(DHARMa)
 
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "2017.07.26_WhitePlague_model_result"
+NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
+
 ```
 
 ## Data preparation for graphs
 
 ### Define Observed data
-```{r ObsPred,echo=FALSE}
+
+```{r ObsPred,,echo=FALSE}
 observedWhitePlague<-Whiteplague_workingdata$Plague
 ```
-
 
 
 ### Extraction of coefficients from stan object
@@ -73,7 +72,6 @@ posterior<-extract(stan.white,inc_warmup=F,permute=F)
 # s.coda <- do.call(mcmc.list, alply(s, 2, mcmc)) # create coda object
 # combinedchains <- lumpchains(s.coda) # lumpchains combines the chains in mcmc.list
 ```
-
 
 
 ### Rename axis-labels
@@ -118,10 +116,9 @@ simulatedPredictedWhitePlague <- cbind(modelPredictions[,,1], modelPredictions[,
 ```
 
 
-
 ## Median model predictions on the linear / response scale - Fitted predicted response
 ```{r Predictions_posterior_fittedPredictedResponse}
-# Plant Symptoms
+# White Plague Prevalence
 modelPredictions <- NULL
 modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw) draw[grepl("^RealDisease[\\[]",names(draw))])
 
@@ -147,7 +144,7 @@ datqPlotWhitePlague <- GraphInput$datq
 ```
 
 
-### 
+##Save files
 ```{r save}
 save(
 posterior,GraphInput,
@@ -171,8 +168,12 @@ predictionsResponseMedianWhitePlague,
 #ParameterNamesWhitePlague,
 
 # Coefficients
+
+#varMedianPlotWhitePlaque,datqPlotWhitePlaque,
+
 varMedianPlotWhitePlague,datqPlotWhitePlague,
 
-file=paste("data/",NameOfModelRun,"_graphinput.RData",sep=""))
+
+file=paste("data/",NameOfModelRun,"_graphinput.Rdata",sep=""))
 ```
 

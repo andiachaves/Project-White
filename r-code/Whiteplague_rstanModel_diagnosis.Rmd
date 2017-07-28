@@ -37,12 +37,12 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 #### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
-load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "2017.07.26_Whiteplague_model_result"
-load(file=paste("data/",NameOfModelRun,"_graphinput.Rdata",sep=""))
+NameOfModelRun <- "2017.07.26_Whiteplague_model_result_graphinput"
+load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 
-#devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
+#"devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
+
 library(DHARMa)
 ```
 
@@ -53,7 +53,6 @@ library(DHARMa)
 WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlague,
   observedResponse = observedWhitePlague,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)
 ```
-
 
 
 #### Plot DHARMa object
@@ -83,4 +82,23 @@ df$y_new <- rnorm(df$y,df$y,0.001)
 testSpatialAutocorrelation(simulationOutput = df, x = df$x_new,y = df$y_new)
 ```
 
-Both tests indicate that we should reject the null of no spatial auto-correlation.
+Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
+
+### Test for temporal autocorrelation
+```{r}
+# test temporal autocorrelation Durbin-Watson test in the residuals
+#Month
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Month_12)
+#Year
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Year)
+#Seasons
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Season)
+#Time points
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Time_point)
+#Random time
+testTemporalAutocorrelation(simulationOutput = df, time = "random")
+
+```
+
+
+
