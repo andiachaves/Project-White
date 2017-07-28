@@ -173,7 +173,9 @@ Station=Whiteplague_workingdata$Station_name
 Reef.Type=Whiteplague_workingdata$Reef.Type
 Latitude=Whiteplague_workingdata$Latitude
 Longitude=Whiteplague_workingdata$Longitude
+
 Site <- as.numeric(Whiteplague_workingdata$Station_name)
+
 ```
 
 
@@ -305,7 +307,10 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDis
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
-stan(model_code = model.Wplague, data = dataList, iter = 50, chains = 1,refresh=1,thin=1)
+
+#This is a short test I run before running the full model, just to check its ok. I do not save this one.
+stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 100, chains = 1,refresh=1,thin=1)
+
 ```
 
 ```{r model_run,eval=FALSE}
