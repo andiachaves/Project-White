@@ -323,7 +323,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/",today,"_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.07.28_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run

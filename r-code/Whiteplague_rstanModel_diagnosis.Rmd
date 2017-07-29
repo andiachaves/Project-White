@@ -38,8 +38,9 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 ```{r}
 rm(list=ls(all=TRUE))
 
-NameOfModelRun <- "2017.07.26_Whiteplague_model_result_graphinput"
+NameOfModelRun <- "2017.07.28_Whiteplague_model_result_graphinput"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
+load(file="data/Whiteplague_workingdata.Rdata")
 
 #"devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
 
@@ -96,7 +97,7 @@ testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdat
 #Time points
 testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Time_point)
 #Random time
-testTemporalAutocorrelation(simulationOutput = df, time = "random")
+#testTemporalAutocorrelation(simulationOutput = df, time = "random")
 
 ```
 
