@@ -326,7 +326,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.07.28_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.07.29_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
@@ -337,7 +337,7 @@ devtools::session_info()
 #Plotting the model
 ```{r ploting from stan to ggmcmc}
 
-print(stan.white2)
+print(stan.white)
 plot(stan.white2)
 
 print(stan.white)
