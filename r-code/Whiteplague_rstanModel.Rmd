@@ -263,7 +263,7 @@ real RealDisease[nWP];
 
 for( i in 1:nWP ) {
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Month[i]*parMonth 
-                  + site_raw[Site[i]]
+                  + site_raw[Site[i]] + month_raw[Month[i]]
                   );
 }
 }
@@ -282,10 +282,11 @@ parMonth       ~ normal(0, 100 );
 
 //Hyperpriors
 tauSite    ~ inv_gamma(0.001, 0.001);
+tauMonth   ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
 site_raw  ~ normal(0, tauSite);
-
+month_raw ~ normal(0,tauMonth);
 
 
 
