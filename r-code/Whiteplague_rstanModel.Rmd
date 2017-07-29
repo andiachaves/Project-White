@@ -250,6 +250,8 @@ real parMonth;                  // Month
 // Random Effects
 vector[nSite] site_raw;
 real<lower=0> tauSite;
+vector[nMonth] month_raw;
+real<lower=0> tauMonth;
 
 }
 
