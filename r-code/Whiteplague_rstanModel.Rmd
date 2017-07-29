@@ -312,7 +312,7 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDis
 ```{r test_run,echo=FALSE,eval=FALSE}
 
 #This is a short test I run before running the full model, just to check its ok. I do not save this one.
-stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 100, chains = 1,refresh=1,thin=1)
+stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 20, chains = 1,refresh=1,thin=1)
 
 ```
 
