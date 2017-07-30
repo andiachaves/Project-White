@@ -209,7 +209,11 @@ dataList = list(
         Month = Month,
         nMonth = length(unique(Month)), #number of months of WP observations Shallow (2 years) Deep (4 years)
         Site = Site,
-        nSite =length(unique(Site))
+        nSite =length(unique(Site)),
+        
+        Year = Year,
+        nYear =length(unique(Year))
+        
         )
 ```
 
@@ -226,12 +230,13 @@ int<lower=0> nWP;    // number of White Plague cases, int=integer  and non negat
 int<lower=1> nEnvi;  // number of environmental variables
 int<lower=1> nMonth; // number of Months sampled
 int<lower=1> nSite;  // number of Sites sampled
+int<lower=1> nYear;  // number of Sites sampled
 
 // predictors
 matrix[nWP, nEnvi] Environment;
 int<lower=1> Month[nWP];
 int<lower=1,upper=nSite> Site[nWP];// site id for each observation
-
+int<lower=1> Year[nWP];
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -246,13 +251,15 @@ real b0; // intercept
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
 real parMonth;                  // Month
+real parYear;                   // Year
 
 // Random Effects
 vector[nSite] site_raw;
 real<lower=0> tauSite;
 vector[nMonth] month_raw;
 real<lower=0> tauMonth;
-
+vector[nYear] year_raw;
+real<lower=0> tauYear;
 }
 
 transformed parameters {
@@ -262,7 +269,7 @@ transformed parameters {
 real RealDisease[nWP];
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Month[i]*parMonth 
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Month[i]*parMonth + Year[i]*parYear 
                   + site_raw[Site[i]] + month_raw[Month[i]]
                   );
 }
@@ -278,16 +285,17 @@ model{
 b0             ~ normal(0, 100 ); //
 parEnvironment ~ normal(0, 100 );
 parMonth       ~ normal(0, 100 );
-
+parYear        ~ normal(0, 100 );
 
 //Hyperpriors
 tauSite    ~ inv_gamma(0.001, 0.001);
 tauMonth   ~ inv_gamma(0.001, 0.001);
+tauYear    ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
 site_raw  ~ normal(0, tauSite);
 month_raw ~ normal(0,tauMonth);
-
+year_raw ~ normal(0,tauYear);
 
 
 
@@ -326,7 +334,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.07.29_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.07.30_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
