@@ -34,64 +34,6 @@ The white plague prevalence data and corresponding environmental and biological 
 
 #Model
 
-## Install Packages to run rstan in R if necessary
-```{r Install apckages if required}
-
-#Install packages and load libraries to run Stan and graphing results from Stan
-if(!require(formatR))
-{
-  install.packages("formatR", repos = mir)
-  require(formatR)
-}
-
-if(!require(StanHeaders)) 
-{
-  install.packages("StanHeaders", repos = mir)
-  require(StanHeaders)
-}
-
-if(!require(rstan))
-{
-  install.packages("rstan", repos = mir)
-  require(rstan)
-}
-
-if(!require(MCMCpack)) # rwish function
-{
-  install.packages("MCMCpack", repos = mir)
-  require(MCMCpack)
-}
-
-if(!require(modeest)) 
-{
-  install.packages("modeest", repos = mir)
-  require(modeest)
-} 
-
-if(!require(IDPmisc))
-{
-  install.packages("IDPmisc", repos = mir)
-  require(IDPmisc)
-} 
-
-if(!require(ggplot2)) 
-{
-  install.packages("ggplot2", repos = mir)
-  require(ggplot2)
-}
-if(!require(shinystan))
-{
-  install.packages("shinystan", repos = mir)
-  require(shinystan)
-}
-if(!require(qtlcharts))
-{
-  install.packages("qtlcharts", repos = mir)
-  require(qtlcharts)
-}
-```
-
-
 ##Load libraries and create directory for results
 ```{r}
 # Date format - forms part of names of created files or graphs
@@ -267,10 +209,24 @@ transformed parameters {
 // these will be saved and printed with the output
 
 real RealDisease[nWP];
+vector[nWP] mu;
+
+vector[nMonth] u;
+vector[nSite] v;
+
+
+for (j in 1:nMonth) {
+u[j] = month_raw[j]*sqrt(tauMonth);
+}
+
+for (j in 1:nSite) {
+v[j] = site_raw[j]*sqrt(tauSite);
+}
+
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Month[i]*parMonth + Year[i]*parYear 
-                  + site_raw[Site[i]] + month_raw[Month[i]]
+mu[i] = u[Month[i]] + v[Site[i]];
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Month[i]*parMonth + Year[i]*parYear + mu[i]
                   );
 }
 }
@@ -290,14 +246,12 @@ parYear        ~ normal(0, 100 );
 //Hyperpriors
 tauSite    ~ inv_gamma(0.001, 0.001);
 tauMonth   ~ inv_gamma(0.001, 0.001);
-tauYear    ~ inv_gamma(0.001, 0.001);
+//tauYear  ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
-site_raw  ~ normal(0, tauSite);
-month_raw ~ normal(0,tauMonth);
-year_raw ~ normal(0,tauYear);
-
-
+site_raw  ~ normal(0,10);
+month_raw ~ normal(0,10);
+//year_raw ~ normal(0,10);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
