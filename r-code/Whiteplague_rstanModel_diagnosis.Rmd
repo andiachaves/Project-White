@@ -101,5 +101,54 @@ testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdat
 
 ```
 
+##Checking temporal autocorrelation with histograms and correlation plots 
+```{r}
+NameOfModelRun <- "2017.07.31_Whiteplague_model_result"
+load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 
+str(stan.white)
+list_of_draws <- extract(stan.white)
+print(names(list_of_draws))
+head(list_of_draws$mu)
+
+mu<- as.matrix(stan.white, pars = c("mu"))
+head(mu)
+
+#Following Chapter 23 "Incorporating Temporal Correlation.." In: Mixed Effects Models and Extensions in Ecology with R (2009) by Zuur, Ieno, Walker, Saveliev, Smith.
+
+#to obtain Fig.23.6
+mu.mean<-apply(mu,2,mean)
+mu.sd<-apply(mu,2,sd)
+hist(mu.mean)
+hist(mu.sd)
+mean(mu.sd^2)
+
+#to obtain Fig.23.7
+
+#Add a column with week.time or day time as in Seals
+
+
+
+#This is from code
+p.dist<-matrix(ncol=239,nrow=239)
+for(i in 1:239) {
+  for(j in 1:239) {
+    p.dist[i,j]<-abs(Whiteplague_workingdata$Month_number[i]-Whiteplague_workingdata$Month_number[j])
+  }
+}
+mu.cor<-cor(mu)
+is.na(diag(mu.cor))<-T
+hist(mu.cor)
+
+plot(as.double(p.dist),as.double(mu.cor),main="Correlation against WeekTime difference",
+     xlab="Month Time difference",ylab="Correlation",pch=20,cex=0.3) 
+
+plot(as.double(p.dist[1:51,1:51]),as.double(p.eps.cor[1:51,1:51]),main="Correlation against WeekTime difference",
+     xlab="WeekTime difference",ylab="Correlation",pch=20,cex=0.3) 
+
+plot(as.double(p.dist[52:98,52:98]),as.double(p.eps.cor[52:98,52:98]),main="Correlation against WeekTime difference",
+     xlab="WeekTime difference",ylab="Correlation",pch=20,cex=0.3) 
+
+
+```
 
