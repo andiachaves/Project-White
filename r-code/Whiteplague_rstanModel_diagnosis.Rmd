@@ -1,4 +1,4 @@
----
+---*
 title: "Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands"
 subtitel: "Residual diagnosis"
 author: "Andia Chaves-Fonnegra, Bernd Panassiti, Tyler B. Smith, Elizabeth Brown, Elizabeth Clemens, Moriah Sevier, and Marilyn Brandt"
@@ -38,7 +38,7 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 ```{r}
 rm(list=ls(all=TRUE))
 
-NameOfModelRun <- "2017.07.30_Whiteplague_model_result_graphinput"
+NameOfModelRun <- "2017.07.31_Whiteplague_model_result_graphinput"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 
