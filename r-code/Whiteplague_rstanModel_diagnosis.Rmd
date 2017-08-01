@@ -133,7 +133,7 @@ mean(mu.sd^2)
 p.dist<-matrix(ncol=239,nrow=239)
 for(i in 1:239) {
   for(j in 1:239) {
-    p.dist[i,j]<-abs(Whiteplague_workingdata$Month_number[i]-Whiteplague_workingdata$Month_number[j])
+    p.dist[i,j]<-abs(Whiteplague_workingdata$Month_12[i]-Whiteplague_workingdata$Month_12[j])
   }
 }
 mu.cor<-cor(mu)
