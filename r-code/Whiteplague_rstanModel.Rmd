@@ -270,7 +270,6 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDis
 ```
 
 
-
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
 
