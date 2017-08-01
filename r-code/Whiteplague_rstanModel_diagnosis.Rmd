@@ -38,7 +38,7 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 ```{r}
 rm(list=ls(all=TRUE))
 
-NameOfModelRun <- "2017.08.01d_Whiteplague_model_result_graphinput"
+NameOfModelRun <- "2017.08.01f_Whiteplague_model_result_graphinput"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 

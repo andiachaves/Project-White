@@ -226,7 +226,7 @@ v[j] = site_raw[j]*sqrt(tauSite);
 
 for( i in 1:nWP ) {
 mu[i] = u[Month[i]] + v[Site[i]];
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + );
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + mu[i]);
 }
 }
 
@@ -288,7 +288,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.08.01d_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.08.01f_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
