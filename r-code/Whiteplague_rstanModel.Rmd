@@ -161,8 +161,7 @@ dataList = list(
 
 
 ## Model definition
-
-```{r define_model}011
+```{r define model}
 # Define model
 
 model.Wplague <- '
@@ -227,7 +226,7 @@ v[j] = site_raw[j]*sqrt(tauSite);
 
 for( i in 1:nWP ) {
 mu[i] = u[Month[i]] + v[Site[i]];
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Site[i]*parSite + v[Site[i]]);
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + );
 }
 }
 
@@ -269,6 +268,8 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDis
 
 '
 ```
+
+
 
 ## Running the model
 ```{r test_run,echo=FALSE,eval=FALSE}
