@@ -48,20 +48,26 @@ Whiteplague_rawdata$Temp_sca    <- scale(Whiteplague_rawdata$Temperature)
 Whiteplague_rawdata$DHW_sca    <- scale(Whiteplague_rawdata$Max_DHW)
 Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
 
+
+
+#creating a time lag between data points to be able to add temporal autocorrelation in the model
+
+#first switch formate to date formt for Time_point
+Whiteplague_rawdata$Time_point <- as.Date(Whiteplague_rawdata$Time_point,format="%d_%b-%y")
+Whiteplague_rawdata$Time_point
+#Then create a new column with the  time lag (i-1)
+Whiteplague_rawdata["Time_lag"] <-NA
+
+
+# create a function that calculates the lag for n periods
+lag <- function(x, n) c(rep(NA, n), x[1:(length(x) - n)])
+# add data to the new column Time_lag
+Whiteplague_rawdata$Time_lag <- as.numeric(Whiteplague_rawdata$Time_point- lag(Whiteplague_rawdata$Time_point, 1))
+
 #Sorting the data frame so Months can be in numerical order
-
-
-Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
-head(Whiteplague_working_data)
 
 Whiteplague_workingdata<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
 Whiteplague_workingdata
-
-
-Whiteplague_working_data<-Whiteplague_rawdata[order(Whiteplague_rawdata$Month_12),]
-head(Whiteplague_working_data)
-
-
 
 ls()
 #check data
