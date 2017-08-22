@@ -115,6 +115,7 @@ Station=Whiteplague_workingdata$Station_name
 Reef.Type=Whiteplague_workingdata$Reef.Type
 Latitude=Whiteplague_workingdata$Latitude
 Longitude=Whiteplague_workingdata$Longitude
+Timepoint=Whiteplague_workingdata$Time_point
 
 Site <- as.numeric(Whiteplague_workingdata$Station_name)
 
@@ -154,7 +155,10 @@ dataList = list(
         nSite =length(unique(Site)),
         
         Year = Year,
-        nYear =length(unique(Year))
+        nYear =length(unique(Year)),
+        
+        Timepoint= Timepoint,
+        nTimepoint = length(unique(Timepoint))
         
         )
 ```
@@ -172,12 +176,14 @@ int<lower=1> nEnvi;  // number of environmental variables
 int<lower=1> nMonth; // number of Months sampled
 int<lower=1> nSite;  // number of Sites sampled
 int<lower=1> nYear;  // number of Sites sampled
+int<lower=1> nTimepoint; // number of sampling dates (temporal autocorrelation)
 
 // predictors
 matrix[nWP, nEnvi] Environment;
 int<lower=1> Month[nWP];
 int<lower=1,upper=nSite> Site[nWP];// site id for each observation
 int<lower=1> Year[nWP];
+int<lower=1> Timepoint[nWP];
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -195,6 +201,7 @@ real parMonth;                  // Month
 real parYear;                   // Year
 real parSite;                   // Site
 
+
 // Random Effects
 vector[nSite] site_raw;
 real<lower=0> tauSite;
@@ -202,6 +209,8 @@ vector[nMonth] month_raw;
 real<lower=0> tauMonth;
 vector[nYear] year_raw;
 real<lower=0> tauYear;
+vector[nTimepoint] timepoint_raw;
+real<lower=0> tautimepoint;
 }
 
 transformed parameters {
@@ -213,7 +222,7 @@ vector[nWP] mu;
 
 vector[nMonth] u;
 vector[nSite] v;
-
+vector[nTimepoint] w;
 
 for (j in 1:nMonth) {
 u[j] = month_raw[j]*sqrt(tauMonth);
@@ -223,12 +232,22 @@ for (j in 1:nSite) {
 v[j] = site_raw[j]*sqrt(tauSite);
 }
 
+for (j in 1:nTimepoint) {
+w[j] = timepoint_raw[j]*sqrt(tautimepoint);
+}
+
+// this loop integrates the time lag in days between sampling dates (auto-regressive structure)
 
 for( i in 1:nWP ) {
-mu[i] = u[Month[i]] + v[Site[i]];
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + mu[i]);
-}
-}
+y[i] = dnorm(y.mean[i],u.tau) 
+d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
+mu[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
+nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
+
+// This joins the linearpart of the model equation with the time lag as a random effect
+RealDisease[i]  = (nu[i] + mu[i]*(y[i-1]-nu[i-1]); // this is the full model equation
+} //closes loop observations
+} //closes transformed parameter
 
 
 model{
@@ -250,6 +269,7 @@ tauMonth   ~ inv_gamma(0.001, 0.001);
 //Random effects priors
 site_raw  ~ normal(0,10);
 month_raw ~ normal(0,10);
+timepoint_raw ~ normal(0,10);
 //year_raw ~ normal(0,10);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
