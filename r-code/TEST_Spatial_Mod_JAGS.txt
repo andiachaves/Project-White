@@ -1,0 +1,40 @@
+
+    model
+    {
+    # priors
+    lambda ~ dunif(0.01, 100)
+    alpha ~ dnorm(0, 0.001)
+    beta ~ dnorm(0, 0.001)
+    tau ~ dgamma(0.001,0.001)
+    V ~ dgamma(0.001,0.001)
+    
+    for(i in 1:NClusters)
+    {
+    # Vector of RE means
+    mu[i]<-0
+    
+    #Define output as coming from binomial distribution
+    y[i] ~ dbin(p[i], Pop[i])
+    
+    # Logistic model 
+    logit(p[i]) <- alpha + beta[1]*Elevation[i] + u[i] 
+    }
+    
+    # derived quantities
+    for(i in 1:NClusters)
+    {
+    
+    for(j in 1:NClusters)
+    {
+    
+    # turning the distance matrix to covariance matrix
+    D.covar[i,j] <- V * exp(-D[i,j]/lambda)
+    }
+    }
+    # turning covariances into precisions 
+    D.tau[1:NClusters,1:NClusters] <- inverse(D.covar[1:NClusters,1:NClusters])
+    
+    # likelihood
+    u[1:NClusters] ~ dmnorm(mu[], D.tau[,])
+    }
+    
