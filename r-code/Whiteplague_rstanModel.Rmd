@@ -175,7 +175,6 @@ dataList = list(
         nTimepoint = length(unique(Timepoint)),
         
         # Stations
-        N= 239, 
         N1= BlackPoint, 
         N2= BrewersBay, 
         N3= CasCayOuter, 
