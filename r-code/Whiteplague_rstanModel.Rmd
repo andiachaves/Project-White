@@ -201,22 +201,22 @@ transformed parameters {
 
 real RealDisease[nWP];
 
-y[N11]~dnorm(nu[N11],u.tau) 
-u[N11]<-y[N11]-nu[N11]
+//y[N11]~dnorm(nu[N11],u.tau) 
+//u[N11]<-y[N11]-nu[N11]
 for( i in 1:nWP ) {
-<<<<<<< HEAD
-y[i]~dnorm(mean[i],u.tau) 
-d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
-rho[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
-nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
+
+//y[i]~dnorm(mean[i],u.tau) 
+//d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
+//rho[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
+//nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
 
 // This joins the linearpart of the model equation with the time lag as a random effect
-RealDisease[i]  = (nu[i] + rho[i]*(y[i-1]-nu[i-1]); // this is the full model equation
-} //closes loop observations
-=======
+//RealDisease[i]  = (nu[i] + rho[i]*(y[i-1]-nu[i-1]); // this is the full model equation
+//} //closes loop observations
+
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment);
   } //closes loop observations
->>>>>>> origin/master
+
 } //closes transformed parameter
 
 
