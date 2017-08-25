@@ -115,7 +115,7 @@ Station=Whiteplague_workingdata$Station_name
 Reef.Type=Whiteplague_workingdata$Reef.Type
 Latitude=Whiteplague_workingdata$Latitude
 Longitude=Whiteplague_workingdata$Longitude
-Timepoint=Whiteplague_workingdata$Time_point
+Timepoint=Whiteplague_workingdata$TimePoint
 
 Site <- as.numeric(Whiteplague_workingdata$Station_name)
 
@@ -173,17 +173,10 @@ data {
 // counters
 int<lower=0> nWP;    // number of White Plague cases, int=integer  and non negative >0 
 int<lower=1> nEnvi;  // number of environmental variables
-int<lower=1> nMonth; // number of Months sampled
-int<lower=1> nSite;  // number of Sites sampled
-int<lower=1> nYear;  // number of Sites sampled
-int<lower=1> nTimepoint; // number of sampling dates (temporal autocorrelation)
+
 
 // predictors
 matrix[nWP, nEnvi] Environment;
-int<lower=1> Month[nWP];
-int<lower=1,upper=nSite> Site[nWP];// site id for each observation
-int<lower=1> Year[nWP];
-int<lower=1> Timepoint[nWP];
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -195,22 +188,11 @@ parameters {
 // these will be saved and printed with the output
 
 real b0; // intercept
+
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
-real parMonth;                  // Month
-real parYear;                   // Year
-real parSite;                   // Site
 
 
-// Random Effects
-vector[nSite] site_raw;
-real<lower=0> tauSite;
-vector[nMonth] month_raw;
-real<lower=0> tauMonth;
-vector[nYear] year_raw;
-real<lower=0> tauYear;
-vector[nTimepoint] timepoint_raw;
-real<lower=0> tautimepoint;
 }
 
 transformed parameters {
@@ -218,29 +200,11 @@ transformed parameters {
 // these will be saved and printed with the output
 
 real RealDisease[nWP];
-vector[nWP] mu;
-
-vector[nMonth] u;
-vector[nSite] v;
-vector[nTimepoint] w;
-
-for (j in 1:nMonth) {
-u[j] = month_raw[j]*sqrt(tauMonth);
-}
-
-for (j in 1:nSite) {
-v[j] = site_raw[j]*sqrt(tauSite);
-}
-
-for (j in 1:nTimepoint) {
-w[j] = timepoint_raw[j]*sqrt(tautimepoint);
-}
-
-// this loop integrates the time lag in days between sampling dates (auto-regressive structure)
 
 y[N11]~dnorm(nu[N11],u.tau) 
 u[N11]<-y[N11]-nu[N11]
 for( i in 1:nWP ) {
+<<<<<<< HEAD
 y[i]~dnorm(mean[i],u.tau) 
 d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
 rho[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
@@ -249,6 +213,10 @@ nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
 // This joins the linearpart of the model equation with the time lag as a random effect
 RealDisease[i]  = (nu[i] + rho[i]*(y[i-1]-nu[i-1]); // this is the full model equation
 } //closes loop observations
+=======
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment);
+  } //closes loop observations
+>>>>>>> origin/master
 } //closes transformed parameter
 
 
@@ -258,34 +226,10 @@ model{
 // All data and parameters used in this section must be defined above
 
 // Fixed effects priors
-b0             ~ normal(0, 100 ); //
+b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
-parMonth       ~ normal(0, 100 );
-parYear        ~ normal(0, 100 );
-
-//Hyperpriors
-tauSite    ~ inv_gamma(0.001, 0.001);
-tauMonth   ~ inv_gamma(0.001, 0.001);
-//tauYear  ~ inv_gamma(0.001, 0.001);
-
-//Random effects priors
-site_raw  ~ normal(0,10);
-month_raw ~ normal(0,10);
-timepoint_raw ~ normal(0,10);
-//year_raw ~ normal(0,10);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
-}
-
-
-//predictive inference
-generated quantities
-{
-real DiseasePredictions[nWP]; //vector to store predictions
-
-for( i in 1:nWP ) {
-DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDisease[i]));
-}
 }
 
 '
@@ -296,7 +240,7 @@ DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDis
 ```{r test_run,echo=FALSE,eval=FALSE}
 
 #This is a short test I run before running the full model, just to check its ok. I do not save this one.
-stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 20, chains = 1,refresh=1,thin=1)
+stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 50, chains = 3,refresh=1)
 
 ```
 
