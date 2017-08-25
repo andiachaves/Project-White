@@ -119,6 +119,20 @@ Timepoint=Whiteplague_workingdata$TimePoint
 
 Site <- as.numeric(Whiteplague_workingdata$Station_name)
 
+#Subset per stations to later calculate temporal autocorrelation function
+BlackPoint <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='BPT'), ]
+BrewersBay <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='BWR'), ]
+CasCayOuter <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='CSC'), ]
+CollegeShoal <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='CSE'), ]
+EastFrenchCap <-Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='EFC'), ]
+FlatCay <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='FLC'), ]
+GrammanikBank <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='GKT'), ]
+MCDS166 <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='HKA'), ]
+MeriShoal <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='MSR'), ]
+HindBank <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='HBE'), ]
+Perseverance <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='PSV'), ]
+SouthCapella <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='SCP'), ]
+Seahorse <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='SHR'), ]
 ```
 
 
@@ -158,7 +172,23 @@ dataList = list(
         nYear =length(unique(Year)),
         
         Timepoint= Timepoint,
-        nTimepoint = length(unique(Timepoint))
+        nTimepoint = length(unique(Timepoint)),
+        
+        # Stations
+        N= 239, 
+        N1= BlackPoint, 
+        N2= BrewersBay, 
+        N3= CasCayOuter, 
+        N4= CollegeShoal,
+        N5= EastFrenchCap, 
+        N6= FlatCay,
+        N7= GrammanikBank,
+        N8= MCDS166,
+        N9= MeriShoal ,
+        N10= HindBank ,
+        N11= Perseverance, 
+        N12= SouthCapella,
+        N13= Seahorse
         
         )
 ```
@@ -201,17 +231,18 @@ transformed parameters {
 
 real RealDisease[nWP];
 
-//y[N11]~dnorm(nu[N11],u.tau) 
-//u[N11]<-y[N11]-nu[N11]
-for( i in 1:nWP ) {
+// Station: BlackPoint
 
-//y[i]~dnorm(mean[i],u.tau) 
-//d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
-//rho[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
-//nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
+y[N1]~dnorm(nu[N1],u.tau) 
+u[N1]<-y[N2]-nu[N2]
+for( i in 1:nWP ) {
+y[i]~dnorm(mean[i],u.tau) 
+d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
+rho[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
+nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
 
 // This joins the linearpart of the model equation with the time lag as a random effect
-//RealDisease[i]  = (nu[i] + rho[i]*(y[i-1]-nu[i-1]); // this is the full model equation
+RealDisease[i]  = (nu[i] + rho[i]*(y[i-1]-nu[i-1]); // this is the full model equation
 //} //closes loop observations
 
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment);
