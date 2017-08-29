@@ -38,7 +38,7 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 ```{r}
 rm(list=ls(all=TRUE))
 
-NameOfModelRun <- "2017.08.01f_Whiteplague_model_result_graphinput"
+NameOfModelRun <- "2017.08.29f_Whiteplague_model_result_graphinput"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 
@@ -74,6 +74,7 @@ df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whi
 dfNew <- as.data.frame(df %>%
   group_by(x, y) %>%
   summarize(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
+
 testSpatialAutocorrelation(simulationOutput = dfNew, x = dfNew$x,y = dfNew$y)
 
 # 2. option - random noise
@@ -85,25 +86,27 @@ testSpatialAutocorrelation(simulationOutput = df, x = df$x_new,y = df$y_new)
 
 Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
 
-### Test for temporal autocorrelation
+### Test for residuals temporal autocorrelation
 ```{r}
 # test temporal autocorrelation Durbin-Watson test in the residuals
 #Month
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Month_12)
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Month_12, plot=T)
 #Year
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Year)
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Year, plot=T)
 #Seasons
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Season)
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Season, plot=T)
 #Time points
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Time_point)
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Time_point, plot=T)
 #Random time
 #testTemporalAutocorrelation(simulationOutput = df, time = "random")
 
+#Same as.. Month
+testTemporalAutocorrelation(simulationOutput= WhitePlagueDHARMaResponse, time = Whiteplague_workingdata$Month_12, plot=T)
 ```
 
 ##Checking temporal autocorrelation with histograms and correlation plots 
 ```{r}
-NameOfModelRun <- "2017.07.31_Whiteplague_model_result"
+NameOfModelRun <- "2017.08.29_Whiteplague_model_result"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 
 str(stan.white)
@@ -151,4 +154,22 @@ plot(as.double(p.dist[52:98,52:98]),as.double(p.eps.cor[52:98,52:98]),main="Corr
 
 
 ```
+
+##Autocorrelation function ACF on residuals
+
+```{r}
+#Autocorrelation and partial autocorrelation plot of the residuals
+
+de <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata$Month_12, y=Whiteplague_workingdata$Year)
+
+
+
+par(mfrow=c(1,2)) #set up two plots in one row
+acf(WhitePlagueDHARMaResponse$scaledResiduals) #autocorrelation
+acf(de, split_pred=list(Subject=Whiteplague_workingdata$Month_12)) #autocorrelation
+
+
+acf((df), type="p") #partial autocorrelation
+```
+
 

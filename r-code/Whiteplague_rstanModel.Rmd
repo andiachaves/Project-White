@@ -114,7 +114,23 @@ Year[Year==2013] <- 2
 Year[Year==2014] <- 3
 Year[Year==2015] <- 4
 Month=Whiteplague_workingdata$Month_12
+Month[Month==1] <- 1
+Month[Month==2] <- 2
+Month[Month==3] <- 3
+Month[Month==4] <- 4
+Month[Month==5] <- 5
+Month[Month==6] <- 6
+Month[Month==7] <- 7
+Month[Month==8] <- 8
+Month[Month==9] <- 9
+Month[Month==10] <- 10
+Month[Month==11] <- 11
+Month[Month==12] <- 12
 Season=Whiteplague_workingdata$Season
+Season[Season==1] <- 1
+Season[Season==2] <- 2
+Season[Season==3] <- 3
+Season[Season==4] <- 4
 Station=Whiteplague_workingdata$Station_name
 Reef.Type=Whiteplague_workingdata$Reef.Type
 Latitude=Whiteplague_workingdata$Latitude
@@ -169,11 +185,15 @@ dataList = list(
 
         Month = Month,
         nMonth = length(unique(Month)), #number of months of WP observations Shallow (2 years) Deep (4 years)
+        
         Site = Site,
         nSite =length(unique(Site)),
         
         Year = Year,
         nYear =length(unique(Year)),
+        
+        Season=Season,
+        nSeason = length(unique(Season)),
         
         Timepoint= Timepoint,
         nTimepoint = length(unique(Timepoint))
@@ -193,6 +213,10 @@ int<lower=0> nWP;                      // number of White Plague cases, int=inte
 int<lower=1> nEnvi;                    // number of environmental variables
 int<lower=1> nYear; 
 int<lower=1,upper=4> Year[nWP];  // year of each observation
+int<lower=1> nSeason; 
+int<lower=1,upper=4> Season[nWP];  // season of each observation
+int<lower=1> nMonth; 
+int<lower=1,upper=12> Month[nWP];  // month of each observation
 
 // predictors
 matrix[nWP, nEnvi] Environment;
@@ -215,10 +239,18 @@ vector[nEnvi] parEnvironment;   // Environmental-level
 vector[nYear] year_raw;
 real<lower=0> tauYear;
 
+vector[nSeason] season_raw;
+real<lower=0> tauSeason;
+
+vector[nMonth] month_raw;
+real<lower=0> tauMonth;
+
 // overdispersion
 vector[nWP] eps;
 real<lower=0> tauOverdispersion;
 }
+
+
 
 transformed parameters {
 // generation of derived parameters from parameters above should be defined here
@@ -228,7 +260,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + eps[i];
+RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + season_raw[Season[i]]+ month_raw[Month[i]] +eps[i];
 
   } //closes loop observations
 } //closes transformed parameter
@@ -247,9 +279,13 @@ parEnvironment ~ normal(0, 100 );
 //Hyperpriors
 tauYear                ~ inv_gamma(0.001, 0.001);
 tauOverdispersion     ~ gamma(0.001,0.001);
+tauSeason               ~ inv_gamma(0.001, 0.001);
+tauMonth               ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
 year_raw                ~ normal(0, tauYear);
+season_raw              ~ normal(0, tauSeason);
+month_raw               ~ normal(0, tauMonth);
 
 // overdispersion
 eps ~ normal(0 , tauOverdispersion);
@@ -289,7 +325,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.08.01f_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.08.29b_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
