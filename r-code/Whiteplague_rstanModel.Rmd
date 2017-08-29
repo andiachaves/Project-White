@@ -109,6 +109,10 @@ Rainfall = Whiteplague_workingdata$Rain_sca
 
 #Time and location factors 
 Year=Whiteplague_workingdata$Year
+Year[Year==2012] <- 1
+Year[Year==2013] <- 2
+Year[Year==2014] <- 3
+Year[Year==2015] <- 4
 Month=Whiteplague_workingdata$Month_12
 Season=Whiteplague_workingdata$Season
 Station=Whiteplague_workingdata$Station_name
@@ -172,22 +176,7 @@ dataList = list(
         nYear =length(unique(Year)),
         
         Timepoint= Timepoint,
-        nTimepoint = length(unique(Timepoint)),
-        
-        # Stations
-        N1= BlackPoint, 
-        N2= BrewersBay, 
-        N3= CasCayOuter, 
-        N4= CollegeShoal,
-        N5= EastFrenchCap, 
-        N6= FlatCay,
-        N7= GrammanikBank,
-        N8= MCDS166,
-        N9= MeriShoal ,
-        N10= HindBank ,
-        N11= Perseverance, 
-        N12= SouthCapella,
-        N13= Seahorse
+        nTimepoint = length(unique(Timepoint))
         
         )
 ```
@@ -200,9 +189,10 @@ dataList = list(
 model.Wplague <- '
 data {
 // counters
-int<lower=0> nWP;    // number of White Plague cases, int=integer  and non negative >0 
-int<lower=1> nEnvi;  // number of environmental variables
-
+int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0 
+int<lower=1> nEnvi;                    // number of environmental variables
+int<lower=1> nYear; 
+int<lower=1,upper=4> Year[nWP];  // year of each observation
 
 // predictors
 matrix[nWP, nEnvi] Environment;
@@ -221,7 +211,13 @@ real b0; // intercept
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
 
+// Random Effects
+vector[nYear] year_raw;
+real<lower=0> tauYear;
 
+// overdispersion
+vector[nWP] eps;
+real<lower=0> tauOverdispersion;
 }
 
 transformed parameters {
@@ -230,23 +226,11 @@ transformed parameters {
 
 real RealDisease[nWP];
 
-// Station: BlackPoint
 
-y[N1]~dnorm(nu[N1],u.tau) 
-u[N1]<-y[N2]-nu[N2]
 for( i in 1:nWP ) {
-y[i]~dnorm(mean[i],u.tau) 
-d[i] = 365* (w[Timepoint[i]] - w[Timepoint[i-1]]); // 365 days in a year
-rho[i] = pow(abs(rho1),d[i])*(step(rho1)-step(-rho1))
-nu[i] = b0  + Environment[i] * parEnvironment + Site[i] * Timepoint
+RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + eps[i];
 
-// This joins the linearpart of the model equation with the time lag as a random effect
-RealDisease[i]  = (nu[i] + rho[i]*(y[i-1]-nu[i-1]); // this is the full model equation
-//} //closes loop observations
-
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment);
   } //closes loop observations
-
 } //closes transformed parameter
 
 
@@ -259,9 +243,30 @@ model{
 b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
 
+
+//Hyperpriors
+tauYear                ~ inv_gamma(0.001, 0.001);
+tauOverdispersion     ~ gamma(0.001,0.001);
+
+//Random effects priors
+year_raw                ~ normal(0, tauYear);
+
+// overdispersion
+eps ~ normal(0 , tauOverdispersion);
+
+
+
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
 
+//predictive inference
+generated quantities{
+real DiseasePredictions[nWP]; //vector to store predictions
+
+for( i in 1:nWP ) {
+DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDisease[i]));
+}
+}
 '
 ```
 
