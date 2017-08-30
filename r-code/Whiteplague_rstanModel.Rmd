@@ -260,7 +260,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + season_raw[Season[i]]+ (month_raw[Month[i]])^2 +eps[i];
+RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + season_raw[Season[i]]+ month_raw[Month[i]]+ (month_raw[Month[i]])^2 + (month_raw[Month[i]])^3 + eps[i];
 
   } //closes loop observations
 } //closes transformed parameter
@@ -325,7 +325,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.08.29c_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.08.30b_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
@@ -337,9 +337,9 @@ devtools::session_info()
 ```{r ploting from stan to ggmcmc}
 
 print(stan.white)
-plot(stan.white2)
 
-print(stan.white)
+
+
 plot(stan.white)
 
 str(stan.white)
