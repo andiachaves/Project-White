@@ -260,7 +260,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + season_raw[Season[i]]+ month_raw[Month[i]] +eps[i];
+RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]] + season_raw[Season[i]]+ (month_raw[Month[i]])^2 +eps[i];
 
   } //closes loop observations
 } //closes transformed parameter
