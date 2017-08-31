@@ -196,8 +196,10 @@ dataList = list(
         nSeason = length(unique(Season)),
         
         Timepoint= Timepoint,
-        nTimepoint = length(unique(Timepoint))
+        nTimepoint = length(unique(Timepoint)),
         
+        Temperature= Temperature,
+        nTemperature = length(unique(Temperature))
         )
 ```
 
@@ -217,6 +219,9 @@ int<lower=1> nSeason;
 int<lower=1,upper=4> Season[nWP];  // season of each observation
 int<lower=1> nMonth; 
 int<lower=1,upper=12> Month[nWP];  // month of each observation
+int<lower=1> nSite;               // number of sites
+int<lower=1> nTemperature;               // Temperature
+
 
 // predictors
 matrix[nWP, nEnvi] Environment;
@@ -234,6 +239,9 @@ real b0; // intercept
 
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
+vector[nSeason] parSeason;   // Season-level
+vector[nTemperature] parTemperature;   // temperature effect
+
 
 // Random Effects
 vector[nYear] year_raw;
@@ -244,6 +252,9 @@ real<lower=0> tauSeason;
 
 vector[nMonth] month_raw;
 real<lower=0> tauMonth;
+
+vector[nSite] site_raw;
+real<lower=0> tauSite;
 
 // overdispersion
 vector[nWP] eps;
@@ -260,7 +271,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = b0  + Environment[i] * parEnvironment + year_raw[Year[i]]*  (season_raw[Season[i]]) + eps[i];
+RealDisease[i]  = b0  + Environment[i] * parEnvironment + Season[i] * parSeason + parTemperature[i]* Season[i] * parEnvironment* Season + year_raw[Year[i]]* site_raw[Site[i]] + eps[i];
 
   } //closes loop observations
 } //closes transformed parameter
@@ -281,12 +292,13 @@ tauYear                ~ inv_gamma(0.001, 0.001);
 tauOverdispersion     ~ gamma(0.001,0.001);
 tauSeason               ~ inv_gamma(0.001, 0.001);
 tauMonth               ~ inv_gamma(0.001, 0.001);
+tauSite              ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
 year_raw                ~ normal(0, tauYear);
 season_raw              ~ normal(0, tauSeason);
 month_raw               ~ normal(0, tauMonth);
-
+site_raw               ~ normal(0, tauSite);
 // overdispersion
 eps ~ normal(0 , tauOverdispersion);
 
@@ -325,7 +337,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.08.30d_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.08.31a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
