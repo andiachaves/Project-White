@@ -299,7 +299,8 @@ model{
 // Fixed effects priors
 b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
-
+parSeason ~ normal(0, 100 );
+parTemperature ~ normal(0, 100 );
 
 //Hyperpriors
 tauYear                ~ inv_gamma(0.001, 0.001);
