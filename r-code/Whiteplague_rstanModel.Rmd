@@ -138,6 +138,20 @@ Longitude=Whiteplague_workingdata$Longitude
 Timepoint=Whiteplague_workingdata$TimePoint
 
 Site <- as.numeric(Whiteplague_workingdata$Station_name)
+Site[Site==1] <- 1
+Site[Site==2] <- 2
+Site[Site==3] <- 3
+Site[Site==4] <- 4
+Site[Site==5] <- 5
+Site[Site==5] <- 6
+Site[Site==7] <- 7
+Site[Site==8] <- 8
+Site[Site==9] <- 9
+Site[Site==10] <- 10
+Site[Site==11] <- 11
+Site[Site==12] <- 12
+Site[Site==13] <- 13
+
 
 #Subset per stations to later calculate temporal autocorrelation function
 BlackPoint <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='BPT'), ]
@@ -220,6 +234,7 @@ int<lower=1,upper=4> Season[nWP];  // season of each observation
 int<lower=1> nMonth; 
 int<lower=1,upper=12> Month[nWP];  // month of each observation
 int<lower=1> nSite;               // number of sites
+int<lower=1,upper=13> Site[nWP];  // season of each observation
 int<lower=1> nTemperature;               // Temperature
 
 
@@ -271,9 +286,8 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = b0  + Environment[i] * parEnvironment + Season[i] * parSeason + parTemperature[i]* Season[i] * parEnvironment* Season + year_raw[Year[i]]* site_raw[Site[i]] + eps[i];
-
-  } //closes loop observations
+RealDisease[i]  = b0  + Environment[i] * parEnvironment + Season[i] * parSeason + parTemperature[i]*Season[i]  + year_raw[Year[i]]+ site_raw[Site[i]] + eps[i]);
+} //closes loop observations
 } //closes transformed parameter
 
 
