@@ -286,7 +286,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment +  Season[i] * parSeason+ parTemperature* Season[i]+ year_raw[Year[i]] + eps[i]);
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment +  Season[i] * parSeason + year_raw[Year[i]] + eps[i]);
 } //closes loop observations
 } //closes transformed parameter
 
@@ -299,7 +299,7 @@ model{
 // Fixed effects priors
 b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
-parSeason ~ normal(0, 100 );
+parSeason     ~ normal(0, 100 );
 parTemperature ~ normal(0, 100 );
 
 //Hyperpriors
