@@ -286,7 +286,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment +  Season[i] * parSeason + year_raw[Year[i]] + eps[i]);
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Season[i] * parSeason + eps[i]);
 } //closes loop observations
 } //closes transformed parameter
 
@@ -301,6 +301,7 @@ b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
 parSeason     ~ normal(0, 100 );
 parTemperature ~ normal(0, 100 );
+
 
 //Hyperpriors
 tauYear                ~ inv_gamma(0.001, 0.001);
@@ -352,7 +353,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.08.31a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.09.05a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
