@@ -240,6 +240,7 @@ int<lower=1> nEnvi;                    // number of environmental variables
 // predictors
 matrix[nWP, nEnvi] Environment;
 vector[nWP] Season;
+vector[nWP] Month;
 //vector[nWP] Temperature;
 
 // response
@@ -256,7 +257,7 @@ real b0; // intercept
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
 real parSeason;   // Season-level
-
+real parMonth;   // Month-level
 
 // Random Effects
 // overdispersion
@@ -274,7 +275,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Season[i] + parSeason +eps[i]);
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Season[i] + parSeason * Month[i] + parMonth +eps[i]);
 
 
 } //closes loop observations
@@ -290,6 +291,7 @@ model{
 b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
 parSeason      ~ normal(0, 100 );
+parMonth      ~ normal(0, 100 );
 //parTemperature ~ normal(0, 100 );
 
 
@@ -343,7 +345,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.09.05a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.10.09b_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
