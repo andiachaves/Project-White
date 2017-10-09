@@ -233,8 +233,8 @@ int<lower=1> nEnvi;                    // number of environmental variables
 //int<lower=1,upper=4> Season[nWP];  // season of each observation
 //int<lower=1> nMonth; 
 //int<lower=1,upper=12> Month[nWP];  // month of each observation
-//int<lower=1> nSite;               // number of sites
-//int<lower=1,upper=13> Site[nWP];  // season of each observation
+int<lower=1> nSite;               // number of sites
+int<lower=1,upper=13> Site[nWP];  // sites
 
 
 // predictors
@@ -263,9 +263,10 @@ real parMonth;   // Month-level
 // overdispersion
 vector[nWP] eps;
 real<lower=0> tauOverdispersion;
+
+vector[nSite] site_raw;
+real<lower=0> tauSite;
 }
-
-
 
 transformed parameters {
 // generation of derived parameters from parameters above should be defined here
@@ -275,7 +276,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Season[i] + parSeason * Month[i] + parMonth +eps[i]);
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Season[i] + parSeason + site_raw[Site[i]] + eps[i]);
 
 
 } //closes loop observations
@@ -300,13 +301,13 @@ parMonth      ~ normal(0, 100 );
 tauOverdispersion     ~ gamma(0.001,0.001);
 //tauSeason            ~ inv_gamma(0.001, 0.001);
 //tauMonth             ~ inv_gamma(0.001, 0.001);
-//tauSite              ~ inv_gamma(0.001, 0.001);
+tauSite              ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
 //year_raw                ~ normal(0, tauYear);
 //season_raw              ~ normal(0, tauSeason);
 //month_raw               ~ normal(0, tauMonth);
-//site_raw               ~ normal(0, tauSite);
+site_raw               ~ normal(0, tauSite);
 // overdispersion
 eps ~ normal(0 , tauOverdispersion);
 
