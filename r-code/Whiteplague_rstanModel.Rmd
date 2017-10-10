@@ -229,18 +229,18 @@ int<lower=1> nEnvi;                    // number of environmental variables
 
 //int<lower=1> nYear; 
 //int<lower=1,upper=4> Year[nWP];  // year of each observation
-//int<lower=1> nSeason; 
-//int<lower=1,upper=4> Season[nWP];  // season of each observation
-//int<lower=1> nMonth; 
-//int<lower=1,upper=12> Month[nWP];  // month of each observation
+int<lower=1> nSeason; 
+int<lower=1,upper=4> Season[nWP];  // season of each observation
+int<lower=1> nMonth; 
+int<lower=1,upper=12> Month[nWP];  // month of each observation
 int<lower=1> nSite;               // number of sites
 int<lower=1,upper=13> Site[nWP];  // sites
 
 
 // predictors
 matrix[nWP, nEnvi] Environment;
-vector[nWP] Season;
-vector[nWP] Month;
+//vector[nWP] Season;
+//vector[nWP] Month;
 //vector[nWP] Temperature;
 
 // response
@@ -256,8 +256,8 @@ real b0; // intercept
 
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
-real parSeason;   // Season-level
-real parMonth;   // Month-level
+//real parSeason;   // Season-level
+//real parMonth;   // Month-level
 
 // Random Effects
 // overdispersion
@@ -266,6 +266,13 @@ real<lower=0> tauOverdispersion;
 
 vector[nSite] site_raw;
 real<lower=0> tauSite;
+
+vector[nSeason] season_raw;
+real<lower=0> tauSeason;
+
+vector[nMonth] month_raw;
+real<lower=0> tauMonth;
+
 }
 
 transformed parameters {
@@ -276,7 +283,7 @@ real RealDisease[nWP];
 
 
 for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + Season[i] + parSeason + site_raw[Site[i]] + eps[i]);
+RealDisease[i]  = (b0  + Environment[i] * parEnvironment + month_raw[Month[i]]+ eps[i]);
 
 
 } //closes loop observations
@@ -291,22 +298,22 @@ model{
 // Fixed effects priors
 b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
-parSeason      ~ normal(0, 100 );
-parMonth      ~ normal(0, 100 );
+//parSeason      ~ normal(0, 100 );
+//parMonth      ~ normal(0, 100 );
 //parTemperature ~ normal(0, 100 );
 
 
 //Hyperpriors
 //tauYear              ~ inv_gamma(0.001, 0.001);
 tauOverdispersion     ~ gamma(0.001,0.001);
-//tauSeason            ~ inv_gamma(0.001, 0.001);
-//tauMonth             ~ inv_gamma(0.001, 0.001);
+tauSeason            ~ inv_gamma(0.001, 0.001);
+tauMonth             ~ inv_gamma(0.001, 0.001);
 tauSite              ~ inv_gamma(0.001, 0.001);
 
 //Random effects priors
 //year_raw                ~ normal(0, tauYear);
-//season_raw              ~ normal(0, tauSeason);
-//month_raw               ~ normal(0, tauMonth);
+season_raw              ~ normal(0, tauSeason);
+month_raw               ~ normal(0, tauMonth);
 site_raw               ~ normal(0, tauSite);
 // overdispersion
 eps ~ normal(0 , tauOverdispersion);
@@ -346,7 +353,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.10.10a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.10.10c_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
