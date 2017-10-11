@@ -1,0 +1,230 @@
+---
+title: "GLMER - Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands "
+author: "Andia Chaves Fonnegra and Bernd Panassiti"
+date: "10/11/2017"
+output: pdf_document
+affiliation: University of the Virgin Islands (US.VI) and Laimburg Research Center (Italy)
+abstract: "This document provides the r-code for a series of GLMER's to model  white plague disease  described on the article:"Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands" Description of the model in terms of data collection, white plague disease, parameter estimations and fitting of the model can be found in Appendix A."
+keywords: white plague, coral reefs, glmer, environment
+number_sections: yes
+    toc: yes
+header-includes: \usepackage{graphicx}
+email: \email{}
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+#Introduction
+
+This document provides the r-code for the glmer's to understand posible interactions of factors afecting the prevalence of white plague disease on St Thomas coral reefs.The model address to the objectives of this study: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental factors on WP disease prevalence. 
+
+#Data
+The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplague_working.RData" needs to be placed in a folder called "Data".
+"
+
+#Model
+
+##Load libraries and create directory for results
+```{r}
+# Date format - forms part of names of created files or graphs
+today <- format(Sys.time(), "%Y.%m.%d")
+
+#To check data distribution use
+require(car)
+require(MASS)
+#For data inspections we start with a pannel plot also called trellis plots or lattice plots for that we need nlme and lattice libraries
+library(nlme)
+library(lattice)
+require(lme4)
+library(lme4)
+library(coefplot) ## for coefplot2
+library(reshape)
+library(plyr)
+library(gridExtra)
+library(emdbook) ## for qchibarsq
+library(nlme)
+library(ggplot2) # for graphs
+
+# create directory if not existing
+#suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
+
+```
+
+## Load data
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+load(file="data/Whiteplague_workingdata.Rdata")
+ls()
+
+#check data
+dim(Whiteplague_workingdata)
+head(Whiteplague_workingdata)
+
+```
+
+## Data preparation
+```{r}
+
+#Response variable=White PLague prevalence
+
+WP<-Whiteplague_workingdata$Plague
+
+##Selecting Environmental variables from the file already SCALED to use in the model.
+#Check in which column scaled environmental variables start.
+
+
+#Selection of all 11 scaled environmental variables. 
+#enviroselection = Whiteplague_workingdata[c(32:42)] 
+#enviroselection
+
+# Predictors environmental data
+Chlorophyll = Whiteplague_workingdata$Chl_sca
+Conductivity = Whiteplague_workingdata$Cond_sca
+Density = Whiteplague_workingdata$Den_sca
+CTD_Depth = Whiteplague_workingdata$DepCTD_sca    
+Oxygen = Whiteplague_workingdata$Oxy_sca
+Salinity = Whiteplague_workingdata$Sal_sca    
+Turbidity = Whiteplague_workingdata$Turb_sca   
+Depth = Whiteplague_workingdata$Depth_tran_sca  
+Temperature = Whiteplague_workingdata$Temp_sca   
+Max_DHW = Whiteplague_workingdata$DHW_sca 
+Rainfall = Whiteplague_workingdata$Rain_sca   
+
+#Selection of Biological variables.
+#biological = Whiteplague_workingdata[c(22:27)] 
+#biological
+
+# Predictors biological data, all are % of cover in transects. No need to scale?
+#Orbicellids = Whiteplague_workingdata$Orbicellids
+#Sand = Whiteplague_workingdata$Sand
+#Coral = Whiteplague_workingdata$Coral
+#Sponges = Whiteplague_workingdata$Sponges    
+#Macroalgae = Whiteplague_workingdata$Macroalgae
+#Cyanobacteria = Whiteplague_workingdata$Cyanobacteria    
+
+#Time and location factors 
+Year=Whiteplague_workingdata$Year
+Month=Whiteplague_workingdata$Month_12
+Season=Whiteplague_workingdata$Season
+Station=Whiteplague_workingdata$Station_name
+Reef.Type=Whiteplague_workingdata$Reef.Type
+Latitude=Whiteplague_workingdata$Latitude
+Longitude=Whiteplague_workingdata$Longitude
+Timepoint=Whiteplague_workingdata$TimePoint
+
+Site <- as.numeric(Whiteplague_workingdata$Station_name)
+```
+
+
+#Check probability distribution in the data.
+I follow suggestions by: http://ase.tufts.edu/gsc/gradresources/guidetomixedmodelsinr/mixed%20model%20guide.html. The y axis represents the observations and the x axis represents the quantiles modeled by the distribution. 
+The solid red line represents a perfect distribution fit and the dashed red lines are the confidence intervals of the perfect distribution fit. 
+```{r}
+#normality test
+#Shapiro-Wilkinson normality test
+shapiro.test(WP)
+#for producing a normal quantile-quantile plot
+qqnorm(WP)
+qqline(WP)
+
+# This is to also check if follows a normal distribution. But we need to ad the value of 1 to avoid problems
+WP1<-WP+1
+
+qqp(WP1, "norm")
+# This is to check if follows a LOG normal distribution
+qqp(WP1, "lnorm")
+
+
+# qqp requires estimates of the parameters of the negative binomial, Poisson
+# and gamma distributions. You can generate estimates using the fitdistr
+# function. Save the output and extract the estimates of each parameter as I
+# have shown below.
+nbinom <- fitdistr(WP1, "negative binomial")
+qqp(WP1, "nbinom", size = nbinom$estimate[[1]], mu = nbinom$estimate[[2]])
+
+poisson <- fitdistr(WP1, "poisson")
+qqp(WP1, "pois", poisson$estimate)
+
+gamma <- fitdistr(WP1, "gamma")
+qqp(WP1, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]])
+
+#You want to pick the distribution for which the largest number of observations falls between the dashed lines. In this case, that's the lognormal distribution. 
+#Now, armed with the knowledge of which probability distribution fits best, I can try fitting a model.
+
+```
+
+#GLMMM
+The White Plague prevalence fits a log-normal distribution, which is not a discretized distribution. That means we can proceed with the PQL method. Penalized quasilikelihood (PQL) or not. PQL is a flexible technique that can deal with non-normal data, unbalanced design, and crossed random effects. However, it produces biased estimates if your response variable fits a discrete count distribution, like Poisson or binomial, and the mean is less than 5 - or if your response variable is binary.
+```{r}
+
+M1 <- glmmPQL(WP ~ Temperature, ~1 | Month/Site, family = gaussian(link = "log"), start=c(0,0))
+summary(M1)
+
+
+M2 <- glmmPQL(WP ~ Rainfall*Temperature, ~1 | Month/Site, family = gaussian(link = "log"), start=c(0,0,0,0))
+
+summary(M2)
+
+M3 <- glmmPQL(WP ~ Temperature+Rainfall+Depth, ~1 | Month/Site, family = gaussian(link = "log"), start=c(0,0,0,0))
+
+summary(M3)
+
+M4 <- glmmPQL(WP ~ Temperature*Rainfall+Temperature*Depth, ~1 | Month/Site, family = gaussian(link = "log"), start=c(0,0,0,0,0,0))
+
+summary(M4)
+
+
+```
+
+
+#glmer
+Generalized Linear Mixed-Effects Models using Temperature, Rain and Depth as fixed factors
+and Month and site as random factors.
+
+from: http://ase.tufts.edu/gsc/gradresources/guidetomixedmodelsinr/mixed%20model%20guide.html
+
+Because the response variable is binary, we will need a generalized linear mixed model with a binomial distribution, and because we have fewer than five random effects, we can use the Laplace approximation.
+
+Strictly speaking, the Laplace approximation is a special case of a parameter estimation method called Gauss-Hermite quadrature (GHQ), with one iteration. GHQ is more accurate than Laplace due to repeated iterations, but becomes less flexible after the first iteration, so you can only use it for one random effect. 
+
+```{r}
+WP
+E1 <- glmer((WP ~ Depth + Temperature + (1|Site)), family = binomial(link = "logit"))  # Set nAGQ to # of desired iterations
+summary(E1)
+
+E2 <- glmer((WP ~ Depth + (1|Site/Year)), family = binomial(link = "logit"))  # Set nAGQ to # of desired iterations
+summary(E2)
+
+
+
+overdisp_fun <- function(E2) {
+        ## number of variance parameters in an n-by-n variance-covariance matrix
+        vpars <- function(m) {
+                nrow(m) * (nrow(m) + 1)/2
+        }
+        # The next two lines calculate the residual degrees of freedom
+        model.df <- sum(sapply(VarCorr(model), vpars)) + length(fixef(model))
+        rdf <- nrow(model.frame(model)) - model.df
+        # extracts the Pearson residuals
+        rp <- residuals(model, type = "pearson")
+        Pearson.chisq <- sum(rp^2)
+        prat <- Pearson.chisq/rdf
+        # Generates a p-value. If less than 0.05, the data are overdispersed.
+        pval <- pchisq(Pearson.chisq, df = rdf, lower.tail = FALSE)
+        c(chisq = Pearson.chisq, ratio = prat, rdf = rdf, p = pval)
+        }
+
+
+```
+
+
