@@ -80,6 +80,8 @@ head(Whiteplague_workingdata)
 #Response variable=White PLague prevalence
 
 WP<-Whiteplague_workingdata$Plague
+ill = Whiteplague_workingdata$ill
+Ntot = Whiteplague_workingdata$Ntot
 
 ##Selecting Environmental variables from the file already SCALED to use in the model.
 #Check in which column scaled environmental variables start.
@@ -142,9 +144,9 @@ qqline(WP)
 # This is to also check if follows a normal distribution. But we need to ad the value of 1 to avoid problems
 WP1<-WP+1
 
-qqp(WP1, "norm")
+qqp(WP, "norm")
 # This is to check if follows a LOG normal distribution
-qqp(WP1, "lnorm")
+qqp(WP, "lnorm")
 
 
 # qqp requires estimates of the parameters of the negative binomial, Poisson
@@ -166,7 +168,7 @@ qqp(WP1, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]])
 ```
 
 #GLMMM
-The White Plague prevalence fits a log-normal distribution, which is not a discretized distribution. That means we can proceed with the PQL method. Penalized quasilikelihood (PQL) or not. PQL is a flexible technique that can deal with non-normal data, unbalanced design, and crossed random effects. However, it produces biased estimates if your response variable fits a discrete count distribution, like Poisson or binomial, and the mean is less than 5 - or if your response variable is binary.
+The White Plague prevalence fits better a log-normal distribution, which is not a discretized distribution. That means we can proceed with the PQL method. Penalized quasilikelihood (PQL) or not. PQL is a flexible technique that can deal with non-normal data, unbalanced design, and crossed random effects. However, it produces biased estimates if your response variable fits a discrete count distribution, like Poisson or binomial, and the mean is less than 5 - or if your response variable is binary.
 ```{r}
 
 M1 <- glmmPQL(WP ~ Temperature, ~1 | Month/Site, family = gaussian(link = "log"), start=c(0,0))
@@ -212,7 +214,13 @@ plot
 E2 <- glmer((WP ~ Depth + Temperature + (1|Month/Site)), family = binomial(link = "logit"))  # Set nAGQ to # of desired iterations
 summary(E2)
 
+E2 <- glmer((WP ~ Depth + Temperature + (1|Month/Site)), family = binomial(link = "logit"))
 
+
+E3 <- glmer(cbind(Ntot,ill) ~ Depth + Turbidity + (1|Month/Site) ,family="binomial"(link = "logit"))
+summary(E3)
+
+---------
 
 overdisp_fun <- function(E2) {
         ## number of variance parameters in an n-by-n variance-covariance matrix
