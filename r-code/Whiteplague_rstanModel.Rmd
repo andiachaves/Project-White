@@ -238,12 +238,6 @@ int<lower=1,upper=12> Month[nWP];  // month of each observation
 int<lower=1> nSite;               // number of sites
 int<lower=1,upper=13> Site[nWP];  // sites
 
-// data needed for ARMA autocorrelation effects
-int<lower=0> Kar;  # AR order 
-int<lower=0> Kma;  # MA order 
-int<lower=1> Karma;  # max(Kma, Kar) 
-matrix[N, Karma] E_pre; # matrix of zeros 
-vector[N] tgroup;  # indicates independent groups 
 
 
 // predictors
@@ -251,11 +245,6 @@ matrix[nWP, nEnvi] Environment;
 //vector[nWP] Season;
 //vector[nWP] Month;
 //vector[nWP] Temperature;
-
-//data needed for ARMA autocorrelation effects
-vector[Kar] ar;  # autoregressive effects 
-  real<lower=0> sigma;  # residual SD 
-
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -295,24 +284,9 @@ transformed parameters {
 
 real RealDisease[nWP];
 
-//data needed for ARMA autocorrelation effects
-matrix[N, Karma] E;  # ARMA design matrix 
-vector[N] e;  # residuals 
-
 
 for( i in 1:nWP ) {
 RealDisease[i]  = (b0  + Environment[i] * parEnvironment + month_raw[Month[i]]+ eps[i]);
-
-
-//Calculation of ARMA effects 
-    e[n] <- (Y[n]) - eta[n]; 
-    for (i in 1:Karma) { 
-      if (n + 1 - i > 0 && n < N && tgroup[n + 1] == tgroup[n + 1 - i]) { 
-        E[n + 1, i] <- e[n + 1 - i]; 
-      } 
-    } 
-    eta[n] <- (eta[n] + head(E[n], Kar) * ar); 
-
 
 
 } //closes loop observations
@@ -389,6 +363,16 @@ save(stan.white, file =paste("data/2017.10.10c_Whiteplague_model_result.Rdata",s
 ```{r}
 devtools::session_info()
 ```
+
+
+# Adding autocorelation with brms (Bayesian Regression Models using Stan)
+```{r}
+temporal.autocorrelation <- brm(y~x, autocor=cor_ar(~Month|Site), data=(stan.test), family='binomial',
+   prior=c(set_prior('normal(0,100)', class='b'),
+           set_prior('cauchy(0,5)', class='sd')),
+   n.chains=3, n.iter=2000, warmup=500, n.thin=2)
+```
+
 
 #Plotting the model
 ```{r ploting from stan to ggmcmc}
