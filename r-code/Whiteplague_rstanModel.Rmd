@@ -367,10 +367,10 @@ devtools::session_info()
 
 # Adding autocorelation with brms (Bayesian Regression Models using Stan)
 ```{r}
-temporal.autocorrelation <- brm(y~x, autocor=cor_ar(~Month|Site), data=(stan.test), family='binomial',
-   prior=c(set_prior('normal(0,100)', class='b'),
-           set_prior('cauchy(0,5)', class='sd')),
-   n.chains=3, n.iter=2000, warmup=500, n.thin=2)
+temporal.autocorrelation <- brm(Plague~Depth, autocor=cor_ar(~Month|Site), data=stan.test, family=binomial(),
+   prior=c(prior(normal(0,100), class=b),
+           prior(cauchy(0,5), class=sd)),
+   chains=3, iter=2000, warmup=500, thin=2)
 ```
 
 
