@@ -1,0 +1,151 @@
+---
+title: "rstan brm model example"
+author: "Andia Chaves Fonnegra"
+date: "10/12/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+#Introduction
+
+This is a test of the example by http://www.flutterbys.com.au/stats/tut/tut8.3b.html to check how to use bmr in stan to add autocorrelation.
+
+#create data
+```{r}
+set.seed(126)
+n <- 100
+a <- 40  #intercept
+b <- 1.5  #slope
+x <- round(runif(n,1,n),1)  #values of the year covariate
+time <- 1:n
+sigma <- 20
+rho <- 0.8
+eps <- NULL
+# first value cant be autocorrelated
+eps[1] <- rnorm(1,0,sigma)
+for (j in 2:n) {
+  eps[j] <- rho*eps[j-1] + rnorm(1, mean = 0, sd = sigma)  #residuals
+}
+
+y <- a + b * x + eps  #response variable
+#OR
+y <- (model.matrix(~x) %*% c(a,b))+eps
+data.temporalCor <- data.frame(y=round(y,1), x, time)  #dataset
+head(data.temporalCor)  #print out the first six rows of the data set
+      y    x time
+1 139.6 64.7    1
+2 101.3 46.2    2
+3  98.1 65.8    3
+4 107.2 68.8    4
+5  40.0 24.0    5
+6 179.1 95.4    6
+#scatterplot of y against x
+library(car)
+scatterplot(y~x, data.temporalCor)
+```
+
+#Regular simple linear regression
+```{r}
+data.temporalCor.lm <- lm(y~x, data.temporalCor)
+acf(resid(data.temporalCor.lm))
+
+summary(data.temporalCor.lm)
+```
+
+#GLM
+
+```{r}
+library(nlme)
+data.temporalCor.gls <- gls(y~x, data=data.temporalCor, correlation=corAR1(form=~time))
+summary(data.temporalCor.gls)
+```
+
+#Now we will fit the model incorporating a first-order auto-regressive correlation structure
+
+```{r}
+modelString="
+model {
+   #Likelihood
+   y[1]~dnorm(mu[1],tau)
+   eta[1] <- beta0+beta1*x[1]
+   eta1[1] ~ dnorm(eta[1], taueps)
+   mu[1] <- eta[1]
+
+   for (i in 2:n) {
+      y[i]~dnorm(mu[i],tau)
+      mu[i] <- eta1[i]
+      eta1[i] ~ dnorm(temp[i], taueps)
+      temp[i] <- eta[i] + rho*(mu[i-1]-y[i-1])
+      eta[i] <- beta0+beta1*x[i]
+   }
+ 
+   #Priors
+   rho ~ dunif(-1,1)
+   beta0 ~ dnorm(0.01,1.0E-6)
+   beta1 ~ dnorm(0,1.0E-6)
+   tau <- 1 / (sigma*sigma)     
+   sigma~dunif(0,100)
+   taueps <- 1 / (sigmaeps*sigmaeps)     
+   sigmaeps~dunif(0,100)
+ }
+"
+```
+
+#Running model
+```{r}
+writeLines(modelString,con="../downloads/BUGSscripts/tut7.2jagsAutoCorr.txt") #this does not open
+data.temporalCor.list <- with(data.temporalCor, list(y = y, x = x, time=time,n = nrow(data.temporalCor)))
+params <- c("beta0", "beta1", "sigma","rho","sigmaeps")
+nChains = 3
+burnInSteps = 5000
+thinSteps = 100
+numSavedSteps = 15000 #across all chains
+nIter = ceiling(burnInSteps+(numSavedSteps * thinSteps)/nChains)
+
+data.temporalCor.r2jags <- jags(data=data.temporalCor.list,
+           inits=NULL, #or inits=list(inits,inits,inits) # since there are three chains
+           parameters.to.save=params,
+           model.file="../downloads/BUGSscripts/tut7.2jagsAutoCorr.txt",
+           n.chains=nChains,
+           n.iter=nIter,
+           n.burnin=burnInSteps,
+                   n.thin=thinSteps
+           )
+```
+
+#print model data
+
+```{r}
+print(data.temporalCor.r2jags)
+```
+
+#Alternatively, we could also fit the model in STAN. In this case we will do so via the convenience of the brms package. To incorporate a first order autoregressive correlation structure, we use the cor_ar() function as an argument to the autocor argument.
+
+```{r}
+data.temporalCor
+
+data.temporalCor.brm <- brm(y~x, autocor=cor_ar(~time), data=data.temporalCor, family='gaussian',
+   chains=3, iter=2000, warmup=500, thin=2)
+```
+
+#summary
+```{r}
+summary(data.temporalCor.brm)
+```
+

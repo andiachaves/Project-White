@@ -366,12 +366,22 @@ devtools::session_info()
 
 
 # Adding autocorelation with brms (Bayesian Regression Models using Stan)
+p= autoregressive (AR) order
 ```{r}
-temporal.autocorrelation <- brm(Plague~Depth, autocor=cor_ar(~Month|Site), data=stan.test, family=binomial(),
-   prior=c(prior(normal(0,100), class=b),
-           prior(cauchy(0,5), class=sd)),
-   chains=3, iter=2000, warmup=500, thin=2)
+temporal.autocorrelation <- brm((Ntot|ill) ~ Depth_transect,autocor=cor_bsts(~Month),data=Whiteplague_workingdata)
 ```
+
+#Summary brm model
+
+```{r}
+summary(temporal.autocorrelation)
+```
+
+#Stan code
+```{r}
+stancode(temporal.autocorrelation)
+```
+
 
 
 #Plotting the model
