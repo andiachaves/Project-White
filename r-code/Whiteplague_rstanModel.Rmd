@@ -366,7 +366,7 @@ devtools::session_info()
 
 
 # Adding autocorelation with brms (Bayesian Regression Models using Stan)
-p= autoregressive (AR) order
+p= autoregressive (COR) order
 ```{r}
 temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Chl_sca + Cond_sca + Den_sca + Oxy_sca + Sal_sca + Turb_sca + Temp_sca + DHW_sca + Rain_sca + (1|Depth_transect),
                                 data=Whiteplague_workingdata,
@@ -380,6 +380,9 @@ temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Chl_sca + Cond_sca + Den_sca 
 
 ```{r}
 summary(temporal.autocorrelation)
+#Check for WAIk and LOOP
+w1 <- WAIC(temporal.autocorrelation)
+
 ```
 
 #Stan code
@@ -390,6 +393,12 @@ stancode(temporal.autocorrelation)
 #plot
 ```{r}
 stanplot(object = temporal.autocorrelation)
+```
+
+#extract residuals from model
+```{r}
+res <- residuals( temporal.autocorrelation, summary = TRUE)
+
 ```
 
 
