@@ -52,7 +52,7 @@ library(modeest)
 library(IDPmisc)
 library(ggplot2) # for graphs
 library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 
-
+library(brm)
 
 # create directory if not existing
 #suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
@@ -364,8 +364,18 @@ save(stan.white, file =paste("data/2017.10.10c_Whiteplague_model_result.Rdata",s
 devtools::session_info()
 ```
 
+# SIMPLE MODEL TEST Adding autocorelation with brms (Bayesian Regression Models using Stan)
+p= autoregressive (COR) order
+```{r}
+temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Month,
+                                data=Whiteplague_workingdata,
+                                family = binomial(link="logit"))
 
-# Adding autocorelation with brms (Bayesian Regression Models using Stan)
+```
+
+
+
+# COMPLEX MODEL TEST Adding autocorelation with brms (Bayesian Regression Models using Stan)
 p= autoregressive (COR) order
 ```{r}
 temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Chl_sca + Cond_sca + Den_sca + Oxy_sca + Sal_sca + Turb_sca + Temp_sca + DHW_sca + Rain_sca + (1|Depth_transect),
@@ -376,13 +386,25 @@ temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Chl_sca + Cond_sca + Den_sca 
 ```
 
 
+#ARMA MODELS NOT IMPLEMENTED WITH BINOMIAL. This does not work
+```{r}
+temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Turb_sca + (1|Depth_transect),
+                                data=Whiteplague_workingdata,
+                                autocor = cor_arma(~Month|Station_code, 1, 1),
+                                family = binomial(link="logit"),
+                                prior = c(set_prior("normal(0,0.5)", class = "ar"),
+                                set_prior("normal(0,0.5)", class = "ma")))
+```
+
+
 #Summary brm model
 
 ```{r}
 summary(temporal.autocorrelation)
 #Check for WAIk and LOOP
 w1 <- WAIC(temporal.autocorrelation)
-
+w1
+summary(temporal.autocorrelation, waic = TRUE) 
 ```
 
 #Stan code
@@ -398,7 +420,7 @@ stanplot(object = temporal.autocorrelation)
 #extract residuals from model
 ```{r}
 res <- residuals( temporal.autocorrelation, summary = TRUE)
-
+res
 ```
 
 
@@ -473,8 +495,65 @@ trellis.device("pdf")
 file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
 plot(stan.white)
 ```
-test
+test example
 ```{r}
+set.seed(126)
+n <- 100
+a <- 40  #intercept
+b <- 1.5  #slope
+x <- round(runif(n,1,n),1)  #values of the year covariate
+time <- 1:n
+sigma <- 20
+rho <- 0.8
+eps <- NULL
+# first value cant be autocorrelated
+eps[1] <- rnorm(1,0,sigma)
+for (j in 2:n) {
+  eps[j] <- rho*eps[j-1] + rnorm(1, mean = 0, sd = sigma)  #residuals
+}
 
+y <- a + b * x + eps  #response variable
+#OR
+y <- (model.matrix(~x) %*% c(a,b))+eps
+data.temporalCor <- data.frame(y=round(y,1), x, time)  #dataset
+head(data.temporalCor)  #print out the first six rows of the data set
+     
+#scatterplot of y against x
+library(car)
+scatterplot(y~x, data.temporalCor)
+
+data.temporalCor.brm <- brm(y~x, autocor=cor_ar(~time), data=data.temporalCor, family='gaussian')
 ```
+Summary test
+
+
+```{r}
+summary(data.temporalCor.brm)
+#Check for WAIk and LOOP
+w1 <- WAIC(data.temporalCor.brm)
+w1
+summary(data.temporalCor.brm, waic = TRUE) 
+```
+
+#Paul Burkner example epilepsy data test
+```{r}
+library(brms)
+```
+
+#data epilepsy from brms package. Model runs
+
+```{r}
+fit <- brm(count ~ log_Age_c + log_Base4_c * Trt_c + (1|patient) + (1|obs), 
+           data = epilepsy, family = "poisson")
+#> Compiling the C++ model
+#> Start sampling
+```
+
+#Summary model
+```{r}
+summary(fit, waic = TRUE) 
+res <- residuals( fit, summary = TRUE)
+res
+```
+
 
