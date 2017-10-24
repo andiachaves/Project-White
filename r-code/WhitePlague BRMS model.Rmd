@@ -129,7 +129,9 @@ res <- residuals( temporal.autocorrelation, summary = TRUE)
 res
 ```
 
-#Check model residuals with Dharma
+
+
+#Check model residuals with Dharma. This does not seem to work
 
 ```{r}
 #The scaled (quantile) residuals are calculated with the simulateResiduals() function
