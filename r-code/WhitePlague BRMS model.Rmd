@@ -84,23 +84,14 @@ temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Month,
 # COMPLEX MODEL TEST Adding autocorelation with brms (Bayesian Regression Models using Stan)
 p= autoregressive (COR) order
 ```{r}
-temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Chl_sca + Cond_sca + Den_sca + Oxy_sca + Sal_sca + Turb_sca + Temp_sca + DHW_sca + Rain_sca + (1|Depth_transect),
+temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Chl_sca,
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"),
-                                autocor=cor_bsts(formula= ~Month|Station_code))
+                                 autocor = cor_bsts(formula=~obsid))
 
 ```
 
 
-#ARMA MODELS NOT IMPLEMENTED WITH BINOMIAL. This does not work
-```{r}
-temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Turb_sca + (1|Depth_transect),
-                                data=Whiteplague_workingdata,
-                                autocor = cor_arma(~Month|Station_code, 1, 1),
-                                family = binomial(link="logit"),
-                                prior = c(set_prior("normal(0,0.5)", class = "ar"),
-                                set_prior("normal(0,0.5)", class = "ma")))
-```
 
 
 #Summary brm model
