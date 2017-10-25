@@ -67,6 +67,9 @@ ls()
 dim(Whiteplague_workingdata)
 head(Whiteplague_workingdata)
 length(unique(Whiteplague_workingdata$Station_name))
+
+
+Whiteplague_workingdata$obsid <- as.factor(1:nrow(Whiteplague_workingdata))
 ```
 
 
@@ -76,7 +79,6 @@ p= autoregressive (COR) order
 temporal.autocorrelation <- brm(ill|trials(Ntot) ~ Month,
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"))
-
 ```
 
 
