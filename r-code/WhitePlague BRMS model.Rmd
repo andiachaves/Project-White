@@ -123,16 +123,16 @@ stan.white <- brm(ill|trials(Ntot) ~ Chl_sca * Month,
 ```
 
 
-#model as for GLMER without autocorrelation function
+#model E3 as for GLMER without autocorrelation function
 ```{r}
-stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Station_code/Month),
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Station_name/Month),
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"))
 ```
 
-#model as for GLMER wit autocorrelation function
+#model as E3 for GLMER wit autocorrelation function
 ```{r}
-stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Station_code/Month),
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca  + Turb_sca + (1|Station_name/Month),
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"),
                                 autocor = cor_bsts(formula=~obsid))
@@ -149,6 +149,32 @@ summary(E3)
 E4 <- glmer(cbind(ill,Ntot-ill) ~ Depth + Turbidity + (1|Season/Month:Site) ,family="binomial"(link = "logit"))
 summary(E4)
 ```
+
+
+#model E4 as for GLMER without autocorrelation function
+```{r}
+stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Season/Month:Station_code),
+                                data=Whiteplague_workingdata,
+                                family = binomial(link="logit"))
+```
+
+#model as E4 for GLMER wit autocorrelation function
+```{r}
+stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Season/Month:Station_code),
+                                data=Whiteplague_workingdata,
+                                family = binomial(link="logit"),
+                                autocor = cor_bsts(formula=~obsid))
+```
+
+
+#model as E4 for GLMER wit autocorrelation function
+```{r}
+stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Month),
+                                data=Whiteplague_workingdata,
+                                family = binomial(link="logit"),
+                                autocor = cor_bsts(formula=~~obsid))
+```
+
 
 
 

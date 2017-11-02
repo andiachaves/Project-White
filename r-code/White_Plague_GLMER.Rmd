@@ -203,6 +203,7 @@ summary(E5)
 E6 <- glm(cbind(ill,Ntot-ill) ~ Depth + Turbidity + (1|Site*Month) ,family="binomial"(link = "logit"))
 summary(E6)
 
+
 ---------
 
 overdisp_fun <- function(E2) {
@@ -284,3 +285,33 @@ testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdat
 #testTemporalAutocorrelation(simulationOutput = df, time = "random")
 
 ```
+
+
+#GLMER2 in STAN
+
+```{r}
+library(lme4)
+install.packages("devtools")
+library(devtools)
+install_github("rmcelreath/glmer2stan")
+library(glmer2stan)
+
+#Month nested within site. Intercept varying among sites and months within sites
+E3 <- glmer(cbind(ill,Ntot-ill) ~ Depth + Turbidity + (1|Site/Month) ,family="binomial"(link = "logit"))
+summary(E3)
+
+
+
+Site_index <- as.integer(Whiteplague_workingdata$Station_name)
+Month_index=as.integer(Whiteplague_workingdata$Month_12)
+
+G1 <- glmer2stan(cbind(ill,Ntot-ill) ~ Depth + Turbidity+ (1|Site_index) ,family="binomial")
+
+summary(G1)
+
+
+
+
+
+```
+
