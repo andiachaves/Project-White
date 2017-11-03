@@ -230,7 +230,7 @@ overdisp_fun <- function(E2) {
 ```{r}
 #The scaled (quantile) residuals are calculated with the simulateResiduals() function
 #What the function does is a) creating n new synthetic datasets by simulating from the fitted model, b) calculates the cumulative distribution of simulated values for each observed value, and c) returning the quantile value that corresponds to the observed value.
-simulationOutput <- simulateResiduals(fittedModel = E3, n = 250)
+simulationOutput <- simulateResiduals(fittedModel = E1, n = 250)
 
 #The calculated residuals are stored in
 simulationOutput$scaledResiduals
@@ -285,14 +285,14 @@ testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdat
 
 ```
 
-
+#------------------------------------------------------------------------------------------
 #GLMER2 in STAN
 
 ```{r}
 library(lme4)
-install.packages("devtools")
+#install.packages("devtools")
 library(devtools)
-install_github("rmcelreath/glmer2stan")
+#install_github("rmcelreath/glmer2stan")
 library(glmer2stan)
 
 #Month nested within site. Intercept varying among sites and months within sites
@@ -308,11 +308,20 @@ df$Month_index=as.integer(Whiteplague_workingdata$Month_12)
 
 G1 <- glmer2stan(cbind(ill,Ntot-ill) ~ Depth + Turbidity+ (1|Site_index),data=df,family="binomial")
 
+```
+
+# Summary and Check Residuals for glmer2stan Model
+
+```{r}
 summary(G1)
+stanmer(G1)
+varef(G1)
+```
 
+#extract posterior
 
+```{r}
 
-
-
+str(G1)
 ```
 
