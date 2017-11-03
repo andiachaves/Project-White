@@ -44,7 +44,6 @@ require(MASS)
 #For data inspections we start with a pannel plot also called trellis plots or lattice plots for that we need nlme and lattice libraries
 library(nlme)
 library(lattice)
-require(lme4)
 library(lme4)
 library(coefplot) ## for coefplot2
 library(reshape)
@@ -297,15 +296,17 @@ install_github("rmcelreath/glmer2stan")
 library(glmer2stan)
 
 #Month nested within site. Intercept varying among sites and months within sites
-E3 <- glmer(cbind(ill,Ntot-ill) ~ Depth + Turbidity + (1|Site/Month) ,family="binomial"(link = "logit"))
+
+df <- data.frame(cbind(ill,Ntot,Depth,Turbidity,Site,Month))
+E3 <- glmer(cbind(ill,Ntot-ill) ~ Depth + Turbidity + (1|Site/Month),data=df,family="binomial"(link = "logit"))
 summary(E3)
 
 
 
-Site_index <- as.integer(Whiteplague_workingdata$Station_name)
-Month_index=as.integer(Whiteplague_workingdata$Month_12)
+df$Site_index <- as.integer(Whiteplague_workingdata$Station_name)
+df$Month_index=as.integer(Whiteplague_workingdata$Month_12)
 
-G1 <- glmer2stan(cbind(ill,Ntot-ill) ~ Depth + Turbidity+ (1|Site_index) ,family="binomial")
+G1 <- glmer2stan(cbind(ill,Ntot-ill) ~ Depth + Turbidity+ (1|Site_index),data=df,family="binomial")
 
 summary(G1)
 
