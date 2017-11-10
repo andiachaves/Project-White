@@ -176,6 +176,15 @@ stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Month),
 ```
 
 
+#model  with only month as random to test with glmer and glmer2stan
+#Both Depth and Turbidity as scaled variables.
+```{r}
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Month_12),
+                                data=Whiteplague_workingdata,
+                                family = binomial(link="logit"))
+```
+
+
 
 
 
