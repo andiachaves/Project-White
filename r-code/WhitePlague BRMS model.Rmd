@@ -125,14 +125,14 @@ stan.white <- brm(ill|trials(Ntot) ~ Chl_sca * Month,
 
 #model E3 as for GLMER without autocorrelation function
 ```{r}
-stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Station_name/Month),
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Station_name/Month_12),
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"))
 ```
 
 #model as E3 for GLMER wit autocorrelation function
 ```{r}
-stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca  + Turb_sca + (1|Station_name/Month),
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca  + Turb_sca + (1|Station_name/Month_12),
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"),
                                 autocor = cor_bsts(formula=~obsid))
@@ -228,6 +228,9 @@ res
 Resid.brm <- residuals(stan.white, type='pearson')
 Fitted.brm <- fitted(stan.white, scale='linear')
 ggplot(data=NULL, aes(y=Resid.brm[,'Estimate'], x=Fitted.brm[,'Estimate'])) + geom_point()
+
+#to scale btw 0 and 1:
+
 
 #qqnorm test
 qqnorm(Resid.brm, ylab="Standardized Residuals", xlab="Normal Scores") 
