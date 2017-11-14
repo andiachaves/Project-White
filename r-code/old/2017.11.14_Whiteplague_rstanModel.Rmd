@@ -145,7 +145,7 @@ Site[Site==2] <- 2
 Site[Site==3] <- 3
 Site[Site==4] <- 4
 Site[Site==5] <- 5
-Site[Site==6] <- 6
+Site[Site==5] <- 6
 Site[Site==7] <- 7
 Site[Site==8] <- 8
 Site[Site==9] <- 9
@@ -196,9 +196,8 @@ dataList = list(
                   Max_DHW, 
                   Rainfall,   
         
-        #Environment = Whiteplague_workingdata[32:(32-1+length(enviroselection))],
-        Environment = Whiteplague_workingdata[,c("Temperature","Conductivity")],
-        nEnvi = ncol(Environment),
+        Environment = Whiteplague_workingdata[32:(32-1+length(enviroselection))],
+        nEnvi = length(enviroselection),
 
         Month = Month,
         nMonth = length(unique(Month)), #number of months of WP observations Shallow (2 years) Deep (4 years)
@@ -230,8 +229,10 @@ dataList = list(
 model.Wplague <- '
 data {
 // counters
-int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0 
-int<lower=1> nEnvi;                    // number of environmental variables
+
+// Number of observations Level-1 (integer)
+
+int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0 int<lower=1> nEnvi;                    // number of environmental variables
 
 // Number of Level-2 (Months)
 int<lower=1> nMonth; 
@@ -241,9 +242,21 @@ int<lower=1,upper=12> Month[nWP];  // month of each observation
 int<lower=1> nSite;               // number of sites
 int<lower=1,upper=13> Site[nWP];  // sites
 
+//PLEASE DO NOT DELETE THESE ONES, I KNOW WE ARE NOT USING THEM RIGHT NOW
+//int<lower=1> nYear; 
+//int<lower=1,upper=4> Year[nWP];  // year of each observation
+//int<lower=1> nSeason; 
+//int<lower=1,upper=4> Season[nWP];  // season of each observation
+
 
 // predictors
 matrix[nWP, nEnvi] Environment;
+
+//vector[nWP] Season;
+//vector[nWP] Month;
+//vector[nWP] Temperature;
+//vector[nWP] Turbidity;
+//vector [nWP] Depth;
 
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
@@ -260,6 +273,17 @@ real b0; // intercept
 
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
+//real parSeason;   // Season-level
+//real parMonth;   // Month-level
+//real parDepth;   // Depth-level
+//real parTurbidity;   // Turbidity-level
+
+// Random Effects
+// overdispersion
+
+//Level-1 Overdispersion 
+vector[nWP] eps;
+real<lower=0> tauOverdispersion;
 
 //Level-2 Month
 vector[nMonth] month_raw;
@@ -268,36 +292,70 @@ real<lower=0> tauMonth;
 //Level-3 Month nested within Site
 vector[nSite] site_raw;
 real<lower=0> tauSite;
+
+//vector[nSeason] season_raw;
+//real<lower=0> tauSeason;
 }
 
 transformed parameters {
+// generation of derived parameters from parameters above should be defined here
+// these will be saved and printed with the output
+
 real RealDisease[nWP];
 
+
+//for( i in 1:nWP ) {
+//RealDisease[i]  = (b0  + Environment[i] * parEnvironment + (site_raw[Site[i]]/month_raw[Month[i]])+ //eps[i]);
+
+
+// Varying intercepts definition
+ // Level-3 (level-3 random intercepts)
+for (k in 1:nSite) {
+Site[k] <- b0  + site_raw[Site[i]];
+}
+// Level-2 (level-2 random intercepts)
+for (j in 1:nMonth) {
+Month[j] <- site_raw[Site[i]] + month_raw[Month[i]];
+}
+// Individual mean
 for (i in 1:nWP) {
-RealDisease[i] =  Environment[i] * parEnvironment + site_raw[Site[i]];
+RealDisease[i] <-  Environment[i] * parEnvironment + month_raw[Month[i]];
 
 
 
 } //closes loop observations
-//RealDisease =  b0 + Environment * parEnvironment+ site_raw[Site];
 } //closes transformed parameter
 
 
 model{
+// This is area for describing the model including the priors and likelihood
+// This is the only place where sampling can be done within Stan
+// All data and parameters used in this section must be defined above
+
 // Fixed effects priors
 b0             ~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
+//parSeason      ~ normal(0, 100 );
+//parMonth      ~ normal(0, 100 );
+//parTemperature ~ normal(0, 100 );
+//parDepth ~ normal(0, 100 );
+//parTurbidity ~ normal(0, 100 );
 
 //Hyperpriors
+//tauYear              ~ inv_gamma(0.001, 0.001);
+tauOverdispersion     ~ gamma(0.001,0.001);
+//tauSeason            ~ inv_gamma(0.001, 0.001);
 tauMonth             ~ inv_gamma(0.001, 0.001);
 tauSite              ~ inv_gamma(0.001, 0.001);
 
+
 //Random effects priors
-for (s in 1:nSite) site_raw[s] ~ normal(month_raw[Month[s]], tauSite);
-for (m in 1:nMonth) month_raw[m] ~ normal(0, tauMonth);
-
-
-
+//year_raw                ~ normal(0, tauYear);
+//season_raw              ~ normal(0, tauSeason);
+month_raw               ~ normal(0, tauMonth);
+site_raw               ~ normal(0, tauSite);
+// overdispersion
+eps ~ normal(0 , tauOverdispersion);
 
 
 
