@@ -218,7 +218,7 @@ dataList = list(
         
         #Depth= Depth, 
         #Turbidity= Turbidity
-        )
+)
 ```
 
 
@@ -229,21 +229,29 @@ dataList = list(
 model.Wplague <- '
 data {
 // counters
-int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0 
-int<lower=1> nEnvi;                    // number of environmental variables
 
+// Number of observations Level-1 (integer)
+
+int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0 int<lower=1> nEnvi;                    // number of environmental variables
+
+// Number of Level-2 (Months)
+int<lower=1> nMonth; 
+int<lower=1,upper=12> Month[nWP];  // month of each observation
+
+// Number of Level-3 (Sites)
+int<lower=1> nSite;               // number of sites
+int<lower=1,upper=13> Site[nWP];  // sites
+
+//PLEASE DO NOT DELETE THESE ONES, I KNOW WE ARE NOT USING THEM RIGHT NOW
 //int<lower=1> nYear; 
 //int<lower=1,upper=4> Year[nWP];  // year of each observation
 //int<lower=1> nSeason; 
 //int<lower=1,upper=4> Season[nWP];  // season of each observation
-int<lower=1> nMonth; 
-int<lower=1,upper=12> Month[nWP];  // month of each observation
-int<lower=1> nSite;               // number of sites
-int<lower=1,upper=13> Site[nWP];  // sites
 
 
 // predictors
 matrix[nWP, nEnvi] Environment;
+
 //vector[nWP] Season;
 //vector[nWP] Month;
 //vector[nWP] Temperature;
@@ -253,12 +261,14 @@ matrix[nWP, nEnvi] Environment;
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
 int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
+
 }
 
 parameters {
 // parameters that will be used in the model should be defined here
 // these will be saved and printed with the output
 
+//Population intercept (a real number)
 real b0; // intercept
 
 // Fixed effects
@@ -270,18 +280,21 @@ vector[nEnvi] parEnvironment;   // Environmental-level
 
 // Random Effects
 // overdispersion
+
+//Level-1 Overdispersion 
 vector[nWP] eps;
 real<lower=0> tauOverdispersion;
 
+//Level-2 Month
+vector[nMonth] month_raw;
+real<lower=0> tauMonth;
+
+//Level-3 Month nested within Site
 vector[nSite] site_raw;
 real<lower=0> tauSite;
 
 //vector[nSeason] season_raw;
 //real<lower=0> tauSeason;
-
-vector[nMonth] month_raw;
-real<lower=0> tauMonth;
-
 }
 
 transformed parameters {
@@ -291,8 +304,23 @@ transformed parameters {
 real RealDisease[nWP];
 
 
-for( i in 1:nWP ) {
-RealDisease[i]  = (b0  + Environment[i] * parEnvironment + (site_raw[Site[i]]/month_raw[Month[i]])+ eps[i]);
+//for( i in 1:nWP ) {
+//RealDisease[i]  = (b0  + Environment[i] * parEnvironment + (site_raw[Site[i]]/month_raw[Month[i]])+ //eps[i]);
+
+
+// Varying intercepts definition
+ // Level-3 (level-3 random intercepts)
+for (k in 1:nSite) {
+Site[k] <- b0  + site_raw[Site[i]];
+}
+// Level-2 (level-2 random intercepts)
+for (j in 1:nMonth) {
+Month[j] <- site_raw[Site[i]] + month_raw[Month[i]];
+}
+// Individual mean
+for (i in 1:nWP) {
+RealDisease[i] <-  Environment[i] * parEnvironment + month_raw[Month[i]];
+
 
 
 } //closes loop observations
