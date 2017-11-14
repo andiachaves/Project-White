@@ -81,8 +81,9 @@ length(unique(Whiteplague_workingdata$Station_name))
 match("Chl_sca",names(Whiteplague_workingdata))
 
 #Selection of all 11 scaled environmental variables. 
-enviroselection = Whiteplague_workingdata[c(32:42)] 
-enviroselection
+#enviroselection = Whiteplague_workingdata[c(32:42)] 
+#enviroselection
+Environment= subset(Whiteplague_workingdata, select=c("Depth_tran_sca"))
 
 # Predictors environmental data
 Chlorophyll = Whiteplague_workingdata$Chl_sca
@@ -197,7 +198,7 @@ dataList = list(
                   Rainfall,   
         
         #Environment = Whiteplague_workingdata[32:(32-1+length(enviroselection))],
-        Environment = Whiteplague_workingdata[,c("Temperature","Conductivity")],
+        Environment = Environment,
         nEnvi = ncol(Environment),
 
         Month = Month,
@@ -261,6 +262,7 @@ real b0; // intercept
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
 
+// Random effects
 //Level-2 Month
 vector[nMonth] month_raw;
 real<lower=0> tauMonth;
@@ -275,8 +277,6 @@ real RealDisease[nWP];
 
 for (i in 1:nWP) {
 RealDisease[i] =  Environment[i] * parEnvironment + site_raw[Site[i]];
-
-
 
 } //closes loop observations
 //RealDisease =  b0 + Environment * parEnvironment+ site_raw[Site];
@@ -334,7 +334,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, ch
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.11.13a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.11.14c_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
