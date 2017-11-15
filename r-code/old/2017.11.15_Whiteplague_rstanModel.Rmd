@@ -36,6 +36,7 @@ The white plague prevalence data and corresponding environmental and biological 
 
 ##Load libraries and create directory for results
 ```{r}
+set.seed(2017)
 # Date format - forms part of names of created files or graphs
 today <- format(Sys.time(), "%Y.%m.%d")
 
@@ -53,7 +54,7 @@ library(IDPmisc)
 library(ggplot2) # for graphs
 library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 
 library(brm)
-
+library(DHARMa)
 # create directory if not existing
 #suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
 
@@ -66,7 +67,6 @@ rm(list=ls(all=TRUE))
 source("r-code/00_settings.r")
 
 load(file="data/Whiteplague_workingdata.Rdata")
-
 
 #check data
 dim(Whiteplague_workingdata)
@@ -172,87 +172,85 @@ dataList = list(
 ## Model definition
 ```{r define model}
 # Define model
+
 model.Wplague <- '
 data {
 // counters
-int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0
+int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0 
 int<lower=1> nEnvi;                    // number of environmental variables
+
 // Number of Level-2 (Months)
-int<lower=1> nMonth;
+int<lower=1> nMonth; 
 int<lower=1,upper=12> Month[nWP];  // month of each observation
+
 // Number of Level-3 (Sites)
 int<lower=1> nSite;               // number of sites
 int<lower=1,upper=13> Site[nWP];  // sites
-// Number of Level-1
-int<lower=1,upper=239> Obs[nWP];  // observations
-// Number of seasons
-int<lower=1> nSeason;               // number of seasons
-int<lower=1,upper=4> Season[nWP];  // seasons
-// Number of years
-int<lower=1> nYear;               // number of years
-int<lower=1,upper=4> Year[nWP];  // years
+
+
 // predictors
 matrix[nWP, nEnvi] Environment;
+
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
 int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
+
 }
+
 parameters {
 // parameters that will be used in the model should be defined here
 // these will be saved and printed with the output
+
 //Population intercept (a real number)
 real b0; // intercept
+
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
-// Random effects
-real<lower=0> sigmalev1;
-real<lower=0> sigmalev2;
-real<lower=0> sigmalev3;
-real<lower=0> sigmalev4;
-real<lower=0> sigmalev5;
-vector[nSite] eta1;
-vector[nMonth] eta2;
-vector[nWP] eta3;
-vector[nSeason] eta4;
-vector[nYear] eta5;
+
+//Level-2 Month
+vector[nMonth] month_raw;
+real<lower=0> tauMonth;
+
+//Level-3 Month nested within Site
+vector[nSite] site_raw;
+real<lower=0> tauSite;
 }
+
 transformed parameters {
 real RealDisease[nWP];
-vector[nSite] site_raw;
-vector[nMonth] month_raw;
-vector[nWP] obs_raw;
-vector[nSeason] season_raw;
-vector[nYear] year_raw;
-site_raw  = sigmalev1 * eta1;
-month_raw = sigmalev2 * eta2;
-obs_raw = eta3;
-season_raw = sigmalev4 * eta4;
-year_raw = sigmalev5 * eta5;
+
 for (i in 1:nWP) {
-RealDisease[i] =  Environment[i] * parEnvironment + site_raw[Site[i]]+month_raw[Month[i]]+obs_raw[Obs[i]];
+RealDisease[i] =  b0 + Environment[i] * parEnvironment + site_raw[Site[i]];
+
+
 
 } //closes loop observations
 } //closes transformed parameter
+
+
 model{
 // Fixed effects priors
-b0~ normal(0, 100 );
-parEnvironment ~ normal(0, 100 );
+b0             ~ normal(0, 100 );
+parEnvironment ~ normal(0, 10 );
+
+//Hyperpriors
+//tauMonth             ~ inv_gamma(0.001, 0.001);
+//tauSite              ~ inv_gamma(0.001, 0.001);
+
 //Random effects priors
-eta1 ~ normal(0, 100);
-eta2 ~ normal(0, 100);
-eta3 ~ normal(0, 0.4);
-eta4 ~ normal(0, 100);
-eta5 ~ normal(0, 100);
-sigmalev1 ~ cauchy(0, 2.5*2.149681);
-sigmalev2 ~ cauchy(0, 2.5*2.149681);
-sigmalev3 ~ cauchy(0, 2.5*2.149681);
-sigmalev4 ~ cauchy(0, 2.5*2.149681);
-sigmalev5 ~ cauchy(0, 2.5*2.149681);
+for (s in 1:nSite) site_raw[s] ~ normal(month_raw[Month[s]], tauSite);
+for (m in 1:nMonth) month_raw[m] ~ normal(0, tauMonth);
+
+
+
+
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
+
 //predictive inference
 generated quantities{
 real DiseasePredictions[nWP]; //vector to store predictions
+
 for( i in 1:nWP ) {
 DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDisease[i]));
 }
@@ -272,12 +270,9 @@ stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 50, chains
 ```{r model_run,eval=FALSE}
 #This is the run of the model.
 time <- proc.time()
-set.seed(2017)
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 3000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
-
-
 
 
 
@@ -337,9 +332,10 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 
 
+
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.11.14e_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.11.13a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 # Session information for model run
@@ -413,3 +409,6 @@ trellis.device("pdf")
 file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
 plot(stan.white)
 ```
+
+
+
