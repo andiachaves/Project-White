@@ -130,7 +130,7 @@ stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Station_name
                                 family = binomial(link="logit"))
 ```
 
-#model as E3 for GLMER wit autocorrelation function
+#model as E3 for GLMER wit autocorrelation function. BEST MODEL UNTIL NOW
 ```{r}
 stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca  + Turb_sca + (1|Station_name/Month_12),
                                 data=Whiteplague_workingdata,
@@ -153,14 +153,14 @@ summary(E4)
 
 #model E4 as for GLMER without autocorrelation function
 ```{r}
-stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Season/Month:Station_code),
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Season/Month_12:Station_name),
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"))
 ```
 
 #model as E4 for GLMER wit autocorrelation function
 ```{r}
-stan.white <- brm(ill|trials(Ntot) ~ Depth_transect + Turb_sca + (1|Season/Month:Station_code),
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Season/Month_12:Station_name),
                                 data=Whiteplague_workingdata,
                                 family = binomial(link="logit"),
                                 autocor = cor_bsts(formula=~obsid))
@@ -185,6 +185,14 @@ stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca + Turb_sca + (1|Month_12),
 ```
 
 
+#model as E3 for GLMER wit autocorrelation function, adding other variables
+```{r}
+stan.white <- brm(ill|trials(Ntot) ~ Depth_tran_sca  + Turb_sca + Chl_sca +Temp_sca+ DHW_sca+ Cond_sca + Den_sca + DepCTD_sca+ Oxy_sca+Sal_sca+ Orbicellids +(1|Station_name/Month_12),
+                                data=Whiteplague_workingdata,
+                                family = binomial(link="logit"),
+                                autocor = cor_bsts(formula=~obsid))
+```
+
 
 
 
@@ -204,7 +212,9 @@ summary(stan.white)
 #Check for WAIk and LOOP
 w1 <- WAIC(stan.white)
 w1
-summary(stan.white, waic = TRUE) 
+w2 <-LOO(stan.white)
+w2
+
 ```
 
 #Stan code

@@ -318,7 +318,7 @@ df$Site_index <- as.integer(Whiteplague_workingdata$Station_name)
 df$Month_index=as.integer(Whiteplague_workingdata$Month_12)
 df$Season_index=as.integer(Whiteplague_workingdata$Season)
 
-G1 <- glmer2stan(cbind(ill,healthy) ~ Depth + Turbidity + (1+ Season_index|Month_index) + (1|Site_index),data=df,family="binomial")
+G1 <- glmer2stan(cbind(ill,healthy) ~ Depth + Turbidity + (1+ Site_index|Month_index) ,data=df,family="binomial")
 
 G1 <- glmer2stan(cbind(ill,healthy) ~ Depth + Turbidity + (1 + Site_index|Month_index) + ( 1+ Month_index|Site_index),data=df,family="binomial")
 
