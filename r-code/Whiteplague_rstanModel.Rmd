@@ -77,7 +77,9 @@ length(unique(Whiteplague_workingdata$Station_name))
 
 ## Data preparation
 ```{r}
-Environment <- Whiteplague_workingdata[,c("Depth_tran_sca","Turb_sca")]
+#Environment <- Whiteplague_workingdata[,c("Depth_tran_sca","Turb_sca")]
+#Selection of all 11 scaled environmental variables. 
+Environment = Whiteplague_workingdata[c(22:27,32:41)] 
 
 # Predictors biological data, all are % of cover in transects. No need to scale?
 #Orbicellids = Whiteplague_workingdata$Orbicellids
@@ -150,6 +152,7 @@ dataList = list(
         observedWpPrevalence = Whiteplague_workingdata$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
         
         Obs = 1 : length(Whiteplague_workingdata$Ntot),
+        
         
         Environment = Environment,
         nEnvi = ncol(Environment),
@@ -283,7 +286,7 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, cha
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.11.15a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.11.16a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
@@ -334,16 +337,6 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 #testZeroInflation(WhitePlagueDHARMaResponse)
 ```
 
-
-
-
-
-
-
-
-
-
-
 #Save the model run results
 ```{r}
 save(stan.white, file =paste("data/2017.11.14e_Whiteplague_model_result.Rdata",sep=""))
@@ -353,7 +346,6 @@ save(stan.white, file =paste("data/2017.11.14e_Whiteplague_model_result.Rdata",s
 ```{r}
 devtools::session_info()
 ```
-
 
 #Plotting the model
 ```{r ploting from stan to ggmcmc}
@@ -397,7 +389,7 @@ ggs_caterpillar(S)
 library(shiny)
 library(shinystan)
 
-launch_shinystan(stan.white2)
+launch_shinystan(stan.white)
 ```
 
 
