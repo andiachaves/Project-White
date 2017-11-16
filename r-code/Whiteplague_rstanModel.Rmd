@@ -53,6 +53,7 @@ library(IDPmisc)
 library(ggplot2) # for graphs
 library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 
 library(brm)
+library(DHARMa) #to extract posterior
 
 # create directory if not existing
 #suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
@@ -148,6 +149,8 @@ dataList = list(
         nWP = length(Whiteplague_workingdata$Plague), #White Plague prevalence total number of rows
         observedWpPrevalence = Whiteplague_workingdata$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
         
+        Obs = 1 : length(Whiteplague_workingdata$Ntot),
+        
         Environment = Environment,
         nEnvi = ncol(Environment),
 
@@ -240,7 +243,7 @@ parEnvironment ~ normal(0, 100 );
 //Random effects priors
 eta1 ~ normal(0, 100);
 eta2 ~ normal(0, 100);
-eta3 ~ normal(0, 0.4);
+eta3 ~ normal(0, 0.41);
 eta4 ~ normal(0, 100);
 eta5 ~ normal(0, 100);
 sigmalev1 ~ cauchy(0, 2.5*2.149681);
@@ -278,6 +281,10 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, cha
 ```
 
 
+#Save the model run results
+```{r}
+save(stan.white, file =paste("data/2017.11.15a_Whiteplague_model_result.Rdata",sep=""))
+```
 
 
 

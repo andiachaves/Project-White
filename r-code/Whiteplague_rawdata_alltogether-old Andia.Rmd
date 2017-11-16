@@ -111,6 +111,7 @@ library(MCMCpack) # rwish function
 library(modeest)
 library(IDPmisc)
 library(ggplot2)
+library(DHARMa)
 # create directory if not existing
 suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
 
