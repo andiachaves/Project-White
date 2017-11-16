@@ -243,7 +243,7 @@ parEnvironment ~ normal(0, 100 );
 //Random effects priors
 eta1 ~ normal(0, 100);
 eta2 ~ normal(0, 100);
-eta3 ~ normal(0, 0.41);
+eta3 ~ normal(0, 0.4);
 eta4 ~ normal(0, 100);
 eta5 ~ normal(0, 100);
 sigmalev1 ~ cauchy(0, 2.5*2.149681);
