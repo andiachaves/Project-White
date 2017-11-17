@@ -279,14 +279,14 @@ stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 50, chains
 #This is the run of the model.
 time <- proc.time()
 set.seed(2017)
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.11.16a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2017.11.16b_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
