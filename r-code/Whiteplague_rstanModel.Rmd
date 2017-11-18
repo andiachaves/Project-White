@@ -244,14 +244,14 @@ model{
 b0~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
 //Random effects priors
-eta1 ~ normal(0, 100);
-eta2 ~ normal(0, 100);
+eta1 ~ normal(0, 10);
+eta2 ~ normal(0, 10);
 eta3 ~ normal(0, 0.4);
 eta4 ~ normal(0, 100);
 eta5 ~ normal(0, 100);
 sigmalev1 ~ cauchy(0, 2.5*2.149681);
 sigmalev2 ~ cauchy(0, 2.5*2.149681);
-sigmalev3 ~ cauchy(0, 2.5*2.149681);
+sigmalev3 ~ inv_gamma_lpdf (0.001,0.001);
 sigmalev4 ~ cauchy(0, 2.5*2.149681);
 sigmalev5 ~ cauchy(0, 2.5*2.149681);
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
@@ -279,7 +279,7 @@ stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 50, chains
 #This is the run of the model.
 time <- proc.time()
 set.seed(2017)
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 
