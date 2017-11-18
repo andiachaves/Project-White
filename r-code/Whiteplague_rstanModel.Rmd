@@ -79,7 +79,7 @@ length(unique(Whiteplague_workingdata$Station_name))
 ```{r}
 #Environment <- Whiteplague_workingdata[,c("Depth_tran_sca","Turb_sca")]
 #Selection of all 11 scaled environmental variables. 
-Environment = Whiteplague_workingdata[c(22:27,32:41)] 
+Environment = Whiteplague_workingdata[c(32:41)] 
 
 # Predictors biological data, all are % of cover in transects. No need to scale?
 #Orbicellids = Whiteplague_workingdata$Orbicellids
@@ -244,8 +244,8 @@ model{
 b0~ normal(0, 100 );
 parEnvironment ~ normal(0, 100 );
 //Random effects priors
-eta1 ~ normal(0, 10);
-eta2 ~ normal(0, 10);
+eta1 ~ normal(0, 100);
+eta2 ~ normal(0, 100);
 eta3 ~ normal(0, 0.4);
 eta4 ~ normal(0, 100);
 eta5 ~ normal(0, 100);
@@ -279,7 +279,7 @@ stan.test <- stan(model_code = model.Wplague, data = dataList, iter = 50, chains
 #This is the run of the model.
 time <- proc.time()
 set.seed(2017)
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, chains = 4,refresh=1)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = 4,refresh=1)
 (proc.time() - time)/60/60
 ```
 
