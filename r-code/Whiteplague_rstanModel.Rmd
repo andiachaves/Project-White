@@ -246,12 +246,12 @@ parEnvironment ~ normal(0, 100 );
 //Random effects priors
 eta1 ~ normal(0, 100);
 eta2 ~ normal(0, 100);
-eta3 ~ normal(0, 0.4);
+eta3 ~ normal(0, 10);
 eta4 ~ normal(0, 100);
 eta5 ~ normal(0, 100);
-sigmalev1 ~ cauchy(0, 1*2.149681);
-sigmalev2 ~ cauchy(0, 1*2.149681);
-sigmalev3 ~ cauchy(0, 0.75*2.149681);
+sigmalev1 ~ cauchy(0, 2.5*2.149681);
+sigmalev2 ~ cauchy(0, 2.5*2.149681);
+sigmalev3 ~ cauchy(0, 0.04);
 sigmalev4 ~ cauchy(0, 2.5*2.149681);
 sigmalev5 ~ cauchy(0, 2.5*2.149681);
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
