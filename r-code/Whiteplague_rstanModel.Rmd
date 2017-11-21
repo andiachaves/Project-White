@@ -231,7 +231,7 @@ vector[nSeason] season_raw;
 vector[nYear] year_raw;
 site_raw  = sigmalev1 * eta1;
 month_raw = sigmalev2 * eta2;
-obs_raw = eta3;
+obs_raw = sigmalev3 * eta3;
 season_raw = sigmalev4 * eta4;
 year_raw = sigmalev5 * eta5;
 for (i in 1:nWP) {
