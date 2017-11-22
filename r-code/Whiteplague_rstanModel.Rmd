@@ -251,7 +251,7 @@ eta4 ~ normal(0, 100);
 eta5 ~ normal(0, 100);
 sigmalev1 ~ cauchy(0, 2.5*2.149681);
 sigmalev2 ~ cauchy(0, 2.5*2.149681);
-sigmalev3 ~ cauchy(0, 0.04);
+sigmalev3 ~ cauchy(0, 2.5*2.149681);
 sigmalev4 ~ cauchy(0, 2.5*2.149681);
 sigmalev5 ~ cauchy(0, 2.5*2.149681);
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
@@ -412,3 +412,50 @@ trellis.device("pdf")
 file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)
 plot(stan.white)
 ```
+
+##Cauchy and normal distribution test
+
+```{r}
+#Normal distribution
+x <- seq(-10, 10, length=100)
+hx <- dnorm(x)
+
+degf <- c(1, 3, 8, 30)
+colors <- c("red", "blue", "darkgreen", "gold", "black")
+labels <- c("df=1", "df=3", "df=8", "df=30", "normal")
+
+plot(x, hx, type="l", lty=2, xlab="x value",
+  ylab="Density", main="Comparison of t Distributions")
+
+for (i in 1:4){
+  lines(x, dt(x,degf[i]), lwd=2, col=colors[i])
+}
+
+legend("topright", inset=.05, title="Distributions",
+  labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)
+
+```
+
+#cauchy
+
+```{r}
+#Cauchy distribution
+
+x <- seq(-10, 10, length=100)
+hi <- dcauchy(x)
+
+degf <- c(1, 3, 8, 30)
+colors <- c("red", "blue", "darkgreen", "gold", "black")
+labels <- c("df=1", "df=3", "df=8", "df=30", "cauchy")
+
+plot(x, hx, type="l", lty=2, xlab="x value",
+  ylab="Density", main="Comparison of t Distributions")
+
+for (i in 1:4){
+  lines(x, dt(x,degf[i]), lwd=2, col=colors[i])
+}
+
+legend("topright", inset=.05, title="Distributions",
+  labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)
+```
+
