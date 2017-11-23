@@ -206,44 +206,36 @@ real b0; // intercept
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
 
-// Random effects
-//Level-3 Month
-vector[nMonth] month_raw;
-real<lower=0> tauMonth;
+real<lower=0> sigmalev1;
+real<lower=0> sigmalev2;
 
-//Level-2 Month nested within Site
-vector[nSite] site_raw;
-real<lower=0> tauSite;
+vector[nSite] eta1;
+vector[nMonth] eta2;
 
-vector[nWP] eps;
-real<lower=0> tauOverdispersion;
 }
 
 transformed parameters {
 real RealDisease[nWP];
 real b0month[nMonth];
-real b0site[nMonth];
-//real b0month_site[nSite];
+real b0month_site[nSite];
 
+
+vector[nSite] site_raw;
+vector[nMonth] month_raw;
+
+site_raw = eta1* sigmalev1;
+month_raw = eta2* sigmalev2;
 
 // level 3 random intercept
-//for (m in 1:nMonth) b0month[m] = b0 + month_raw[m] ;
+for (m in 1:nMonth) b0month[m] = b0 + month_raw[m] ;
 
 // level 2 random intercept
-//for (s in 1:nSite)  b0month_site[s] = b0month[Month[s]] + site_raw[s];
-
-
-
-
+for (s in 1:nSite)  b0month_site[s] = b0month[Month[s]] + site_raw[s];
 
 
 
 for (i in 1:nWP) {
-
-//RealDisease[i] =  Environment[i] * parEnvironment + b0month_site[Site[i]]+eps[i];
-//RealDisease[i] =  b0 + Environment[i] * parEnvironment +eps[i];
-//RealDisease[i] =  b0 + Environment[i] * parEnvironment;
-
+RealDisease[i] =  Environment[i] * parEnvironment + b0month_site[Site[i]];
 
 } //closes loop observations
 } //closes transformed parameter
@@ -251,20 +243,17 @@ for (i in 1:nWP) {
 
 model{
 // Fixed effects priors
-b0             ~ normal(0, 100 );
-parEnvironment ~ normal(0, 100 );
+b0             ~ normal(0, 10);
+parEnvironment ~ normal(0, 10);
 
 
 // Random intercept priors
-//month_raw ~ normal(0, tauMonth);
-//site_raw ~ normal(0, tauSite);
 
-month_raw ~ normal(0, 100);
-site_raw ~ normal(0, 100);
+eta1 ~ normal(0, 1);
+eta2 ~ normal(0, 1);
 
-// overdispersion
-tauOverdispersion     ~ gamma(0.001,0.001);
-eps ~ normal(0 , 10000);
+sigmalev1 ~ cauchy(0,2.5);
+sigmalev1 ~ cauchy(0,2.5);
 
 
 

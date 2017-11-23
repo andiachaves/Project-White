@@ -54,6 +54,10 @@ library(ggplot2) # for graphs
 library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 
 library(brm)
 library(DHARMa) #to extract posterior
+
+# create directory if not existing
+#suppressWarnings(dir.create(file.path(getwd(),"Results/04_Rstan")))
+
 ```
 
 ## Load data
@@ -63,40 +67,110 @@ rm(list=ls(all=TRUE))
 source("r-code/00_settings.r")
 
 load(file="data/Whiteplague_workingdata.Rdata")
+
+
+#check data
+dim(Whiteplague_workingdata)
+head(Whiteplague_workingdata)
+length(unique(Whiteplague_workingdata$Station_name))
 ```
 
 ## Data preparation
 ```{r}
-df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Temp_sca","Turb_sca","Depth_tran_sca")]
+Environment <- Whiteplague_workingdata[,c("Depth_tran_sca","Temp_sca","Turb_sca")]
+#Selection of all 11 scaled environmental variables. 
+#Environment = Whiteplague_workingdata[c(32:41)] 
 
-df$healthy <- df$Ntot-df$ill
-df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
-df$Site    <- as.factor(as.numeric(Whiteplague_workingdata$Station_name))
-df$Obsid   <- as.factor(1:nrow(df))
-df$SiteMonth <- as.factor(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
+# Predictors biological data, all are % of cover in transects. No need to scale?
+#Orbicellids = Whiteplague_workingdata$Orbicellids
+#Sand = Whiteplague_workingdata$Sand
+#Coral = Whiteplague_workingdata$Coral
+#Sponges = Whiteplague_workingdata$Sponges    
+#Macroalgae = Whiteplague_workingdata$Macroalgae
+#Cyanobacteria = Whiteplague_workingdata$Cyanobacteria    
 
-df$Site_index <- as.integer(df$Site)
-df$Month_index=as.integer(df$Month)
-df$Obsid_index=as.integer(df$Obsid)
-df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
+#Time and location factors 
+Year=Whiteplague_workingdata$Year
+Year[Year==2012] <- 1
+Year[Year==2013] <- 2
+Year[Year==2014] <- 3
+Year[Year==2015] <- 4
+Month=Whiteplague_workingdata$Month_12
 
-Environment <- df[,c("Turb_sca","Temp_sca")]
+#Month=rep(1:12,c(3,25,26,29,22,4,7,29,30,14,25,25))  # Total of 12 months, with different sampling per month over 2-4 years
+
+Season=Whiteplague_workingdata$Season
+Season[Season==1] <- 1
+Season[Season==2] <- 2
+Season[Season==3] <- 3
+Season[Season==4] <- 4
+Station=Whiteplague_workingdata$Station_name
+Reef.Type=Whiteplague_workingdata$Reef.Type
+Latitude=Whiteplague_workingdata$Latitude
+Longitude=Whiteplague_workingdata$Longitude
+Timepoint=Whiteplague_workingdata$TimePoint
+
+Site <- as.numeric(Whiteplague_workingdata$Station_name)
+Site[Site==1] <- 1
+Site[Site==2] <- 2
+Site[Site==3] <- 3
+Site[Site==4] <- 4
+Site[Site==5] <- 5
+Site[Site==6] <- 6
+Site[Site==7] <- 7
+Site[Site==8] <- 8
+Site[Site==9] <- 9
+Site[Site==10] <- 10
+Site[Site==11] <- 11
+Site[Site==12] <- 12
+Site[Site==13] <- 13
+
+
+#Subset per stations to later calculate temporal autocorrelation function
+BlackPoint <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='BPT'), ]
+BrewersBay <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='BWR'), ]
+CasCayOuter <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='CSC'), ]
+CollegeShoal <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='CSE'), ]
+EastFrenchCap <-Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='EFC'), ]
+FlatCay <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='FLC'), ]
+GrammanikBank <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='GKT'), ]
+MCDS166 <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='HKA'), ]
+MeriShoal <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='MSR'), ]
+HindBank <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='HBE'), ]
+Perseverance <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='PSV'), ]
+SouthCapella <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='SCP'), ]
+Seahorse <- Whiteplague_workingdata[which(Whiteplague_workingdata$Station_code=='SHR'), ]
 ```
 
 
 ## Model definition
 ```{r}
 dataList = list(
-  TotalObservedcolonies = df$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
-  Diseasedcolonies = df$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
-  nWP = nrow(df), #White Plague prevalence total number of rows
-  observedWpPrevalence = df$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
-  
-  Environment = Environment,
-  nEnvi = ncol(Environment),
-  
-  SiteMonth = df$SiteMonth_index,
-  nSiteMonth =length(unique(df$SiteMonth_index))
+        TotalObservedcolonies = Whiteplague_workingdata$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
+        Diseasedcolonies = Whiteplague_workingdata$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
+        nWP = length(Whiteplague_workingdata$Plague), #White Plague prevalence total number of rows
+        observedWpPrevalence = Whiteplague_workingdata$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
+        
+        Obs = 1 : length(Whiteplague_workingdata$Ntot),
+        
+        
+        Environment = Environment,
+        nEnvi = ncol(Environment),
+
+        Month = Month,
+        nMonth = length(unique(Month)), #number of months of WP observations Shallow (2 years) Deep (4 years)
+        
+        Site = Site,
+        nSite =length(unique(Site)),
+        
+        Year = Year,
+        nYear =length(unique(Year)),
+        
+        Season=Season,
+        nSeason = length(unique(Season)),
+        
+        Timepoint= Timepoint,
+        nTimepoint = length(unique(Timepoint))
 )
 ```
 
@@ -109,57 +183,83 @@ data {
 // counters
 int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0
 int<lower=1> nEnvi;                    // number of environmental variables
-
-int<lower=1> nSiteMonth;               // number of sites-month combinations
-int<lower=1,upper=130> SiteMonth[nWP];  // sites-month combinations
-
+// Number of Level-2 (Months)
+int<lower=1> nMonth;
+int<lower=1,upper=12> Month[nWP];  // month of each observation
+// Number of Level-3 (Sites)
+int<lower=1> nSite;               // number of sites
+int<lower=1,upper=13> Site[nWP];  // sites
+// Number of Level-1
+int<lower=1,upper=239> Obs[nWP];  // observations
+// Number of seasons
+int<lower=1> nSeason;               // number of seasons
+int<lower=1,upper=4> Season[nWP];  // seasons
+// Number of years
+int<lower=1> nYear;               // number of years
+int<lower=1,upper=4> Year[nWP];  // years
+// predictors
 matrix[nWP, nEnvi] Environment;
-
 // response
 int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
 int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
 }
 parameters {
+// parameters that will be used in the model should be defined here
+// these will be saved and printed with the output
+//Population intercept (a real number)
 real b0; // intercept
 // Fixed effects
 vector[nEnvi] parEnvironment;   // Environmental-level
-
 // Random effects
-real<lower=0> sigmalev_1;
-vector[nSiteMonth] eta_1;
+real<lower=0> sigmalev1;
+real<lower=0> sigmalev2;
+real<lower=0> sigmalev3;
+real<lower=0> sigmalev4;
+
+vector[nWP] eta1;
+vector[nSite] eta2;
+vector[nMonth] eta3;
+vector[nSeason] eta4;
+
+
 }
-
-
-
 transformed parameters {
 vector[nWP] RealDisease;
-vector[nSiteMonth] sitemonth_raw;
+vector[nWP] obs_raw;
+vector[nSite] site_raw;
+vector[nMonth] month_raw;
 
-sitemonth_raw  = eta_1 * sigmalev_1;
 
-RealDisease =  Environment * parEnvironment + sitemonth_raw[SiteMonth];
+obs_raw   = eta1 * sigmalev1;
+site_raw  = eta2 * sigmalev2;
+month_raw = eta3 * sigmalev3;
+
+RealDisease =  Environment * parEnvironment + site_raw[Site]+month_raw[Month];
 } //closes transformed parameter
-
-
-
 
 model{
 // Fixed effects priors
-b0             ~ normal(0, 10);
+b0~ normal(0, 10);
 parEnvironment ~ normal(0, 10);
 
 //Random effects priors
-eta_1 ~ normal(0, 100);
+eta1 ~ normal(0, 1);
+eta2 ~ normal(0, 1);
+eta3 ~ normal(0, 1);
 
-sigmalev_1 ~ uniform(0,100);
-//sigmalev_1 ~ student_t(1,0,1);
-//sigmalev_1 ~ cauchy(0,2.5);
-//sigmalev_1 ~ inv_gamma(0.001, 0.001);
+//sigmalev1 ~ uniform(0,.5);
+sigmalev1 ~ student_t(1,0,1);
+//sigmalev1 ~ cauchy(0,0.001);
+sigmalev2 ~ cauchy(0,2.5);
+sigmalev3 ~ cauchy(0,2.5);
+
+
+//sigmalev1 ~ inv_gamma(1, 1);
+//sigmalev2 ~ inv_gamma(0.001, 0.001);
+//sigmalev3 ~ inv_gamma(0.001, 0.001);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
-
-
 
 generated quantities{ //predictive inference
 real DiseasePredictions[nWP]; //vector to store predictions
@@ -175,7 +275,7 @@ for(i in 1:nWP) DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],i
 ```{r model_run,eval=FALSE}
 Nchains=3
 time <- proc.time()
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, chains = Nchains,refresh=100)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 3000, chains = Nchains,refresh=10)
 (proc.time() - time)/60/60
 ```
 
@@ -183,12 +283,12 @@ stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, cha
 NvarEnvironment <- ncol(Environment)
 printVarEnvironment <- paste(rep("parEnvironment[",NvarEnvironment),1:NvarEnvironment,rep("]",NvarEnvironment),sep="")
 
-print(stan.white,pars=c("b0",printVarEnvironment),probs=c(.1,.5,.9))
-plot(stan.white,pars=c("b0",printVarEnvironment))
+print(stan.white,pars=c("b0",printVarEnvironment,"obs_raw"),probs=c(.1,.5,.9))
+#plot(stan.white,pars=c("b0",printVarEnvironment,"obs_raw"))
 
 
 #plotting the posterior distribution for the parameters
-post_beta<-As.mcmc.list(stan.white,pars=c("b0",printVarEnvironment))
+post_beta<-As.mcmc.list(stan.white,pars=c("b0",printVarEnvironment,"obs_raw"))
 plot(post_beta)
 #traceplot(post_beta, inc_warmup = FALSE)
 ```
