@@ -237,7 +237,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2017.11.16b_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2018.01.18a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
