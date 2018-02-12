@@ -67,7 +67,7 @@ load(file="data/Whiteplague_workingdata.Rdata")
 
 ## Data preparation
 ```{r}
-df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Temp_sca","Turb_sca","Depth_tran_sca")]
+df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Orbicellids", "Sand","Coral", "Sponges","Macroalgae","Cyanobacteria","Chl_sca","Cond_sca","Den_sca", "DepCTD_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
 
 df$healthy <- df$Ntot-df$ill
 df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
@@ -80,7 +80,7 @@ df$Month_index=as.integer(df$Month)
 df$Obsid_index=as.integer(df$Obsid)
 df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
 
-Environment <- df[,c("Turb_sca","Temp_sca")]
+Environment <- df[,c("Orbicellids", "Sand","Coral", "Sponges","Macroalgae", "Cyanobacteria","Chl_sca","Cond_sca","Den_sca", "DepCTD_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
 ```
 
 
@@ -173,9 +173,9 @@ for(i in 1:nWP) DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],i
 ## Running the model
 
 ```{r model_run,eval=FALSE}
-Nchains=3
+Nchains=4
 time <- proc.time()
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 2000, chains = Nchains,refresh=100)
+stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = Nchains,refresh=100)
 (proc.time() - time)/60/60
 ```
 
@@ -237,7 +237,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2018.01.18a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2018.02.12a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
