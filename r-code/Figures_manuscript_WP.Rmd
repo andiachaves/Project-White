@@ -1,0 +1,318 @@
+date: 27.01.2015, last modified: 13.02.2018
+author: Bernd Panassiti and Andia Chaves Fonnegra
+
+Figure X- Influence of environment on White Plague Prevalence
+========================================================
+
+
+Use bquote(), as in                                                                   
+  n <- 200                                                                            
+  vent <- bquote(paste("R con ventanas de ", .(n), " ", italic(datos)))               
+                                                                                      
+or, using ~ instead of paste(),                                                       
+  vent <- bquote("R con ventanas de " ~ .(n) ~ italic(datos))                         
+  plot(1, 1, main=vent)                                                               
+                                                                                      
+The notation .(xxx) means to replace xxx by the value of the variable called "xxx".   
+
+
+
+```{r setup}
+library(knitr) # for creating html-file
+opts_knit$set(root.dir='../') # definining working directory; or normalizePath('../')
+```
+
+```{r load}
+rm(list=ls(all=TRUE))
+
+# load settings, data & libraries
+source("r-code/R - 00 - settings.r")
+load("data/predictors_response2012_work.RData")
+
+library(rstan) # extraction of posterior, function:stanGraphInput
+set_cppo("fast")  # for best running speed
+library(MCMCpack) # rwish function, to create mmcmc list, function:stanGraphInput
+library(modeest)
+library(IDPmisc)
+library(plyr) # for coda function
+library(ggmcmc) # extraction of samples
+
+set.seed(2013)
+```
+
+#### BN
+```{r BN_graph_input}
+load(file="results/4_rstan/output_rstan_bn_frequentgrapes.RData")
+model.name="rstan_bn_frequentgrapes" # for graphic
+
+# load posterior and disease observations
+load("data/predictors_response2012_final_input_newdata.RData") # newdata
+Grapes = newdata[3:(3-1+length(grapeselection))]
+Environment = newdata[(3+length(grapeselection)):(3-1+length(grapeselection)+length(enviroselection))]
+
+# stanGRAPH defaults: 
+# q=0.1 (0.1 -> 0.1 & 0.)
+# parGrep="par" depending how parameters are specified in Stan model, e.g.: parEnvi[1],parEnvi[2], parGrap[1],...etc
+
+GraphInput<-stanGraphInput(stan.fit)
+GraphInputBn<-GraphInput# backup
+```
+
+
+```{r graph_BN}
+### X axis labels
+abbr<-read.table("data/abbreviations.csv",sep="\t") # load correct notation
+ParameterNames<-colnames(newdata)[-c(1,2,(ncol(newdata)-3):ncol(newdata))]   # extract variable names from modelling input dataframe
+nameReplace<-which(ParameterNames %in% abbr[,1])    # which need to be replaced with correct notation?
+for (i in nameReplace){ ParameterNames[i]<-as.vector(abbr[which(abbr[,1] %in% ParameterNames[i]),2])}
+ParameterNames<-c("intercept",ParameterNames)
+
+
+########### ADJUST BY HAND ###############
+# which parameters should be plotted together in one graph?
+parplot<-2:(length(Grapes)+1) # Grapes
+parType<-"Grapes"
+ylim=c(-200,20)
+at=c(-200,-150,-100,-50,0,10)
+mar=c(8,5,1,1)
+parusrMINUSx=2
+
+parplot<-c(1,(length(Grapes)+2):(length(Grapes)+1+length(Environment))) # Environment
+parType<-"Environment"
+xlim=c(-10,5)
+at=c(-15,-10,-5,0,5,10)
+mar=c(17,6,1,1)
+parusrMINUSx=0.5
+n.ch=4
+###########################################
+
+
+# MEDIANS OF RUNS
+var.median.plot<-GraphInput$var.median[GraphInput$var.median[,1] %in% parplot,]
+var.median.plot[,1]<-rep(1:length(parplot),each=n.ch)
+
+# CREDIBLE INTERVAL
+datq.plot<-GraphInput$datq[GraphInput$datq[,1] %in% parplot,]
+datq.plot[,1:2]<-1:length(parplot)
+
+# RANKING
+# add mean of the four medians for ranking
+datq.plot$mean <- 0
+for (i in 1:nrow(datq.plot)){
+  datq.plot[i,5] <- mean(var.median.plot[var.median.plot[,1]==i,2])
+}
+
+# delete intercept
+datq.plot <- datq.plot[-1,]
+
+var.median.plot$parameter <- rep(ParameterNames[parplot],each=4)
+var.median.plot <- var.median.plot[-c(1:4),]
+
+# rank & order according ranking
+datq.plot$mean_rank<-rank(datq.plot[,5])                    # ranking credible interval
+var.median.plot$mean_rank<-rep(rank(datq.plot[,5]),each=4)  # ranking median
+
+df                <- datq.plot[order(datq.plot[,6]),]             # sort for mean_rank
+var.median.qqplot <- var.median.plot[order(var.median.plot[,4]),] # sort for mean_rank
+
+
+# preparation of data.frame for qqplot
+datq.qqplot<-data.frame(matrix(0,nrow=nrow(df)*2,ncol=4))
+j=1
+for (i in 1:nrow(df)){
+  datq.qqplot[j,c(1:2,3,4)]  <- df[i,c(2,3,5,6)]
+  datq.qqplot[j+1,c(1:2,3,4)]  <- df[i,c(2,4,5,6)]
+j=j+2
+}
+
+colnames(datq.qqplot)       <-c("id","credible_range","mean","mean_rank")
+colnames(var.median.qqplot) <-c("id","median","parameter","mean_rank")
+
+# save
+BNdatq.qqplot <- datq.qqplot
+BNvar.median.qqplot <- var.median.qqplot
+datq.qqplot <- BNdatq.qqplot
+var.median.qqplot <- BNvar.median.qqplot
+
+# y labels
+yLabels <- unique(var.median.qqplot$parameter)
+yLabels2 <- yLabels
+yLabels2[11] <- expression(paste(italic(Hyalesthes)," ",italic(obsoletus)," ","predictions"))
+qp <- ggplot(data=datq.qqplot, aes(x=credible_range, y=mean_rank, group=mean_rank)) + geom_line()
+BNqqplot <- qp + 
+  geom_point(data=var.median.qqplot,aes(x=median,y=mean_rank)) +
+  scale_y_discrete(breaks=unique(var.median.qqplot$mean_rank),labels=yLabels2) +
+  geom_vline(xintercept=0,size=0.2)+
+  theme_bw() + # removes grey background
+  theme(axis.line = element_line(colour='black',size=0.5),
+        axis.title = element_blank() # remove axis labels
+        )
+```
+
+
+### Ho
+```{r Ho_graph_input}
+rm(stan.fit) # delete BN stan.fit
+rm(newdata)  # delete newdata - input for BN model
+load(file="results/4_rstan/output_rstan_ho_100000.RData") # contains stan.fit and newdata
+
+
+enviroselection = c(4:14)
+Environment = newdata[3:(3-1+length(enviroselection))]
+
+
+GraphInput<-stanGraphInput(stan.fit)
+GraphInputHo<-GraphInput # backup
+```
+
+```{r Ho_graph_preparation}
+######### ADJUST BY HAND ###########
+model.name="rstan_ho" # for graphic
+n.ch=4 # number of chains
+n.iter.total=100000
+n.draws<-100000/100 # total samples divided by final samples size
+n.draws.new=1000
+nObs=length(newdata$ill)
+
+### X axis labels
+abbr<-read.table("data/abbreviations.csv",sep="\t") # load correct notation
+ParameterNames<-colnames(newdata)[-c(1,2)]   # extract variable names from modelling input dataframe
+nameReplace<-which(ParameterNames %in% abbr[,1])    # which need to be replaced with correct notation?
+for (i in nameReplace){ ParameterNames[i]<-as.vector(abbr[which(abbr[,1] %in% ParameterNames[i]),2])}
+ParameterNames<-c("intercept",ParameterNames)
+
+
+
+########### ADJUST BY HAND ###############
+# which parameters should be plotted together in one graph?
+parplot<-1:(length(Environment)+1) # Environment
+parType<-"Environment"
+yupper=230
+ylower=-120
+ylim=c(ylower,yupper)
+at=seq(ylower,yupper,50) # numeric vector where ticks should be drawn
+parusrMINUSx=20
+mar=c(17,6,1,1)
+###########################################
+
+
+var.median.plot<-GraphInput$var.median[GraphInput$var.median[,1] %in% parplot,]
+var.median.plot[,1]<-rep(1:length(parplot),each=n.ch)
+datq.plot<-GraphInput$datq[GraphInput$datq[,1] %in% parplot,]
+datq.plot[,1:2]<-1:length(parplot)
+
+
+# RANKING
+# based on "BNvar.median.qqplot"
+datq.plot$mean <- 0
+for (i in 1:nrow(datq.plot)){
+  datq.plot[i,5] <- mean(var.median.plot[var.median.plot[,1]==i,2])
+}
+
+# delete intercept
+#datq.plot <- datq.plot[-1,]
+
+datq.plot$parameter <- ParameterNames[parplot] # assign variable names to intervals
+var.median.plot$parameter <- rep(ParameterNames[parplot],each=4)
+#var.median.plot <- var.median.plot[-c(1:4),] # when intercept is not needed
+
+# rank & order according ranking
+# variables ranking are synchronized with that from BN model
+
+# datq.plot$mean_rank<-rank(datq.plot[,5])                    # ranking credible interval
+
+# > datq.plot
+#    X1 X2          X3          X4       mean                          parameter
+# 1   1  1 -3.71570560 23.24714997 10.0893622                          intercept
+# 2   2  2 -8.84270941  0.88758754 -3.5809379           cation exchange capacity
+# 3   3  3 -6.10586649  0.84009127 -2.6122812          precipitation seasonality
+# 4   4  4  1.33634875  9.52672049  4.1120640                      isothermality
+# 5   5  5 -3.15947761 10.96274256  2.5390761  min temperature of coldest period
+# 6   6  6 -6.70536454  1.76097134 -1.1979371 mean temperature of driest quarter
+# 7   7  7 -7.39594407  2.85838340 -1.2646789            mean annual temperature
+# 8   8  8 -5.92716716  8.68756929  2.2921944                            soil pH
+# 9   9  9  8.91648709 23.62616175 16.1291624                 natural vegetation
+# 10 10 10 -9.63668545  7.25690355 -0.7802193           effective field capacity
+# 11 11 11  3.45714061 15.33539478  8.8162528                       soil erosion
+# 12 12 12 -0.09866019 -0.02768301 -0.0627370                    altitude a.s.l.
+
+
+# # exposition is missing in Ho model -> ADDITIONAL LINE(s) # #
+datq.plot <- rbind(datq.plot,rep(0,ncol(datq.plot)))
+datq.plot[nrow(datq.plot),6] <- ""
+
+var.median.plot <- rbind(var.median.plot,rep(0,ncol(var.median.plot)),rep(0,ncol(var.median.plot)),rep(0,ncol(var.median.plot)),rep(0,ncol(var.median.plot)))
+
+var.median.plot[(nrow(var.median.plot)-3):nrow(var.median.plot),3] <- ""
+#############################################################################
+# # intercept not available in BN model -> gets rank of Ho predictor
+datq.plot$mean_rank<-c(11,2,7,5,1,4,12,9,8,10,6,13,3)
+
+var.median.plot$mean_rank<-rep(datq.plot[,7],each=4)  # ranking median
+
+df                <- datq.plot[order(datq.plot[,7]),-6]           # sort for mean_rank
+var.median.qqplot <- var.median.plot[order(var.median.plot[,4]),] # sort for mean_rank
+
+
+# preparation of data.frame for qqplot
+datq.qqplot<-data.frame(matrix(0,nrow=nrow(df)*2,ncol=4))
+j=1
+for (i in 1:nrow(df)){
+  datq.qqplot[j,c(1:2,3,4)]  <- df[i,c(2,3,5,6)]
+  datq.qqplot[j+1,c(1:2,3,4)]  <- df[i,c(2,4,5,6)]
+  j=j+2
+}
+
+colnames(datq.qqplot)       <-c("id","credible_range","mean","mean_rank")
+colnames(var.median.qqplot) <-c("id","median","parameter","mean_rank")
+
+# save
+HOdatq.qqplot <- datq.qqplot
+HOvar.median.qqplot <- var.median.qqplot
+
+# y labels
+yLabels <- unique(var.median.qqplot$parameter)
+
+```
+
+```{r Ho_graph}
+qp <- ggplot(data=datq.qqplot, aes(x=credible_range, y=mean_rank, group=mean_rank)) + geom_line()
+HOqqplot <- qp + 
+  geom_point(data=var.median.qqplot,aes(x=median,y=mean_rank)) +
+  scale_y_discrete(breaks=unique(var.median.qqplot$mean_rank),labels=yLabels) +
+  geom_vline(xintercept=0,size=0.2)+
+  theme_bw() + # removes grey background
+  theme(axis.line = element_line(colour='black',size=0.5),
+        axis.title = element_blank() # remove axis labels
+        )
+```
+
+
+### Combine Bn and Ho conditional distributions in one graph
+```{r}
+Layout <- grid.layout(nrow = 1, ncol = 2, 
+                      widths = unit(c(2,2), c("null", "null")), heights = unit(c(1,1), c("null", "null")))
+vplayout <- function(...) {
+  grid.newpage()
+  pushViewport(viewport(layout = Layout))
+}
+subplot <- function(x, y) viewport(layout.pos.row = x,
+                                   layout.pos.col = y)
+
+
+
+vplayout()
+print(BNqqplot, vp = subplot(1, 1))
+print(HOqqplot, vp = subplot(1, 2))
+```
+
+
+### 
+```{r save}
+save(
+  GraphInputBn,GraphInputHo,
+  BNdatq.qqplot,BNvar.median.qqplot,BNqqplot,
+  HOdatq.qqplot,HOvar.median.qqplot,HOqqplot,
+  file="results/4_rstan/output_rstan_graphs.RData")
+```
+

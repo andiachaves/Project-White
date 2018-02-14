@@ -63,11 +63,13 @@ rm(list=ls(all=TRUE))
 source("r-code/00_settings.r")
 
 load(file="data/Whiteplague_workingdata.Rdata")
+head(Whiteplague_workingdata)
+dim(Whiteplague_workingdata)
 ```
 
 ## Data preparation
 ```{r}
-df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Orbicellids", "Sand","Coral", "Sponges","Macroalgae","Cyanobacteria","Chl_sca","Cond_sca","Den_sca", "DepCTD_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
 
 df$healthy <- df$Ntot-df$ill
 df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
@@ -80,7 +82,7 @@ df$Month_index=as.integer(df$Month)
 df$Obsid_index=as.integer(df$Obsid)
 df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
 
-Environment <- df[,c("Orbicellids", "Sand","Coral", "Sponges","Macroalgae", "Cyanobacteria","Chl_sca","Cond_sca","Den_sca", "DepCTD_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
 ```
 
 
@@ -237,7 +239,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2018.02.12a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2018.02.14b_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
@@ -271,7 +273,7 @@ print(stan.white)
 
 plot(stan.white)
 
-str(stan.white)
+ str(stan.white)
 
 library(ggmcmc)
 library(coda)
