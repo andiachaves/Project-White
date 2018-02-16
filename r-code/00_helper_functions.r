@@ -5,6 +5,13 @@ if(!require(compiler))
 }
 
 
+if(!require(stringi)) # stri_sub function
+{
+  install.packages("stringi", repos = mir)
+  require(stringi)
+}
+
+
 #' ## script for converting .Rmd files to .R scripts.
 
 #' #### Kevin Keenan 2014
