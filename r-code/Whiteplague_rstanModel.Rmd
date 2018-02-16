@@ -51,8 +51,6 @@ library(MCMCpack) # rwish function
 library(modeest)
 library(IDPmisc)
 library(ggplot2) # for graphs
-library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 
-library(brm)
 library(DHARMa) #to extract posterior
 ```
 

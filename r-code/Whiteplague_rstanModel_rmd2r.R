@@ -1,315 +1,77 @@
-#' ---	
-#' title: "Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands"	
-#' author: 	
-#' -name:"Andia Chaves Fonnegra and Bernd Panassiti"	
-#'   affiliation: University of the Virgin Islands (US.VI) and Laimburg Research Center (Italy)	
-#'   abstract: "This document provides the r-code for the white plague disease model described on the article:"Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands" Description of the model in terms of data collection, white plague disease, parameter estimations and fitting of the model can be found in Appendix A."	
-#'   keywords: white plague, coral reefs, bayesian model, environment	
-#' date: "7/18/2017"	
-#' output: pdf_document	
-#' number_sections: yes	
-#'     toc: yes	
-#' header-includes: \usepackage{graphicx}	
-#' email: \email{}	
-#' ---	
-#' 	
-#' 	
-library(knitr)	
-opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')	
-opts_chunk$set(fig.align='center',                # aligns all figures	
-                echo=TRUE,                        # shows r-code	
-                message=FALSE,                    # suppresses library outputs	
-                warnings=FALSE,                   # suppresses library outputs	
-                tidy=TRUE,  # prevents the source code from running off a pdf page	
-                dev='pdf')                        # pdf device	
-#' 	
-#' 	
-#' #Introduction	
-#' 	
-#' This document provides the r-code for the white plague disease model described on the article.The model address to the objectives of this study: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental factors on WP disease prevalence using Bayesian inference. We use rstan for statistical inference (http://mc-stan.org/about/). 	
-#' 	
-#' #Data	
-#' The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplague_working.RData" needs to be placed in a folder called "Data".	
-#' "	
-#' 	
-#' #Model	
-#' 	
-#' ##Load libraries and create directory for results	
-#' 	
-# Date format - forms part of names of created files or graphs	
-today <- format(Sys.time(), "%Y.%m.%d")	
-set.seed(2017)	
-	
-# load libraries	
-library(formatR)	
-library(StanHeaders)	
-library(rstan)	
-rstan_options(auto_write = TRUE) # automatically save the compilied Stan program	
-options(mc.cores = parallel::detectCores()) # execute multiple Markov chains in paral	
-	
-library(MCMCpack) # rwish function	
-library(modeest)	
-library(IDPmisc)	
-library(ggplot2) # for graphs	
-library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 	
-library(brm)	
-library(DHARMa) #to extract posterior	
-#' 	
-#' 	
-#' ## Load data	
-#' 	
-rm(list=ls(all=TRUE))	
-# Load settings	
-source("r-code/00_settings.r")	
-	
-load(file="data/Whiteplague_workingdata.Rdata")	
-head(Whiteplague_workingdata)	
-dim(Whiteplague_workingdata)	
-#' 	
-#' 	
-#' ## Data preparation	
-#' 	
-df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]	
-	
-df$healthy <- df$Ntot-df$ill	
-df$Month   <- as.factor(Whiteplague_workingdata$Month_12)	
-df$Site    <- as.factor(as.numeric(Whiteplague_workingdata$Station_name))	
-df$Obsid   <- as.factor(1:nrow(df))	
-df$SiteMonth <- as.factor(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))	
-	
-df$Site_index <- as.integer(df$Site)	
-df$Month_index=as.integer(df$Month)	
-df$Obsid_index=as.integer(df$Obsid)	
-df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))	
-	
-Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]	
-#' 	
-#' 	
-#' 	
-#' ## Model definition	
-#' 	
-dataList = list(	
-  TotalObservedcolonies = df$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)	
-  Diseasedcolonies = df$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)	
-  nWP = nrow(df), #White Plague prevalence total number of rows	
-  observedWpPrevalence = df$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)	
-  	
-  Environment = Environment,	
-  nEnvi = ncol(Environment),	
-  	
-  SiteMonth = df$SiteMonth_index,	
-  nSiteMonth =length(unique(df$SiteMonth_index))	
-)	
-#' 	
-#' 	
-#' 	
-#' ## Running the model	
-#' 	
-#' 	
-time <- proc.time()	
-stan.white <- stan("r-code/Whiteplague_rstanModel.stan",	
-                   data = dataList,	
-                   iter = 30000, 	
-                   chains = 4,	
-                   control = list(adapt_delta = 0.99,max_treedepth = 15),	
-                   refresh=10)	
-(proc.time() - time)/60/60	
-#' 	
-#' 	
-#' 	
-#' 	
-#' 	
-NvarEnvironment <- ncol(Environment)	
-printVarEnvironment <- paste(rep("parEnvironment[",NvarEnvironment),1:NvarEnvironment,rep("]",NvarEnvironment),sep="")	
-	
-print(stan.white,pars=c("b0",printVarEnvironment),probs=c(.1,.5,.9))	
-plot(stan.white,pars=c("b0",printVarEnvironment))	
-	
-	
-#plotting the posterior distribution for the parameters	
-post_beta<-As.mcmc.list(stan.white,pars=c("b0",printVarEnvironment))	
-plot(post_beta)	
-#traceplot(post_beta, inc_warmup = FALSE)	
-#' 	
-#' 	
-#' 	
-#' 	
-#' 	
-#' 	
-posterior<-extract(stan.white,inc_warmup=F,permute=F)	
-	
-Ntot <- Whiteplague_workingdata$Ntot	
-observedWhitePlague <- Whiteplague_workingdata$ill	
-	
-Nchains=Nchains # number of chains, see model definition	
-modelpredictionsChains <- paste(rep("modelPredictions[,,",Nchains),1:Nchains,rep("]",Nchains),sep="")	
-	
-	
-# FITTED PREDICTED	
-modelPredictions <- NULL	
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw) draw[grepl("^RealDisease[\\[]",names(draw))])	
-	
-	
-# combine 4 chains	
-predictionsLinearWhitePlague <- NULL	
-assign("predictionsLinearWhitePlague",eval(parse(text=paste("cbind(",paste(modelpredictionsChains, collapse = ","),")",sep=""))))	
-	
-predictionsResponseMedianWhitePlague <- inv.logit(as.vector(apply(predictionsLinearWhitePlague, 1, median)))*Ntot	
-	
-# SIMULATED	
-modelPredictions <- NULL	
-modelPredictions<-apply(posterior, MARGIN=1:2, FUN = function(draw) draw[grepl("^DiseasePredictions[\\[]",names(draw))])	
-	
-# combine 4 chains	
-simulatedPredictedWhitePlague <- NULL	
-assign("simulatedPredictedWhitePlague",eval(parse(text=paste("cbind(",paste(modelpredictionsChains, collapse = ","),")",sep=""))))	
-	
-	
-WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlague,	
-  observedResponse = observedWhitePlague,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)	
-	
-	
-plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)	
-#' 	
-#' 	
-#' 	
-#' 	
-#' #Save the model run results	
-#' 	
-save(stan.white, file =paste("data/2018.02.14b_Whiteplague_model_result.Rdata",sep=""))	
-#' 	
-#' 	
-#' 	
-#' 	
-#' 	
-#' ###Test overdispersion	
-#' 	
-#testOverdispersion(simulationOutput = WhitePlagueDHARMaResponse)	
-#' 	
-#' ###Test zero inflation	
-#' 	
-#testZeroInflation(WhitePlagueDHARMaResponse)	
-#' 	
-#' 	
-#' #Save the model run results	
-#' 	
-save(stan.white, file =paste("data/2017.11.21a_Whiteplague_model_result.Rdata",sep=""))	
-#' 	
-#' 	
-#' # Session information for model run	
-#' 	
-devtools::session_info()	
-#' 	
-#' 	
-#' #Plotting the model	
-#' 	
-	
-print(stan.white)	
-	
-	
-	
-plot(stan.white)	
-	
- str(stan.white)	
-	
-library(ggmcmc)	
-library(coda)	
-	
-#This is to Install Stan Caterpillar StanCat to build caterpillar graphs from Stan	
-#devtools::install_github('christophergandrud/StanCat')	
-StanCat::stan_caterpillar(stan.white, pars = 'v_raw\\[.*\\]')	
-	
-#To use ggmcmc#the rstan::extract, specify that is extracted from rstan procedure and not from dpylr	
-library(plyr)	
-#this one extracts everything but is not plotting histograms properly	
-s <- rstan::extract(stan.white, inc_warmup=FALSE, permuted=FALSE) 	
-#this one extracts only some functions	
-	
-s <- mcmc.list(mcmc(s[,1,-4]), mcmc(s[,2,-4]), mcmc(s[,3,-4]), mcmc(s[,4,-4]))	
-S <- ggs(s) 	
-ggmcmc(S)	
-ggs_traceplots(S)	
-ggs_caterpillar(S)	
-	
-	
-#for specific parameters. But is not runing	
-#s <- rstan::extract(stan.white, pars = 'v_raw', permuted = TRUE)$parEnvironment 	
-#s <- do.call(mcmc.list, alply(s[,,-4], 2, mcmc))	
-	
-#' 	
-#' 	
-#' #Check model output with Shiny	
-#' 	
-library(shiny)	
-library(shinystan)	
-	
-launch_shinystan(stan.white)	
-#' 	
-#' 	
-#' 	
-#' #Save r markdown file	
-#' 	
-	
-save(dataList, stan.white, file = paste("Figures/", today, "_fit.fullModel.pdf",	
-sep = ""))	
-save(dataList, file = paste("Figures/", today, "_fit.fullModel_data.Rdata",	
-sep = ""))	
-library(lattice)	
-trellis.device("pdf", file = paste("Figures/", today, "_Output_rstan.pdf",	
-sep = ""), width = 14, height = 7)	
-plot(stan.white)	
-dev.off()	
-	
-	
-library(lattice)	
-trellis.device("pdf")	
-file= paste("Figures/",today,"_Output_rstan.pdf",sep="2-2016", width=14, height=7)	
-plot(stan.white)	
-#' 	
-#' 	
-#' ##Cauchy and normal distribution test	
-#' 	
-#' 	
-#Normal distribution	
-x <- seq(-10, 10, length=100)	
-hx <- dnorm(x)	
-	
-degf <- c(1, 3, 8, 30)	
-colors <- c("red", "blue", "darkgreen", "gold", "black")	
-labels <- c("df=1", "df=3", "df=8", "df=30", "normal")	
-	
-plot(x, hx, type="l", lty=2, xlab="x value",	
-  ylab="Density", main="Comparison of t Distributions")	
-	
-for (i in 1:4){	
-  lines(x, dt(x,degf[i]), lwd=2, col=colors[i])	
-}	
-	
-legend("topright", inset=.05, title="Distributions",	
-  labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)	
-	
-#' 	
-#' 	
-#' #cauchy	
-#' 	
-#' 	
-#Cauchy distribution	
-	
-x <- seq(-10, 10, length=100)	
-hi <- dcauchy(x)	
-	
-degf <- c(1, 3, 8, 30)	
-colors <- c("red", "blue", "darkgreen", "gold", "black")	
-labels <- c("df=1", "df=3", "df=8", "df=30", "cauchy")	
-	
-plot(x, hx, type="l", lty=2, xlab="x value",	
-  ylab="Density", main="Comparison of t Distributions")	
-	
-for (i in 1:4){	
-  lines(x, dt(x,degf[i]), lwd=2, col=colors[i])	
-}	
-	
-legend("topright", inset=.05, title="Distributions",	
-  labels, lwd=2, lty=c(1, 1, 1, 1, 2), col=colors)	
-#' 	
-#' 	
+#' #Model
+#'
+
+# Date format - forms part of names of created files or graphs
+today <- format(Sys.time(), "%Y.%m.%d")
+set.seed(2017)
+
+# load libraries
+library(formatR)
+library(StanHeaders)
+library(rstan)
+rstan_options(auto_write = TRUE) # automatically save the compilied Stan program
+options(mc.cores = parallel::detectCores()) # execute multiple Markov chains in paral
+
+library(MCMCpack) # rwish function
+library(modeest)
+library(IDPmisc)
+#'
+#'
+#' ## Load data
+#'
+rm(list=ls(all=TRUE))
+# Load settings
+source("r-code/00_settings.r")
+
+load(file="data/Whiteplague_workingdata.Rdata")
+head(Whiteplague_workingdata)
+dim(Whiteplague_workingdata)
+#'
+#'
+#' ## Data preparation
+#'
+df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+
+df$healthy <- df$Ntot-df$ill
+df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
+df$Site    <- as.factor(as.numeric(Whiteplague_workingdata$Station_name))
+df$Obsid   <- as.factor(1:nrow(df))
+df$SiteMonth <- as.factor(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
+
+df$Site_index <- as.integer(df$Site)
+df$Month_index=as.integer(df$Month)
+df$Obsid_index=as.integer(df$Obsid)
+df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
+
+Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+#'
+#'
+#'
+#' ## Model definition
+#'
+dataList = list(
+  TotalObservedcolonies = df$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
+  Diseasedcolonies = df$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
+  nWP = nrow(df), #White Plague prevalence total number of rows
+  observedWpPrevalence = df$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
+
+  Environment = Environment,
+  nEnvi = ncol(Environment),
+
+  SiteMonth = df$SiteMonth_index,
+  nSiteMonth =length(unique(df$SiteMonth_index))
+)
+#'
+#'
+#'
+#' ## Running the model
+#'
+#'
+time <- proc.time()
+stan.white <- stan("r-code/Whiteplague_rstanModel.stan",
+                   data = dataList,
+                   iter = 30000,
+                   chains = 4,
+                   control = list(adapt_delta = 0.99,max_treedepth = 15),
+                   refresh=10)
+(proc.time() - time)/60/60
