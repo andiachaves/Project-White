@@ -69,6 +69,7 @@ dim(Whiteplague_workingdata)
 
 #aggregate working_data file per year
 ```{r}
+#Make a new data fream only with annual mean values for each variables, in this way we can join biological variables (only were collected once a year) with environmental variables (here as mean per year).
 Whiteplague_workingdata_Annual <-aggregate(Whiteplague_workingdata, by=list(Whiteplague_workingdata$Station_code,Whiteplague_workingdata$Year), 
   FUN=mean, na.rm=TRUE)
 
