@@ -1,0 +1,155 @@
+---
+title: "Figure 2. Boxplot, linear graphs and also tet of normality and ANOVA"
+author: "Andia Chaves Fonnegra"
+date: "2/21/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+#Introduction
+
+This document provides the code for Box Plot Figure 2 of the paper.
+
+#Data
+The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplague_working.RData" was used for this boxplot. Not the rawdata file.
+
+## Load data
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+source("r-code/00_settings.r")
+
+load(file="data/Whiteplague_workingdata.Rdata")
+head(Whiteplague_workingdata)
+dim(Whiteplague_workingdata)
+```
+
+#Normality test
+
+```{r}
+#Shapiro-Wilkinson normality test
+shapiro.test(Whiteplague_workingdata$Plague)
+#for producing a normal quantile-quantile plot
+qqnorm(Whiteplague_workingdata$Plague)
+qqline(Whiteplague_workingdata$Plague)
+
+#If p> than 0.05. Data is normal, if not, not normal
+```
+Prevalence data of disease is no-normal distribute- go with Kruskal Wallis test.
+
+#Bartlest test of homegenty of variances
+
+```{r}
+bartlett.test(Whiteplague_workingdata$Plague~Whiteplague_workingdata$Station_code)
+#If p> than 0.05. variances are homogeneous, if not, not homogeneous
+```
+WP prevalence of disease data is non-homogeneous
+
+
+#If normal One way ANOVA comparing between the habitats
+
+```{r}
+summary(aov(area ~ time, data=grow)) #correct data depending of file to use
+#To do the Tukey test a posteriori
+TukeyHSD(results, conf.level=0.95)
+#This is to make the regular boxplot with the two variables the $ connects the file name with the column within the file
+boxplot(grow$area ~ grow$time)
+qqnorm(Reefvariables$Coral.Density)
+```
+
+
+#if no-normal kruskal wallis
+
+```{r}
+#To do kruskal Wallis test, pecify each column withn the file so it can be read as a vector and not as data frame
+kruskal.test(Whiteplague_workingdata$Plague~Whiteplague_workingdata$Station_code)
+
+library(dunn.test)
+#To do Pots-hoc dunn and Kruskal Wallis in one
+dunn.testresults<-dunn.test (Whiteplague_workingdata$Plague, g=Whiteplague_workingdata$Station_code, method="bonferroni", kw=TRUE, label=TRUE, wrap=TRUE, rmc=FALSE, alpha=0.05)
+
+
+boxplot(Whiteplague_workingdata$Plague ~ Whiteplague_workingdata$Station_code, las=2)
+text(3,1,"*",cex=0.5)
+
+```
+
+#FIGURE 2 MANUCRIPT 
+
+#FIRST Add a column of depth category and month category to make easier the figure (graph)
+
+```{r}
+
+#Add depth category
+Whiteplague_workingdata$Depth_categories <- cut(Whiteplague_workingdata$Depth_transect, breaks = c(0,15,30,45), labels = c("Shallow","Mid-depth", "Mesophotic"), right = FALSE)
+
+Whiteplague_workingdata$Station_code
+Whiteplague_workingdata$Depth_transect [0:100]
+Depth_categories [0:100]
+
+# Month
+Whiteplague_workingdata$Month <- cut(Whiteplague_workingdata$Month_12, breaks = c(0,1.1,2.1,3.1,4.1,5.1,6.1,7.1,8.1,9.1,10.1,11.1,12.1), labels = c("J","F","Mr","A","My","Jn","Jl","A","S","O","N","D"), right = FALSE, left=FALSE)
+
+Whiteplague_workingdata$Month_12 [0:100]
+Whiteplague_workingdata$Month [0:100]
+
+```
+
+#Fig2. A) WP prevalence per station per depth two options
+
+#Option 1, is use depth categories on x axis. Although I would prefer option 2) stations on x axis (However, option two do not organize the stations per depth, even that I rearange their order)
+
+```{r}
+#Arranging order of stations to match depth (reorder only arrange by median value, not depth value)
+library(forcats)
+library(ggthemes)
+library(ggplot2)
+library(devtools)
+
+
+theme_set(theme_classic())
+#Option 1
+ggplot(Whiteplague_workingdata, aes(x = reorder(Depth_categories, Plague, fun = median), y = Plague,fill=Station_code)) + geom_boxplot()+
+theme(axis.text.x = element_text(angle=360, vjust=0.6)) + 
+  labs(x= "Stations", y="White Plague Prevalence")
+
+#Option 2) I prefer this graph, however I would like that moddepth stations will be together in teh middle, and not in different positions. ahh.
+
+ggplot(Whiteplague_workingdata, aes(x = reorder(Station_code, Plague, fun = median), y = Plague,fill=Depth_categories)) + geom_boxplot()+
+theme(axis.text.x = element_text(angle=360, vjust=0.6)) + 
+  labs(x= "Stations", y="White Plague Prevalence")
+```
+
+# Fig 2. B) Prevalence of disease per month per depth category
+
+```{r}
+#Horrible, discusting graph, seems to need some codding to diferentiate standard error from average.
+ggplot(Whiteplague_workingdata, aes(x=Time_point, y=Plague, group=Depth_categories)) + geom_line((aes(color=Depth_categories)))
+
+```
+
+# Fig 2. C) Prevalence of disease per season per depth category
+
+
+```{r}
+#Same problem with season, no clear average lines and standard error, check on codding. Compare with excel graphs.
+ggplot(Whiteplague_workingdata, aes(x=Season, y=Plague, group=Depth_categories)) + geom_line((aes(color=Depth_categories)))
+
+```
+

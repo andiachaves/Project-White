@@ -1,0 +1,71 @@
+---
+title: "Predictions based on the bayesian"
+author: "Andia Chaves Fonnegra"
+date: "2/22/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#Create list call predicted TrapsPvalues
+
+predictedTrapsPvalues <- list()
+
+predictedTrapsPvalues[["Vector"]] <- vectorDHARMaLinear$scaledResiduals
+predictedTrapsPvalues[["Pathogen"]] <- pathogenDHARMaResponse$scaledResiduals
+predictedTrapsPvalues[["PlantSymptoms"]] <- plantSymptomsDHARMaResponse$scaledResiduals
+```
+
+
+
+```{r}
+# Model = Data White
+# Model > Daten Red (because if high it is more intuitive to make it red)
+# Model < Data Blue
+
+#create a gradient from red to blue, the midle is white
+colFunc<-colorRampPalette(c("red","white","blue"))
+#This is to give 10 levels or categories to the color palete.
+colFuncBlueRed<-colFunc(10)
+
+#Create PDF figure
+
+#Check plot(schriesheimTerrassen) This is the area bernd used, we need a map to plot first. Ask Liz for this map.
+
+trellis.device("pdf",file=paste("r-code/figures/",today,"_rstan_trap_predictions.pdf",sep=""))
+for (n in c("Vector","Pathogen","PlantSymptoms")){ # vector,pathogen or plantsymptoms
+ 
+  #Ignore histogram 
+  
+#hist(ecdfPredictions,xlim=range(c(0,1)),ylim=c(0,100),main=paste("predicted",n,sep=""))
+
+  #First plot the map and then add the residuals for each site.
+pointColor<-NULL
+plot(schriesheimTerrassen,lwd = 0.1,main=paste("predicted",n,sep=""))
+#points(schriesheimTraps,pch=15,col="yellow"). 
+
+#Number of sites (in our case is 13 sites)
+#The scaled  residuals (p-values) of each site is assigned to each color 
+for (i in 1:96){
+  x<-predictedTrapsPvalues[[n]][i]
+  if(x <=0.1){pointColor<-colFuncBlueRed[1]}
+  if(x > 0.1 & x<=0.2){pointColor<-colFuncBlueRed[2]}
+  if(x > 0.2 & x<=0.3){pointColor<-colFuncBlueRed[3]}
+  if(x > 0.3 & x<=0.4){pointColor<-colFuncBlueRed[4]}
+  if(x > 0.4 & x<=0.5){pointColor<-colFuncBlueRed[5]}
+  if(x > 0.5 & x<=0.6){pointColor<-colFuncBlueRed[6]}
+  if(x > 0.6 & x<=0.7){pointColor<-colFuncBlueRed[7]}
+  if(x > 0.7 & x<=0.8){pointColor<-colFuncBlueRed[8]}
+  if(x > 0.8 & x<=0.9){pointColor<-colFuncBlueRed[9]}
+  if(x > 0.9 & x<=1  ){pointColor<-colFuncBlueRed[10]}
+  #This add the point color to the coordinates, add sites coordinates and x and y.
+  points(trapCoords$st_x[i],trapCoords$st_y[i],col=pointColor,pch=19,cex=2)
+}
+}
+dev.off()
+```
+
