@@ -137,8 +137,8 @@ data {
 int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0
 int<lower=1> nEnvi;                    // number of environmental variables
 
-int<lower=1> nSiteYear;               // number of sites-month combinations
-int<lower=1,upper=130> SiteYear[nWP];  // sites-month combinations
+int<lower=1> nSiteYear;               // number of sites-year combinations
+int<lower=1,upper=52> SiteYear[nWP];  // sites-year combinations
 
 matrix[nWP, nEnvi] Environment;
 
