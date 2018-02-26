@@ -70,13 +70,36 @@ dim(Whiteplague_workingdata)
 #aggregate working_data file per year
 ```{r}
 #Make a new data fream only with annual mean values for each variables, in this way we can join biological variables (only were collected once a year) with environmental variables (here as mean per year).
+library(dplyr)
+library(plyr)
+#Option 1
+Whiteplague_workingdata_Annual<-Whiteplague_workingdata %>% 
+    group_by(Station_code,Year,Season) %>%
+    summarise(Orbicellids = max(Orbicellids), 
+              Sandp = max(Sand), 
+              Coral = max(Coral),
+              total = n())
+
+
+#Option 2
+a1 <- group_by(Whiteplague_workingdata, Station_code,Year,Season)
+Whiteplague_workingdata_Annual<- summarise(a1, arr = max(Orbicellids:DHW_sca, na.rm = TRUE))
+
+
+head(Whiteplague_workingdata_Annual)
+
+
+#Option 3 is the easier but it does not calculate max values
 Whiteplague_workingdata_Annual <-aggregate(Whiteplague_workingdata, by=list(Whiteplague_workingdata$Station_code,Whiteplague_workingdata$Year), 
-  FUN=mean, na.rm=TRUE)
+  FUN= max, na.rm=TRUE)
 
-Whiteplague_workingdata_Annual
 
+#Option 4
+Whiteplague_workingdata_Annual <-group_by(Whiteplague_workingdata$Year) %>%
+  summarize( max (Whiteplague_workingdata[,22:41], na.rm = TRUE))
 
 #delete columns without values (NA)
+
 Whiteplague_workingdata_Annual$Station_name <- NULL
 Whiteplague_workingdata_Annual$Station_code <- NULL
 Whiteplague_workingdata_Annual$Reef.Type <- NULL
