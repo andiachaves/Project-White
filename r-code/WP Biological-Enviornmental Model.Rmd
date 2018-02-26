@@ -69,48 +69,27 @@ dim(Whiteplague_workingdata)
 
 #aggregate working_data file per year
 ```{r}
-#Make a new data fream only with annual mean values for each variables, in this way we can join biological variables (only were collected once a year) with environmental variables (here as mean per year).
+#Make a new data frame only with annual mean values for each variables, in this way we can join biological variables (that only were collected once a year) with environmental variables (here as mean per season, per year).
 library(dplyr)
-library(plyr)
-#Option 1
-Whiteplague_workingdata_Annual<-Whiteplague_workingdata %>% 
-    group_by(Station_code,Year,Season) %>%
-    summarise(Orbicellids = max(Orbicellids), 
-              Sandp = max(Sand), 
-              Coral = max(Coral),
-              total = n())
+packageVersion("dplyr")
+
+#Group data per station, year and season and summarize the max value of each variable
+a1<- Whiteplague_workingdata %>% 
+  group_by(Station_code, Year, Season) %>% 
+  summarise (Coral = max(Coral) , Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth_tran_sca = max(Depth_tran_sca),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
+head(a1)
 
 
-#Option 2
-a1 <- group_by(Whiteplague_workingdata, Station_code,Year,Season)
-Whiteplague_workingdata_Annual<- summarise(a1, arr = max(Orbicellids:DHW_sca, na.rm = TRUE))
+# subset data to keep only the max value for season 4 (rainny-heat), mantaining all the stations and years and previous data
 
-
-head(Whiteplague_workingdata_Annual)
-
-
-#Option 3 is the easier but it does not calculate max values
-Whiteplague_workingdata_Annual <-aggregate(Whiteplague_workingdata, by=list(Whiteplague_workingdata$Station_code,Whiteplague_workingdata$Year), 
-  FUN= max, na.rm=TRUE)
-
-
-#Option 4
-Whiteplague_workingdata_Annual <-group_by(Whiteplague_workingdata$Year) %>%
-  summarize( max (Whiteplague_workingdata[,22:41], na.rm = TRUE))
-
-#delete columns without values (NA)
-
-Whiteplague_workingdata_Annual$Station_name <- NULL
-Whiteplague_workingdata_Annual$Station_code <- NULL
-Whiteplague_workingdata_Annual$Reef.Type <- NULL
-Whiteplague_workingdata_Annual$Month <- NULL
-Whiteplague_workingdata_Annual$Month_12 <- NULL
-Whiteplague_workingdata_Annual$Month_number <- NULL
-Whiteplague_workingdata_Annual$Season <- NULL
-
-#Check final data frame
+Whiteplague_workingdata_Annual<- filter(a1, Season %in% 4)
 Whiteplague_workingdata_Annual
-dim(Whiteplague_workingdata_Annual)
+
+
+#Finally!!
+
+
+
 ```
 
 
@@ -121,7 +100,7 @@ df <- Whiteplague_workingdata_Annual[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca
 
 df$healthy <- df$Ntot-df$ill
 df$Year   <- as.factor(Whiteplague_workingdata_Annual$Year)
-df$Site    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Group.1))
+df$Site    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
 df$Obsid   <- as.factor(1:nrow(df))
 df$SiteYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
@@ -287,7 +266,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2018.02.23c_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2018.02.26a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
