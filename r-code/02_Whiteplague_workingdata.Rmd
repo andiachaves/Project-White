@@ -94,9 +94,49 @@ count(Whiteplague_workingdata$Month_12)
 ```
 
 
+
+#aggregate working_data file per year
+```{r}
+#Make a new data frame only with annual mean values for each variables, in this way we can join biological variables (that only were collected once a year) with environmental variables (here as mean per season, per year).
+detach("package:pylr", unload=TRUE)
+library(dplyr)
+packageVersion("dplyr")
+
+#Group data per station, year and season and summarize the max value of each variable
+a1<- Whiteplague_workingdata %>% 
+  group_by(Station_code, Year, Season) %>% 
+  summarise (Coral = max(Coral) , Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth_tran_sca = max(Depth_tran_sca),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
+head(a1)
+
+
+# subset data to keep only the max value for season 4 (rainny-heat), mantaining all the stations and years and previous data
+
+Whiteplague_workingdata_Annual_orig<- filter(a1, Season %in% 4)
+df <- Whiteplague_workingdata_Annual_orig
+df$Sand <- scale(df$Sand)
+df$Coral <- scale(df$Coral)
+df$Sponges <- scale(df$Sponges)
+df$Macroalgae <- scale(df$Macroalgae)
+df$Cyanobacteria <- scale(df$Cyanobacteria)
+
+Whiteplague_workingdata_Annual <- df
+
+#Finally!!
+
+
+
+```
+
+
+
+
+
 ## Saving data
 ```{r}
 #Save working data  file with data already scaled/ and or transformed to be used by the model
-save(Whiteplague_workingdata,file="data/Whiteplague_workingdata.Rdata")
+save(
+Whiteplague_workingdata,
+Whiteplague_workingdata_Annual_orig,Whiteplague_workingdata_Annual,
+file="data/Whiteplague_workingdata.Rdata")
 ```
 

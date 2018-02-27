@@ -34,6 +34,16 @@ The white plague prevalence data and corresponding environmental and biological 
 
 #Model
 
+## Load data
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+source("r-code/00_settings.r")
+
+load(file="data/Whiteplague_workingdata.Rdata")
+```
+
+
 ##Load libraries and create directory for results
 ```{r}
 # Date format - forms part of names of created files or graphs
@@ -51,65 +61,65 @@ library(MCMCpack) # rwish function
 library(modeest)
 library(IDPmisc)
 library(ggplot2) # for graphs
-library(brms) # To include auto-correlation structures in the Stan model/new package Sep 2017 
-library(brm)
 library(DHARMa) #to extract posterior
-```
-
-## Load data
-```{r}
-rm(list=ls(all=TRUE))
-# Load settings
-source("r-code/00_settings.r")
-
-load(file="data/Whiteplague_workingdata.Rdata")
-head(Whiteplague_workingdata)
-dim(Whiteplague_workingdata)
-```
-
-#aggregate working_data file per year
-```{r}
-#Make a new data frame only with annual mean values for each variables, in this way we can join biological variables (that only were collected once a year) with environmental variables (here as mean per season, per year).
-library(dplyr)
-packageVersion("dplyr")
-
-#Group data per station, year and season and summarize the max value of each variable
-a1<- Whiteplague_workingdata %>% 
-  group_by(Station_code, Year, Season) %>% 
-  summarise (Coral = max(Coral) , Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth_tran_sca = max(Depth_tran_sca),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
-head(a1)
-
-
-# subset data to keep only the max value for season 4 (rainny-heat), mantaining all the stations and years and previous data
-
-Whiteplague_workingdata_Annual<- filter(a1, Season %in% 4)
-Whiteplague_workingdata_Annual
-
-
-#Finally!!
-
-
-
 ```
 
 
 
 ## Data preparation
 ```{r}
-df <- Whiteplague_workingdata_Annual[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
+df <- data.frame(Whiteplague_workingdata_Annual[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")])
 
 df$healthy <- df$Ntot-df$ill
 df$Year   <- as.factor(Whiteplague_workingdata_Annual$Year)
 df$Site    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
 df$Obsid   <- as.factor(1:nrow(df))
-df$SiteYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
 df$Site_index <- as.integer(df$Site)
 df$Year_index=as.integer(df$Year)
 df$Obsid_index=as.integer(df$Obsid)
-df$SiteYear_index=as.integer(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
-Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
+#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
+
+
+df$Chl_sca2 <- df$Chl_sca*df$Chl_sca
+df$Oxy_sca2 <- df$Oxy_sca*df$Oxy_sca
+df$Sal_sca2 <- df$Sal_sca*df$Sal_sca
+df$Turb_sca2 <- df$Turb_sca*df$Turb_sca
+df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
+df$Temp_sca2 <- df$Temp_sca*df$Temp_sca
+df$DHW_sca2 <- df$DHW_sc*df$DHW_sc
+df$Sand2 <- df$Sand*df$Sand
+df$Coral2 <- df$Coral*df$Coral
+df$Sponges2 <- df$Sponges*df$Sponges
+df$Macroalgae2 <- df$Macroalgae*df$Macroalgae
+df$Cyanobacteria2 <- df$Cyanobacteria*df$Cyanobacteria
+
+
+
+
+# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Depth_tran_sca","Depth_tran_sca2","Temp_sca","Temp_sca2",
+#                      "DHW_sca","DHW_sca2","Sand", "Sand2","Coral","Coral2", "Sponges","Sponges2","Macroalgae", "Macroalgae2","Cyanobacteria","Cyanobacteria2")]
+
+
+# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Depth_tran_sca","Depth_tran_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
+#                      "Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+
+
+Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Depth_tran_sca","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
+                     "Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+
+
+
+# df$Year1 <- rep(0,length(df$Year_index))
+# df$Year2 <- rep(0,length(df$Year_index))
+# df$Year3 <- rep(0,length(df$Year_index))
+# 
+# df$Year1[which(df$Year_index==1)]<-1
+# df$Year2[which(df$Year_index==2)]<-1
+# df$Year3[which(df$Year_index==3)]<-1
+
+#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria","Year1","Year2","Year3")]
 ```
 
 
@@ -124,87 +134,22 @@ dataList = list(
   Environment = Environment,
   nEnvi = ncol(Environment),
   
-  SiteYear = df$SiteYear_index,
-  nSiteYear =length(unique(df$SiteYear_index))
+  Year = df$Year_index,
+  nYear =length(unique(df$Year_index))
 )
-```
-
-
-## Model definition
-```{r define model}
-# Define model
-model.Wplague <- '
-data {
-// counters
-int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0
-int<lower=1> nEnvi;                    // number of environmental variables
-
-int<lower=1> nSiteYear;               // number of sites-year combinations
-int<lower=1,upper=52> SiteYear[nWP];  // sites-year combinations
-
-matrix[nWP, nEnvi] Environment;
-
-// response
-int<lower=0> TotalObservedcolonies [nWP]; // Total number of coral colonies (cases)
-int<lower=0> Diseasedcolonies [nWP]; // number of diseased coral colonies (successes)
-}
-parameters {
-real b0; // intercept
-// Fixed effects
-vector[nEnvi] parEnvironment;   // Environmental-level
-
-// Random effects
-real<lower=0> sigmalev_1;
-vector[nSiteYear] eta_1;
-}
-
-
-
-transformed parameters {
-vector[nWP] RealDisease;
-vector[nSiteYear] siteyear_raw;
-
-siteyear_raw  = eta_1 * sigmalev_1;
-
-RealDisease =  Environment * parEnvironment + siteyear_raw[SiteYear];
-} //closes transformed parameter
-
-
-
-
-model{
-// Fixed effects priors
-b0             ~ normal(0, 10);
-parEnvironment ~ normal(0, 10);
-
-//Random effects priors
-eta_1 ~ normal(0, 100);
-
-sigmalev_1 ~ uniform(0,100);
-//sigmalev_1 ~ student_t(1,0,1);
-//sigmalev_1 ~ cauchy(0,2.5);
-//sigmalev_1 ~ inv_gamma(0.001, 0.001);
-
-Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
-}
-
-
-
-generated quantities{ //predictive inference
-real DiseasePredictions[nWP]; //vector to store predictions
-for(i in 1:nWP) DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],inv_logit(RealDisease[i]));
-
-}
-'
 ```
 
 
 ## Running the model
 
 ```{r model_run,eval=FALSE}
-Nchains=4
 time <- proc.time()
-stan.white <- stan(model_code = model.Wplague, data = dataList, iter = 30000, chains = Nchains,refresh=100)
+stan.white <- stan("r-code/03_Whiteplague_rstan_bio_Model.stan",
+                   data = dataList,
+                   iter = 300, 
+                   chains = 4,
+                   control = list(adapt_delta = 0.99,max_treedepth = 15),
+                   refresh=10)
 (proc.time() - time)/60/60
 ```
 
@@ -228,8 +173,8 @@ plot(post_beta)
 ```{r}
 posterior<-extract(stan.white,inc_warmup=F,permute=F)
 
-Ntot <- Whiteplague_workingdata$Ntot
-observedWhitePlague <- Whiteplague_workingdata$ill
+Ntot <- Whiteplague_workingdata_Annual$Ntot
+observedWhitePlague <- Whiteplague_workingdata_Annual$ill
 
 Nchains=Nchains # number of chains, see model definition
 modelpredictionsChains <- paste(rep("modelPredictions[,,",Nchains),1:Nchains,rep("]",Nchains),sep="")
@@ -300,7 +245,7 @@ print(stan.white)
 
 plot(stan.white)
 
- str(stan.white)
+str(stan.white)
 
 library(ggmcmc)
 library(coda)
