@@ -77,14 +77,14 @@ df$Year   <- as.factor(Whiteplague_workingdata_Annual$Year)
 df$Site    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
 df$Depth    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Depth))
 df$Obsid   <- as.factor(1:nrow(df))
-df$DepthYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Depth,sep="-"))))
+#df$SiteYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
 
 df$Site_index <- as.integer(df$Site)
 df$Year_index=as.integer(df$Year)
 df$Depth_index=as.integer(df$Depth)
 df$Obsid_index=as.integer(df$Obsid)
-df$DepthYear_index=as.integer(as.numeric(as.factor(paste(df$Year,df$Depth,sep="-"))))
+#df$SiteYear_index=as.integer(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
 #Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
 
@@ -142,14 +142,8 @@ dataList = list(
   nEnvi = ncol(Environment),
   
   Year = df$Year_index,
-  nYear =length(unique(df$Year_index)),
-  
-  Depth = df$Depth_index,
-  nDepth =length(unique(df$Depth_index),
-                 
-  DepthYear = df$DepthYear_index,
-  nDepthYear =length(unique(df$DepthYear_index))
-         )        
+  nYear =length(unique(df$Year_index))
+       
 )
 ```
 
@@ -225,7 +219,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/Extraction_diagnosis/2018.02.28_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/Extraction_diagnosis/2018.02.28b_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 

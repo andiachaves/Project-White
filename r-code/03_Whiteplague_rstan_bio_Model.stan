@@ -3,8 +3,8 @@ data {
 int<lower=0> nWP;                      // number of White Plague cases, int=integer  and non negative >0
 int<lower=1> nEnvi;                    // number of environmental variables
 
-int<lower=1> nDepthYear;               // number of sites-month combinations
-int<lower=1,upper=130> DepthYear[nWP];  // sites-month combinations
+int<lower=1> nYear;               // number of sites-month combinations
+int<lower=1,upper=130> Year[nWP];  // sites-month combinations
 
 matrix[nWP, nEnvi] Environment;
 
@@ -19,18 +19,18 @@ vector[nEnvi] parEnvironment;   // Environmental-level
 
 // Random effects
 real<lower=0> sigmalev_1;
-vector[nDepthYear] eta_1;
+vector[nYear] eta_1;
 }
 
 
 
 transformed parameters {
 vector[nWP] RealDisease;
-vector[nDepthYear] depthyear_raw;
+vector[nYear] year_raw;
 
-depthyear_raw  = eta_1 * sigmalev_1;
+year_raw  =eta_1 * sigmalev_1;
 
-RealDisease =  Environment * parEnvironment + depthyear_raw[DepthYear];
+RealDisease =  Environment * parEnvironment + year_raw[Year];
 } //closes transformed parameter
 
 
@@ -44,9 +44,9 @@ parEnvironment ~ normal(0, 10);
 //Random effects priors
 eta_1 ~ normal(0, 100);
 
-//sigmalev_1 ~ uniform(0,100);
+sigmalev_1 ~ uniform(0,100);
 //sigmalev_1 ~ student_t(1,0,1);
-sigmalev_1 ~ cauchy(0,2.5);
+//sigmalev_1 ~ cauchy(0,2.5);
 //sigmalev_1 ~ inv_gamma(0.001, 0.001);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
