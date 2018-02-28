@@ -44,7 +44,7 @@ library(zoo) # rollapply
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "2018.02.26a_Whiteplague_model_result"
+NameOfModelRun <- "2018.02.27a_Whiteplague_model_result"
 load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
 
 ```

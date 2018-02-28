@@ -108,7 +108,7 @@ dataList = list(
 time <- proc.time()
 stan.white <- stan("r-code/03_Whiteplague_rstan_env_Model.stan",
                    data = dataList,
-                   iter = 30000, 
+                   iter = 300, 
                    chains = 4,
                    control = list(adapt_delta = 0.99,max_treedepth = 15),
                    refresh=10)

@@ -818,3 +818,86 @@ print(summary(m18)) # Significant
 ```
 
 
+--------------------------------------------------
+#Check for correlations at the annual level
+
+#call/load file
+```{r}
+load(file="data/Whiteplague_workingdata.Rdata")
+
+```
+
+#Make sure variables are numeric to be able to run correlations
+```{r}
+#variables as data frame and numeric
+
+#Biological
+Whiteplague_workingdata_Annual$Coral <- as.numeric(Whiteplague_workingdata_Annual$Coral)
+Whiteplague_workingdata_Annual$Sponges <- as.numeric(Whiteplague_workingdata_Annual$Sponges)
+Whiteplague_workingdata_Annual$Macroalgae <- as.numeric(Whiteplague_workingdata_Annual$Macroalgae)
+Whiteplague_workingdata_Annual$Cyanobacteria <- as.numeric(Whiteplague_workingdata_Annual$Cyanobacteria)
+Whiteplague_workingdata_Annual$Sand <- as.numeric(Whiteplague_workingdata_Annual$Sand)
+
+#Environmental
+Whiteplague_workingdata_Annual$Chl_sca <- as.numeric(Whiteplague_workingdata_Annual$Chl_sca)
+Whiteplague_workingdata_Annual$Oxy_sca <- as.numeric(Whiteplague_workingdata_Annual$Oxy_sca)
+Whiteplague_workingdata_Annual$Sal_sca <- as.numeric(Whiteplague_workingdata_Annual$Sal_sca)
+Whiteplague_workingdata_Annual$Turb_sca <- as.numeric(Whiteplague_workingdata_Annual$Turb_sca)
+Whiteplague_workingdata_Annual$Depth_tran_sca <- as.numeric(Whiteplague_workingdata_Annual$Depth_tran_sca)
+Whiteplague_workingdata_Annual$Temp_sca <- as.numeric(Whiteplague_workingdata_Annual$Temp_sca)
+Whiteplague_workingdata_Annual$DHW_sca <- as.numeric(Whiteplague_workingdata_Annual$DHW_sca)
+
+
+```
+
+
+#set up correlation for annual variables
+```{r}
+Env1 <- data.frame(Whiteplague_workingdata_Annual[,c(4:8)]) #Only Biological variables and station code
+head(Env1)
+
+Env2<- data.frame(Whiteplague_workingdata_Annual[,c(12:18)]) # All environmental variables SCALED
+head(Env2)
+Env3<- data.frame(Whiteplague_workingdata_Annual[,c(4:6,12:14)]) #biol and environ
+head(Env3)
+Env4<- data.frame(Whiteplague_workingdata_Annual[,c(7:8,12:14)]) #both biological and environmental
+head(Env4)
+Env5<- data.frame(Whiteplague_workingdata_Annual[,c(4:6, 15:18)])# combining environ variables-biol
+head(Env5)
+Env6<- data.frame(Whiteplague_workingdata_Annual[,c(7:8,15:18)])# combining rest of environ-biol
+head(Env6)
+
+
+
+```
+
+
+#Correlations
+```{r}
+#use ggpairs to check possible correlations between all 11 environmental variables. We use Spearman correlation testy
+
+library(GGally)
+
+ggpairs(data = Env1, upper = list(continuous = wrap("cor", method = "spearman")))
+
+ggpairs(data = Env2, upper = list(continuous = wrap("cor", method = "spearman")))
+
+ggpairs(data = Env3, upper = list(continuous = wrap("cor", method = "spearman")))
+
+ggpairs(data = Env4, upper = list(continuous = wrap("cor", method = "spearman")))
+
+ggpairs(data = Env5, upper = list(continuous = wrap("cor", method = "spearman")))
+
+ggpairs(data = Env6, upper = list(continuous = wrap("cor", method = "spearman")))
+
+This uses Pearson correlation
+ggpairs(Env3) 
+ggpairs(Env4)
+ggpairs(Env5)
+ggpairs(Env6)
+ggpairs(Env7)
+ggpairs(Env8)
+ggpairs(Env9)
+
+```
+

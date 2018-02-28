@@ -41,6 +41,8 @@ rm(list=ls(all=TRUE))
 source("r-code/00_settings.r")
 
 load(file="data/Whiteplague_workingdata.Rdata")
+
+head(Whiteplague_workingdata)
 ```
 
 
@@ -68,34 +70,30 @@ library(DHARMa) #to extract posterior
 
 ## Data preparation
 ```{r}
-df <- data.frame(Whiteplague_workingdata_Annual[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")])
+df <- data.frame(Whiteplague_workingdata_Annual[,c("Station_code","Year","Season","Depth", "Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")])
 
-<<<<<<< Updated upstream:r-code/03_Whiteplague_rstan_bio_Model.Rmd
 df$healthy <- df$Ntot-df$ill
 df$Year   <- as.factor(Whiteplague_workingdata_Annual$Year)
 df$Site    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
+df$Depth    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Depth))
 df$Obsid   <- as.factor(1:nrow(df))
-=======
-#Group data per station, year and season and summarize the max value of each variable
-a1<- Whiteplague_workingdata %>% 
-  group_by(Station_code, Year, Season) %>% 
-  summarise (Coral = max(Coral),Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth_tran_sca = max(Depth_tran_sca),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
-a1
-head(a1)
->>>>>>> Stashed changes:r-code/WP Biological-Enviornmental Model.Rmd
+df$SiteYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
+
 
 df$Site_index <- as.integer(df$Site)
 df$Year_index=as.integer(df$Year)
+df$Depth_index=as.integer(df$Depth)
 df$Obsid_index=as.integer(df$Obsid)
+df$SiteYear_index=as.integer(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
-#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
+#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
 
 
 df$Chl_sca2 <- df$Chl_sca*df$Chl_sca
 df$Oxy_sca2 <- df$Oxy_sca*df$Oxy_sca
 df$Sal_sca2 <- df$Sal_sca*df$Sal_sca
 df$Turb_sca2 <- df$Turb_sca*df$Turb_sca
-df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
+#df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
 df$Temp_sca2 <- df$Temp_sca*df$Temp_sca
 df$DHW_sca2 <- df$DHW_sc*df$DHW_sc
 df$Sand2 <- df$Sand*df$Sand
@@ -107,15 +105,15 @@ df$Cyanobacteria2 <- df$Cyanobacteria*df$Cyanobacteria
 
 
 
-# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Depth_tran_sca","Depth_tran_sca2","Temp_sca","Temp_sca2",
+# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2",
 #                      "DHW_sca","DHW_sca2","Sand", "Sand2","Coral","Coral2", "Sponges","Sponges2","Macroalgae", "Macroalgae2","Cyanobacteria","Cyanobacteria2")]
 
 
-# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Depth_tran_sca","Depth_tran_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
+# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
 #                      "Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
 
-Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Depth_tran_sca","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
+Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
                      "Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
 
@@ -128,7 +126,7 @@ Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sc
 # df$Year2[which(df$Year_index==2)]<-1
 # df$Year3[which(df$Year_index==3)]<-1
 
-#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria","Year1","Year2","Year3")]
+#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria","Year1","Year2","Year3")]
 ```
 
 
@@ -144,7 +142,13 @@ dataList = list(
   nEnvi = ncol(Environment),
   
   Year = df$Year_index,
-  nYear =length(unique(df$Year_index))
+  nYear =length(unique(df$Year_index)),
+  
+  SiteYear = df$SiteYear_index,
+  nSiteYear =length(unique(df$SiteYear_index)),
+       
+  Depth = df$SDepth_index,
+  nDepth =length(unique(df$Depth_index))        
 )
 ```
 
@@ -220,7 +224,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2018.02.26a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/2018.02.27a_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 
