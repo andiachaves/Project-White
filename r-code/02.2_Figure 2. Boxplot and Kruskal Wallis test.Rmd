@@ -5,11 +5,6 @@ date: "2/21/2018"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
----
 
 ```{r setup, include=FALSE, warnings=FALSE}
 library(knitr)
@@ -140,8 +135,25 @@ theme(axis.text.x = element_text(angle=360, vjust=0.6)) +
 
 ```{r}
 #Horrible, discusting graph, seems to need some codding to diferentiate standard error from average.
-ggplot(Whiteplague_workingdata, aes(x=Time_point, y=Plague, group=Depth_categories)) + geom_line((aes(color=Depth_categories)))
 
+WPplot <- data.frame(Whiteplague_workingdata %>% group_by(Depth_categories,Time_point) %>% summarise(WPmean=mean(Plague),WPsd=sd(Plague)))
+pd <- position_dodge(5) # move them .05 to the left and right
+ggplot(WPplot, 
+       aes(x=Time_point, y=WPmean, colour=Depth_categories, group=Depth_categories)) +
+  geom_errorbar(aes(ymin=pmax(WPmean-WPsd,0), ymax=WPmean+WPsd), colour="black", width=50, position=pd) +
+  geom_line() +
+  geom_point(position=pd, size=3, shape=21, fill="white") + # 21 is filled circle
+  xlab("Time point") +
+  ylab("White Plague prevalence") +
+scale_colour_hue(name="Sea depth",    # Legend label, use darker colors
+                     breaks=c("Shallow","Mid-depth", "Mesophotic"),
+                     labels=c("Shallow", "Mid-depth", "Mesophotic"),
+                     l=40) +                    # Use darker colors, lightness=40
+    ggtitle("Average monthly pattern of White Plague disease prevalence for different sea depth") +
+    #scale_y_continuous(limits = c(0, NA))+
+    theme_bw() +
+    theme(legend.justification=c(1,0),legend.position=c(1,0), # Position legend in bottom right
+          plot.title = element_text(hjust = 0.5)) # title position - justified
 ```
 
 # Fig 2. C) Prevalence of disease per season per depth category
@@ -149,7 +161,8 @@ ggplot(Whiteplague_workingdata, aes(x=Time_point, y=Plague, group=Depth_categori
 
 ```{r}
 #Same problem with season, no clear average lines and standard error, check on codding. Compare with excel graphs.
-ggplot(Whiteplague_workingdata, aes(x=Season, y=Plague, group=Depth_categories)) + geom_line((aes(color=Depth_categories)))
+ggplot(Whiteplague_workingdata, 
+       aes(x=Season, y=Plague, group=Depth_categories)) + geom_line((aes(color=Depth_categories)))
 
 ```
 
