@@ -24,6 +24,8 @@ Data was scaled and saved as working_data file to feed into the model
 
 ## Loading data
 ```{r}
+rm(list=ls(all=TRUE))
+detachAllPackages() 
 # load data & libraries - Loading Raw data file as r.data
 load(file="data/Whiteplague_rawdata.Rdata")
 ls()
@@ -89,8 +91,7 @@ dim(Whiteplague_workingdata)
 head(Whiteplague_workingdata)
 
 #count how many samples per month we have in total this is to later define in the model
-library(plyr)
-count(Whiteplague_workingdata$Month_12)
+length(table(Whiteplague_workingdata$Month_12))
 ```
 
 
@@ -98,9 +99,8 @@ count(Whiteplague_workingdata$Month_12)
 #aggregate working_data file per year
 ```{r}
 #Make a new data frame only with annual mean values for each variables, in this way we can join biological variables (that only were collected once a year) with environmental variables (here as mean per season, per year).
-detach("package:pylr", unload=TRUE)
 library(dplyr)
-packageVersion("dplyr")
+#packageVersion("dplyr")
 
 #Group data per station, year and season and summarize the max value of each variable
 a1<- Whiteplague_workingdata %>% 

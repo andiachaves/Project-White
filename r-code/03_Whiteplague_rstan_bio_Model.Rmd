@@ -147,7 +147,7 @@ dataList = list(
   SiteYear = df$SiteYear_index,
   nSiteYear =length(unique(df$SiteYear_index)),
        
-  Depth = df$SDepth_index,
+  Depth = df$Depth_index,
   nDepth =length(unique(df$Depth_index))        
 )
 ```
@@ -224,7 +224,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2018.02.27a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("data/Extraction_diagnosis/2018.02.28_Whiteplague_model_result.Rdata",sep=""))
 ```
 
 

@@ -38,8 +38,8 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 ```{r}
 rm(list=ls(all=TRUE))
 
-NameOfModelRun <- "2018.02.27a_Whiteplague_model_result_graphinput"
-load(file=paste("data/",NameOfModelRun,".Rdata",sep=""))
+NameOfModelRun <- "2018.02.28_Whiteplague_model_result_graphinput"
+load(file=paste("data/Extraction_diagnosis/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 
 #"devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = TRUE)
@@ -52,7 +52,7 @@ library(DHARMa)
 ```{r,echo=FALSE}
 # Symptomatic corals - Response scale - inv.logit
 WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlague,
-  observedResponse = Whiteplague_workingdata$ill,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)
+  observedResponse = Whiteplague_workingdata_Annual$ill,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)
 ```
 
 
@@ -78,7 +78,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 # Problem repeating sites result in 0 distances!
 library(dplyr)
-df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata$Latitude,y=Whiteplague_workingdata$Longitude)
+df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata_Annual$Latitude,y=Whiteplague_workingdata_Annual$Longitude)
 
 # 1 option - group and mean
 
@@ -100,14 +100,10 @@ Both tests indicate that we should reject the null of no spatial auto-correlatio
 ### Test for residuals temporal autocorrelation
 ```{r}
 # test temporal autocorrelation Durbin-Watson test in the residuals
-#Month
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Month_12, plot=T)
+
 #Year
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Year, plot=T)
-#Seasons
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Season, plot=T)
-#Time points
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata$Time_point, plot=T)
+testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata_Annual$Year, plot=T)
+
 #Random time
 #testTemporalAutocorrelation(simulationOutput = df, time = "random")
 
@@ -189,8 +185,8 @@ acf((WhitePlagueDHARMaResponse$scaledResiduals), type="p") #partial autocorrelat
 
 predictedWPPvalues <- list()
 
-predictedWPPvalues[["Month"]] <- WhitePlagueDHARMaResponse$scaledResiduals
-#predictedWPPvalues[["Annual"]] <- pWhitePlagueDHARMaResponse$scaledResiduals
+#predictedWPPvalues[["Month"]] <- WhitePlagueDHARMaResponse$scaledResiduals
+predictedWPPvalues[["Annual"]] <- WhitePlagueDHARMaResponse$scaledResiduals
 
 ```
 

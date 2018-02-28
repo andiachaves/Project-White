@@ -7,7 +7,7 @@ int<lower=1> nYear;               // number of years
 int<lower=1,upper=4> Year[nWP];  // years
 
 int<lower=1> nDepth;               // number of depths
-int<lower=1,upper=10> Depth[nWP];  // depth
+int<lower=1> Depth[nWP];  // depth
 
 //int<lower=1> nSiteYear;               // number of sites-month combinations
 //int<lower=1,upper=130> SiteYear[nWP];  // sites-month combinations
@@ -27,11 +27,8 @@ vector[nEnvi] parEnvironment;   // Environmental-level
 real<lower=0> sigmalev_1;
 vector[nYear] eta_1;
 
-//real<lower=0> sigmalev_2;
-//vector[nSiteYear] eta_2;
-
-real<lower=0> sigmalev_3;
-vector[nDepth] eta_3;
+real<lower=0> sigmalev_2;
+vector[nDepth] eta_2;
 
 }
 
@@ -41,13 +38,12 @@ vector[nWP] RealDisease;
 vector[nYear] year_raw;
 year_raw  = eta_1;
 
-//vector[nSiteYear] siteyear_raw;
-//siteyear_raw  = eta_2 * sigmalev_2;
+//vector[nDepth] depth_raw;
+//depth_raw  = eta_2;
 
-vector[nDepth] depth_raw;
-depth_raw  = eta_3 * sigmalev_3;
 
-RealDisease =  Environment * parEnvironment + year_raw[Year]+depth_raw[Depth];
+RealDisease =  Environment * parEnvironment + year_raw[Year];
+
 } //closes transformed parameter
 
 
@@ -61,15 +57,10 @@ parEnvironment ~ normal(0, 100);
 
 //Random effects priors
 eta_1 ~ normal(0, sigmalev_1);
-//eta_2 ~ normal(0, sigmalev_2);
-eta_3 ~ normal(0, sigmalev_3);
+eta_2 ~ normal(0, sigmalev_2);
 
-//sigmalev_1 ~ uniform(0,100);
-//sigmalev_1 ~ student_t(1,0,1);
 sigmalev_1 ~ cauchy(0,2.5);
-//sigmalev_1 ~ inv_gamma(0.001, 0.001);
-//sigmalev_2 ~ uniform(0,100);
-sigmalev_3 ~ uniform(0,100);
+sigmalev_2 ~ uniform(0,100);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }
