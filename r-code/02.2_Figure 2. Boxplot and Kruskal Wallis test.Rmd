@@ -90,7 +90,7 @@ text(3,1,"*",cex=0.5)
 
 ```
 
-#FIGURE 2 MANUCRIPT 
+#FIGURE 2 MANUSCRIPT 
 
 #FIRST Add a column of depth category and month category to make easier the figure (graph)
 

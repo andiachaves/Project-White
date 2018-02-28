@@ -185,7 +185,7 @@ posterior<-extract(stan.white,inc_warmup=F,permute=F)
 Ntot <- Whiteplague_workingdata_Annual$Ntot
 observedWhitePlague <- Whiteplague_workingdata_Annual$ill
 
-Nchains=Nchains # number of chains, see model definition
+Nchains=4 # number of chains, see model definition
 modelpredictionsChains <- paste(rep("modelPredictions[,,",Nchains),1:Nchains,rep("]",Nchains),sep="")
 
 
