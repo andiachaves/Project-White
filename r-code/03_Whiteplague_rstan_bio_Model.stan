@@ -4,7 +4,7 @@ int<lower=0> nWP;                      // number of White Plague cases, int=inte
 int<lower=1> nEnvi;                    // number of environmental variables
 
 int<lower=1> nYear;               // number of years
-int<lower=1,upper=4=> Year[nWP];  // years
+int<lower=1,upper=4> Year[nWP];  // years
 
 int<lower=1> nDepth;               // number of depths
 int<lower=1,upper=10> Depth[nWP];  // depth
