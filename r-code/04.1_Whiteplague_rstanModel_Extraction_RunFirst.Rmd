@@ -29,7 +29,6 @@ set.seed(123)
 
 # load settings, data & libraries
 source("r-code/00_settings.r")
-source("r-code/00_helper_functions.r")
 
 # unload all packages in "other attached packages"
 sessionInfo()
@@ -44,7 +43,8 @@ library(zoo) # rollapply
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "2018.02.28_Whiteplague_model_result"
+#NameOfModelRun <- "2018.02.28b_Whiteplague_model_result" # last biological
+NameOfModelRun <- "2018.03.01_Whiteplague_model_result" # last environmental
 load(file=paste("data/Extraction_diagnosis/",NameOfModelRun,".Rdata",sep=""))
 
 ```

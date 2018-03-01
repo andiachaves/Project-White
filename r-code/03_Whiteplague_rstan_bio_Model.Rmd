@@ -72,36 +72,34 @@ library(DHARMa) #to extract posterior
 ```{r}
 df <- data.frame(Whiteplague_workingdata_Annual[,c("Station_code","Year","Season","Depth", "Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")])
 
-df$healthy <- df$Ntot-df$ill
-df$Year   <- as.factor(Whiteplague_workingdata_Annual$Year)
-df$Site    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
+df$healthy  <- df$Ntot-df$ill
+df$Year     <- as.factor(Whiteplague_workingdata_Annual$Year)
+df$Site     <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
 df$Depth    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Depth))
-df$Obsid   <- as.factor(1:nrow(df))
+df$Obsid    <- as.factor(1:nrow(df))
 #df$SiteYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
 
-df$Site_index <- as.integer(df$Site)
-df$Year_index=as.integer(df$Year)
-df$Depth_index=as.integer(df$Depth)
-df$Obsid_index=as.integer(df$Obsid)
+df$Site_index  = as.integer(df$Site)
+df$Year_index  = as.integer(df$Year)
+df$Depth_index = as.integer(df$Depth)
+df$Obsid_index = as.integer(df$Obsid)
 #df$SiteYear_index=as.integer(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
 #Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
 
-
-df$Chl_sca2 <- df$Chl_sca*df$Chl_sca
-df$Oxy_sca2 <- df$Oxy_sca*df$Oxy_sca
-df$Sal_sca2 <- df$Sal_sca*df$Sal_sca
-df$Turb_sca2 <- df$Turb_sca*df$Turb_sca
-#df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
-df$Temp_sca2 <- df$Temp_sca*df$Temp_sca
-df$DHW_sca2 <- df$DHW_sc*df$DHW_sc
-df$Sand2 <- df$Sand*df$Sand
-df$Coral2 <- df$Coral*df$Coral
-df$Sponges2 <- df$Sponges*df$Sponges
-df$Macroalgae2 <- df$Macroalgae*df$Macroalgae
+df$Chl_sca2       <- df$Chl_sca*df$Chl_sca
+df$Oxy_sca2       <- df$Oxy_sca*df$Oxy_sca
+df$Sal_sca2       <- df$Sal_sca*df$Sal_sca
+df$Temp_sca2      <- df$Temp_sca*df$Temp_sca
+df$DHW_sca2       <- df$DHW_sc*df$DHW_sc
+df$Sand2          <- df$Sand*df$Sand
+df$Coral2         <- df$Coral*df$Coral
+df$Sponges2       <- df$Sponges*df$Sponges
+df$Macroalgae2    <- df$Macroalgae*df$Macroalgae
 df$Cyanobacteria2 <- df$Cyanobacteria*df$Cyanobacteria
-
+df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
+#df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
 
 
 
@@ -142,7 +140,10 @@ dataList = list(
   nEnvi = ncol(Environment),
   
   Year = df$Year_index,
-  nYear =length(unique(df$Year_index))
+  nYears =length(unique(df$Year_index)),
+  
+  Site = df$Site_index,
+  nSites =length(unique(df$Site_index))
        
 )
 ```
@@ -154,7 +155,7 @@ dataList = list(
 time <- proc.time()
 stan.white <- stan("r-code/03_Whiteplague_rstan_bio_Model.stan",
                    data = dataList,
-                   iter = 300, 
+                   iter = 1000, 
                    chains = 4,
                    control = list(adapt_delta = 0.99,max_treedepth = 15),
                    refresh=10)
@@ -170,8 +171,8 @@ plot(stan.white,pars=c("b0",printVarEnvironment))
 
 
 #plotting the posterior distribution for the parameters
-post_beta<-As.mcmc.list(stan.white,pars=c("b0",printVarEnvironment))
-plot(post_beta)
+#post_beta<-As.mcmc.list(stan.white,pars=c("b0",printVarEnvironment))
+#plot(post_beta)
 #traceplot(post_beta, inc_warmup = FALSE)
 ```
 

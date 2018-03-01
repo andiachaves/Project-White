@@ -13,3 +13,5 @@ literature/*
 article/Submitted Abstract- WP-disease-Gordon Research Conference 2018.docx
 article/Abstract- WP-disease-Gordon Research Conference 2018_BP.docx
 article/Abstract- WP-disease-Gordon Research Conference 2018.docx
+*.svg
+*.rds

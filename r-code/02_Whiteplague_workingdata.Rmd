@@ -39,20 +39,18 @@ library(lubridate)
 ## Data preparation
 ```{r data_preparation}
 #All environmental data is scaled due to difference in units, this to avoid adding more variability in the analysis
-Whiteplague_rawdata$Chl_sca   <- scale(Whiteplague_rawdata$Chlorophyll)
-Whiteplague_rawdata$Cond_sca    <- scale(Whiteplague_rawdata$Conductivity)
-Whiteplague_rawdata$Den_sca    <- scale(Whiteplague_rawdata$Density)
-Whiteplague_rawdata$DepCTD_sca    <- scale(Whiteplague_rawdata$Depth_CTD)
-Whiteplague_rawdata$Oxy_sca   <- scale(Whiteplague_rawdata$Oxygen)
-Whiteplague_rawdata$Sal_sca    <- scale(Whiteplague_rawdata$Salinity)
-Whiteplague_rawdata$Turb_sca    <- scale(Whiteplague_rawdata$Turbidity)
-Whiteplague_rawdata$Depth_tran_sca  <- scale(Whiteplague_rawdata$Depth_transect)
-Whiteplague_rawdata$Temp_sca    <- scale(Whiteplague_rawdata$Temperature)
-Whiteplague_rawdata$DHW_sca    <- scale(Whiteplague_rawdata$Max_DHW)
-Whiteplague_rawdata$Rain_sca    <- scale(Whiteplague_rawdata$Rainfall)
-Whiteplague_rawdata$Depth  <- Whiteplague_rawdata$Depth_transect
-
-
+Whiteplague_rawdata$Chl_sca        <- scale(Whiteplague_rawdata$Chlorophyll)
+Whiteplague_rawdata$Cond_sca       <- scale(Whiteplague_rawdata$Conductivity)
+Whiteplague_rawdata$Den_sca        <- scale(Whiteplague_rawdata$Density)
+Whiteplague_rawdata$DepCTD_sca     <- scale(Whiteplague_rawdata$Depth_CTD)
+Whiteplague_rawdata$Oxy_sca        <- scale(Whiteplague_rawdata$Oxygen)
+Whiteplague_rawdata$Sal_sca        <- scale(Whiteplague_rawdata$Salinity)
+Whiteplague_rawdata$Turb_sca       <- scale(Whiteplague_rawdata$Turbidity)
+Whiteplague_rawdata$Depth_tran_sca <- scale(Whiteplague_rawdata$Depth_transect)
+Whiteplague_rawdata$Temp_sca       <- scale(Whiteplague_rawdata$Temperature)
+Whiteplague_rawdata$DHW_sca        <- scale(Whiteplague_rawdata$Max_DHW)
+Whiteplague_rawdata$Rain_sca       <- scale(Whiteplague_rawdata$Rainfall)
+Whiteplague_rawdata$Depth          <- Whiteplague_rawdata$Depth_transect
 ```
 
 
@@ -104,7 +102,7 @@ library(dplyr)
 
 #Group data per station, year and season and summarize the max value of each variable
 a1<- Whiteplague_workingdata %>% 
-  group_by(Station_code, Year, Season) %>% 
+  group_by(Station_code, Year, Season,Latitude, Longitude) %>% 
   summarise (Coral = max(Coral) , Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth = max(Depth),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
 head(a1)
 
@@ -122,12 +120,7 @@ df$Cyanobacteria <- scale(df$Cyanobacteria)
 Whiteplague_workingdata_Annual <- df
 
 #Finally!!
-
-
-
 ```
-
-
 
 
 
