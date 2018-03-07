@@ -103,7 +103,7 @@ library(dplyr)
 #Group data per station, year and season and summarize the max value of each variable
 a1<- Whiteplague_workingdata %>% 
   group_by(Station_code, Year, Season,Latitude, Longitude) %>% 
-  summarise (Coral = max(Coral) , Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth = max(Depth),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
+  summarise (Coral = max(Coral) , Sand = max(Sand), Sponges = max(Sponges), Macroalgae = max(Macroalgae), Cyanobacteria = max(Cyanobacteria),ill = max(ill), Ntot=max(Ntot),Plague = max(Plague),Chl_sca = max(Chl_sca),Oxy_sca = max(Oxy_sca),Sal_sca = max(Sal_sca),Turb_sca = max(Turb_sca),Depth_tran_sca = max(Depth_tran_sca),Temp_sca = max(Temp_sca), DHW_sca = max(DHW_sca) )
 head(a1)
 
 
