@@ -67,7 +67,7 @@ dim(Whiteplague_workingdata)
 
 ## Data preparation
 ```{r}
-df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth","Temp_sca","DHW_sca")]
+df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
 
 df$healthy <- df$Ntot-df$ill
 df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
@@ -80,18 +80,20 @@ df$Month_index=as.integer(df$Month)
 df$Obsid_index=as.integer(df$Obsid)
 df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
 
-df$Chl_sca2       <- df$Chl_sca*df$Chl_sca
-df$Oxy_sca2       <- df$Oxy_sca*df$Oxy_sca
-df$Sal_sca2       <- df$Sal_sca*df$Sal_sca
-df$Temp_sca2      <- df$Temp_sca*df$Temp_sca
-df$DHW_sca2       <- df$DHW_sc*df$DHW_sc
-df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
-df$Depth2         <- df$Depth*df$Depth
+Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Depth_tran_sca")]
 
-Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2")]
+# df$Chl_sca2       <- df$Chl_sca*df$Chl_sca
+# df$Oxy_sca2       <- df$Oxy_sca*df$Oxy_sca
+# df$Sal_sca2       <- df$Sal_sca*df$Sal_sca
+# df$Temp_sca2      <- df$Temp_sca*df$Temp_sca
+# df$DHW_sca2       <- df$DHW_sc*df$DHW_sc
+# df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
+# df$Depth2         <- df$Depth*df$Depth
+
+#Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2")]
 
 
-#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+
 ```
 
 
@@ -133,7 +135,7 @@ NvarEnvironment <- ncol(Environment)
 printVarEnvironment <- paste(rep("parEnvironment[",NvarEnvironment),1:NvarEnvironment,rep("]",NvarEnvironment),sep="")
 
 print(stan.white,pars=c("b0",printVarEnvironment),probs=c(.1,.5,.9))
-plot(stan.white,pars=c("b0",printVarEnvironment))
+plot(stan.white,pars=c(printVarEnvironment))
 
 
 #plotting the posterior distribution for the parameters
@@ -186,7 +188,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("results/2018.03.07_Whiteplague_Environmental_model_result.Rdata",sep=""))
+save(stan.white, file =paste("results/2018.03.08_Whiteplague_Environmental_model_result.Rdata",sep=""))
 ```
 
 

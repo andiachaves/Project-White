@@ -44,7 +44,7 @@ library(zoo) # rollapply
 load(file="data/Whiteplague_workingdata.Rdata")
 
 #NameOfModelRun <- "2018.03.07_Whiteplague_Biological_model_result" # last biological
-NameOfModelRun <- "2018.03.07_Whiteplague_Environmental_model_result" # last environmental
+NameOfModelRun <- "2018.03.08_Whiteplague_Environmental_model_result" # last environmental
 load(file=paste("results/",NameOfModelRun,".Rdata",sep=""))
 
 ```
