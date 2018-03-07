@@ -34,7 +34,6 @@ Compilation of raw data from the csv file compiled and prepared by Andia Chaves 
 ```{r}
 rm(list=ls(all=TRUE))
 # Load settings
-
 # load data & libraries 
 Whiteplague_rawdata <- read.csv("data/Rawdata/WhitePlague_rawdata.csv", header = TRUE) 
 
