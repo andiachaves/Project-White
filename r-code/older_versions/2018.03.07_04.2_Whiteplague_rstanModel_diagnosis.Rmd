@@ -220,49 +220,30 @@ SHP_study_area <- shapefile
 
 
 ##### Observed incidenes per site
-```{r}
-library("ggplot2")
-library("maps")
-library("grid")
-library("gridExtra")
+```{r Observed_incidences_site}
+# # Farbcodierung
+# Model = Data White
+# Model > Daten Red (because if high it is more intuitive to make it red)
+# Model < Data Blue
 
-
-colFunc<-colorRampPalette(c("blue","white","red"))
+colFunc<-colorRampPalette(c("red","white","blue"))
 colFuncBlueRed<-colFunc(10)
 
 
-x = Whiteplague_workingdata_Annual$Longitude
-y = Whiteplague_workingdata_Annual$Latitude
-df <- data.frame(x,y,values=WhitePlagueDHARMaResponse$scaledResiduals,sites=Whiteplague_workingdata_Annual$Station_code)
 
-SHP_study_area_Fortified <- fortify(shapefile)
+predictedWPPvalues <- list()
+predictedWPPvalues[["scaledResiduals"]] <- WhitePlagueDHARMaResponse$scaledResiduals
 
-
-df2 <- df%>% group_by(site)
-
-p1 <- ggplot() +
-geom_path(data = SHP_study_area_Fortified, aes(x = long, y = lat, group = group),color = 'gray', size = .2)+
-#geom_point(data=df,aes(x = x, y = y) ,shape=23, fill="blue", color="darkred", size=3)+
-#geom_boxplot(data=df, aes(x=x, y=y, stat = "identity",fill=factor(sites), group=sites))+
-  theme_bw()+
-coord_cartesian(xlim=c(-65.2,-64.5),ylim=c(18.14,18.42))
-
-```
+n="scaledResiduals"
+nObs=length(predictedWPPvalues[[n]])
+            
+predictedWPPvalues[["pointColor"]] <- rep(0,nObs)
 
 
-```{r}
-grid.newpage()
-pushViewport(dataViewport(x, y, c(-65.2,-64.5), c(18.14,18.42)))
-#pushViewport(dataViewport(x, y, c(0,1), c(0,1)))
-v1<-viewport(default.units = "native") #plot area for the main map
+pointColor<-NULL
 
-print(p1,vp=v1) 
-
-for (i in 1:length(unique(df$sites))){
-  dfSite <- df[df$sites %in% unique(df$sites)[i],]
-  
-
-  x<-mean(dfSite$values)
+for (i in 1:nObs){
+  x<-predictedWPPvalues[[n]][i]
   if(x <=0.1){pointColor<-colFuncBlueRed[1]}
   if(x > 0.1 & x<=0.2){pointColor<-colFuncBlueRed[2]}
   if(x > 0.2 & x<=0.3){pointColor<-colFuncBlueRed[3]}
@@ -273,10 +254,193 @@ for (i in 1:length(unique(df$sites))){
   if(x > 0.7 & x<=0.8){pointColor<-colFuncBlueRed[8]}
   if(x > 0.8 & x<=0.9){pointColor<-colFuncBlueRed[9]}
   if(x > 0.9 & x<=1  ){pointColor<-colFuncBlueRed[10]}
-  
+    predictedWPPvalues[["pointColor"]][i] <- pointColor
 
+}
+pointColors <- predictedWPPvalues[["pointColor"]]
+
+set.seed(1)
+#trellis.device("pdf",file=paste("figures/",today,"_rstan_WP_predictions_Annual.pdf",sep=""))
+#dev.off()
+
+# biological
+x = Whiteplague_workingdata_Annual$Longitude
+y = Whiteplague_workingdata_Annual$Latitude
+plot(SHP_study_area,lwd = 0.1,main=paste("Bayesian p-values of Biological model"),ylim=c(18.18,18.348))
+points(jitter(x,factor=40),y,col=pointColors,pch=19,cex=2)
+
+
+# # environmental
+# x = Whiteplague_workingdata$Longitude
+# y = Whiteplague_workingdata$Latitude
+# 
+# plot(SHP_study_area,lwd = 0.1,main=paste("Bayesian p-values of Environmental model"),ylim=c(18.18,18.348))
+# points(jitter(x,factor=40),jitter(y,factor=40),col=pointColors,pch=19,cex=2)
+
+```
+
+
+
+
+```{r}
+x = Whiteplague_workingdata_Annual$Longitude
+y = Whiteplague_workingdata_Annual$Latitude
+df <- data.frame(x,y,values=WhitePlagueDHARMaResponse$scaledResiduals,sites=Whiteplague_workingdata_Annual$Station_code)
+
+SHP_study_area_Fortified <- fortify(shapefile)
+
+
+library("ggplot2")
+library("maps")
+library("grid")
+library("gridExtra")
+
+df2 <- df%>% group_by(site)
+
+p1 <- ggplot() +
+geom_path(data = SHP_study_area_Fortified, aes(x = long, y = lat, group = group),color = 'gray', size = .2)+
+geom_point(data=df,aes(x = x, y = y,color=values, group=sites) ,shape=16,  size=6)+
+  geom_path(lwd=20) +
+  scale_color_continuous(low='blue', high='red', guide=F)+
+theme_bw()+
+coord_cartesian(ylim=c(18.16,18.42))
+
+p1
+```
+
+
+```{r}
+x = Whiteplague_workingdata_Annual$Longitude
+y = Whiteplague_workingdata_Annual$Latitude
+df <- data.frame(x,y,values=WhitePlagueDHARMaResponse$scaledResiduals,sites=Whiteplague_workingdata_Annual$Station_code)
+
+SHP_study_area_Fortified <- fortify(shapefile)
+
+
+library("ggplot2")
+library("maps")
+library("grid")
+library("gridExtra")
+
+df2 <- df%>% group_by(site)
+
+p1 <- ggplot() +
+geom_path(data = SHP_study_area_Fortified, aes(x = long, y = lat, group = group),color = 'gray', size = .2)+
+#geom_point(data=df,aes(x = x, y = y) ,shape=23, fill="blue", color="darkred", size=3)+
+#geom_boxplot(data=df, aes(x=x, y=y, stat = "identity",fill=factor(sites), group=sites))+
+  theme_bw()+
+coord_cartesian(xlim=c(-65.2,-64.5),ylim=c(18.14,18.42))
+
+
+
+
+colFunc<-colorRampPalette(c("red","white","blue"))
+colFuncBlueRed<-colFunc(10)
+
+
+
+
+grid.newpage()
+pushViewport(dataViewport(x, y, c(-65.2,-64.5), c(18.14,18.42)))
+v1<-viewport(default.units = "native") #plot area for the main map
+print(p1,vp=v1) 
+
+for (i in 1:length(unique(df$sites))){
+  dfSite <- df[df$sites %in% unique(df$sites)[i],]
+  dfSite$values <- as.factor(dfSite$values)
+  scaleColors <- list()
+  scaleColors[["pointColor"]] <- rep(0,nrow(dfSite))
   
-p2 <- ggplot(dfSite, aes(sites, values)) + geom_boxplot(fill=pointColor)+ 
+  for (j in 1:nrow(dfSite)){
+  x<-as.numeric(as.character(dfSite$values[j]))
+  if(x <=0.1){pointColor<-colFuncBlueRed[1]}
+  if(x > 0.1 & x<=0.2){pointColor<-colFuncBlueRed[2]}
+  if(x > 0.2 & x<=0.3){pointColor<-colFuncBlueRed[3]}
+  if(x > 0.3 & x<=0.4){pointColor<-colFuncBlueRed[4]}
+  if(x > 0.4 & x<=0.5){pointColor<-colFuncBlueRed[5]}
+  if(x > 0.5 & x<=0.6){pointColor<-colFuncBlueRed[6]}
+  if(x > 0.6 & x<=0.7){pointColor<-colFuncBlueRed[7]}
+  if(x > 0.7 & x<=0.8){pointColor<-colFuncBlueRed[8]}
+  if(x > 0.8 & x<=0.9){pointColor<-colFuncBlueRed[9]}
+  if(x > 0.9 & x<=1  ){pointColor<-colFuncBlueRed[10]}
+    scaleColors[["pointColor"]][j] <- pointColor
+
+}
+  
+  colors=scaleColors[["pointColor"]]
+  
+p2 <- ggplot(data=dfSite,aes(x = 1, y=values,fill=values)) +
+geom_tile(show.legend = FALSE,stat="identity") + 
+scale_fill_manual(values=colors)+
+  #scale_fill_gradient2(low = 'blue', mid = 'white', high = 'red', midpoint = 0.5) + 
+  #theme_minimal()
+  xlab("") + 
+  ylab("") +
+  theme(#panel.grid.major = element_blank(),
+        #panel.grid.minor = element_blank(),
+        axis.line = element_blank(),
+        axis.ticks = element_blank(),
+        legend.position = "none",
+        axis.text.x= element_blank(),
+        axis.text.y= element_blank(),
+        panel.background = element_rect(fill = "transparent"), # bg of the panel
+     plot.background = element_rect(fill = "transparent"), # bg of the plot
+     panel.grid.major = element_blank(), # get rid of major grid
+    panel.grid.minor = element_blank(), # get rid of minor grid
+     legend.background = element_rect(fill = "transparent"), # get rid of legend bg
+    legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg)
+    )
+    
+v2<-viewport(width = 0.04, height = 0.04, x = dfSite$x[1], y = dfSite$y[1],default.units = "native") #plot area for the inset map
+
+print(p2,vp=v2)
+}
+
+```
+
+
+
+
+
+
+```{r}
+x = Whiteplague_workingdata_Annual$Longitude
+y = Whiteplague_workingdata_Annual$Latitude
+df <- data.frame(x,y,values=WhitePlagueDHARMaResponse$scaledResiduals,sites=Whiteplague_workingdata_Annual$Station_code)
+
+SHP_study_area_Fortified <- fortify(shapefile)
+
+
+library("ggplot2")
+library("maps")
+library("grid")
+library("gridExtra")
+
+df2 <- df%>% group_by(site)
+
+p1 <- ggplot() +
+geom_path(data = SHP_study_area_Fortified, aes(x = long, y = lat, group = group),color = 'gray', size = .2)+
+#geom_point(data=df,aes(x = x, y = y) ,shape=23, fill="blue", color="darkred", size=3)+
+#geom_boxplot(data=df, aes(x=x, y=y, stat = "identity",fill=factor(sites), group=sites))+
+  theme_bw()+
+coord_cartesian(xlim=c(-65.2,-64.5),ylim=c(18.14,18.42))
+
+
+
+
+vp <- dataViewport(xData = df$x, yData = df$y)
+
+
+grid.newpage()
+pushViewport(dataViewport(x, y, c(-65.2,-64.5), c(18.14,18.42)))
+#pushViewport(dataViewport(x, y, c(0,1), c(0,1)))
+v1<-viewport(default.units = "native") #plot area for the main map
+
+print(p1,vp=v1) 
+
+for (i in 1:length(unique(df$sites))){
+  dfSite <- df[df$sites %in% unique(df$sites)[i],]
+p2 <- ggplot(dfSite, aes(sites, values)) + geom_boxplot()+ 
   theme(
       axis.title=element_blank()
     ,  panel.background = element_rect(fill = "transparent") # bg of the panel
@@ -287,7 +451,7 @@ p2 <- ggplot(dfSite, aes(sites, values)) + geom_boxplot(fill=pointColor)+
     , legend.box.background = element_rect(fill = "transparent") # get rid of legend panel bg
   )
 
-  if (i==1){dfSite$x[1] <- -64.98}
+
 v2<-viewport(width = 0.05, height = 0.05, x = dfSite$x[1], y = dfSite$y[1],default.units = "native") #plot area for the inset map
 
 # 
@@ -302,7 +466,22 @@ v2<-viewport(width = 0.05, height = 0.05, x = dfSite$x[1], y = dfSite$y[1],defau
 print(p2,vp=v2)
 
 }
+
+
+
+tmp <- grid.locator()
+tmp.n <- as.numeric(tmp)
+tmp2.x <- as.numeric(convertX( unit(x,'native'), 'in' ))
+tmp2.y <- as.numeric(convertY( unit(y,'native'), 'in' ))
+
+w <- which.min( (tmp2.x-tmp.n[1])^2 + (tmp2.y-tmp.n[2])^2 )
+grid.text(w, tmp$x, tmp$y )
+
+
+
 ```
+
+
 
 
 
