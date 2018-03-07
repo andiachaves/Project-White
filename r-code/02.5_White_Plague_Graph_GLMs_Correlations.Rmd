@@ -27,16 +27,16 @@ source('r-code/00_settings.R')
 
 
 # load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
-White <- read.csv("data/Rawdata_WP_No_average_Rainmm.csv", header = TRUE) #Rainfall in mm
-ls(White)
-dim(White)
-head(White)
+load(file="data/Whiteplague_workingdata.Rdata")
+
+library(ggplot2) 
 ```
 
 
 Boxplots - figures
 ```{r}
-library(ggplot2) 
+White <- Whiteplague_workingdata
+
 
 #BOX-PLOTS PER MONTH ENVIRONMENTAL VARIABLES
 #Chlorophyll

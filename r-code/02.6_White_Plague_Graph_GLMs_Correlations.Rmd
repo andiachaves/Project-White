@@ -1,0 +1,200 @@
+---
+title: "Univariate GLMS"
+author: "Bernd Panassiti"
+date: "3/03/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+# Data
+
+
+## Loading data 
+```{r}
+rm(list=ls(all=TRUE))
+# Load settings
+source('r-code/00_settings.R')
+
+
+# load data & libraries - Loading Raw data file without average of ill a ntot of White Plague - made July 11-Andia 
+load(file="data/Whiteplague_workingdata.Rdata")
+
+library(ggplot2) 
+library(caTools)
+library(dplyr)
+library(gridExtra)
+```
+
+```{r}
+df <- Whiteplague_workingdata
+
+#Evaluating WP prevalence in relation to Depth and Turbidity
+df$Depth_tran_sca <-as.factor(df$Depth_tran_sca) # Change Depth as factor
+#Give number of corals with and without diseases for the binomial, as it needs both to run
+healthy<- df$Ntot-df$ill
+healthy
+ill<-df$ill
+ill
+y<-cbind(ill,healthy) # binding both vectors of ill and no.ill corals - binomial
+```
+
+```{r}
+preds <- c("Cond_sca",
+"Den_sca",
+"DepCTD_sca",
+"Oxy_sca",
+"Sal_sca",
+"Turb_sca",
+"Temp_sca",
+"DHW_sca",
+"Rain_sca")
+
+dat <- data.frame(df[,preds])
+
+
+GLMresults <- data.frame(matrix(nrow=length(preds),ncol=14))
+colnames(GLMresults) <- c(
+  "predictor",
+  "Intercept","Intercept - p",
+  "Coef","Coef - p",
+  "AIC",
+  "Sq - Intercept","Sq - Intercept - p",
+  "Sq - Coef","Sq - Coef - p",
+  "Sq - Coef2","Sq - Coef2 - p",
+  "Sq - AIC",
+  "Anova -Chisq -p"
+)
+
+for (i in 1:length(preds)){
+  fit1 <- glm(y ~ dat[,i],family=binomial)
+  fit2 <- glm(y ~ dat[,i]+I(dat[,i]^2),family=binomial)
+  
+  GLMresults[i,1]      <- preds[i]
+  GLMresults[i,2:3]    <-  c(round(summary(fit1)$coefficients[1,c(1,4)],2))
+  GLMresults[i,4:5]    <-  c(round(summary(fit1)$coefficients[2,c(1,4)],2))
+  GLMresults[i,6]      <- round(fit1$aic,2)
+  GLMresults[i,7:8]    <-  c(round(summary(fit2)$coefficients[1,c(1,4)],2))
+  GLMresults[i,9:10]   <-  c(round(summary(fit2)$coefficients[2,c(1,4)],2))
+  GLMresults[i,11:12]  <-  c(round(summary(fit2)$coefficients[2,c(1,4)],2))
+  GLMresults[i,13]     <- round(fit2$aic,2)  
+  GLMresults[i,14]     <-round(anova(fit1, fit2, test = "Chisq")[2,5],3)
+}
+```
+
+
+```{r}
+pdf("plots.pdf", onefile = TRUE)
+for (i in 1:length(preds)){
+  
+dat <- data.frame(y,x1=df[,preds[i]])
+
+m<-glm(cbind(ill, healthy) ~ x1, family=binomial, data=dat)
+print(paste(preds[i],summary(m)$coefficients[2,1]))
+
+
+
+dat <- data.frame(prob = dat$ill/(dat$ill+dat$healthy),x1 = dat$x1,fit = predict(m, dat))
+
+
+#convert those logit values to probabilities
+dat$fit_prob <- exp(dat$fit)/(1+exp(dat$fit))
+
+dat$fit_prob2 <- dat$fit_prob
+meanDat <- mean(dat$fit_prob2)
+dat[dat$fit_prob2<meanDat,"fit_prob2"] <- 0
+dat[dat$fit_prob2>=meanDat,"fit_prob2"] <- 1
+
+hh <- round(dat[,c("x1","fit_prob2")],1)
+
+# Summarise data to create histogram counts
+h = hh %>% group_by(fit_prob2) %>%
+  mutate(breaks = cut(x1, breaks=seq(-2,2,length.out=7),labels=seq(-2,2,length.out=6), include.lowest=TRUE),
+         breaks = as.numeric(as.character(breaks))) %>%
+  group_by(fit_prob2, breaks) %>%
+  summarise(n = n()) %>%
+  mutate(pct = ifelse(fit_prob2==0, n/sum(n), 1 - n/sum(n)))
+
+
+
+
+p <- ggplot() + 
+  #geom_point() +
+  geom_segment(data=h, size=4, show.legend=FALSE,aes(x=breaks, xend=breaks, y=fit_prob2, yend=pct,color=factor(fit_prob2))) +
+  geom_line(data=dat,aes(x=x1, y=fit_prob))+
+  scale_y_continuous(limits=c(-0.02,1.02)) +
+  xlab(preds[i])+
+  ylab("Prevalence")+
+  theme_bw(base_size=12)
+print(p)
+}
+
+dev.off()
+
+
+```
+
+
+
+
+```{r}
+pdf("plots.pdf", onefile = TRUE)
+for (i in 1:length(preds)){
+
+x2 <- df[,preds[i]]*df[,preds[i]]
+  
+dat <- data.frame(y,x1=df[,preds[i]],x2=x2)
+
+m<-glm(cbind(ill, healthy) ~ x1+x2, family=binomial, data=dat)
+print(paste(preds[i],round(summary(m)$coefficients[2,1],2),round(summary(m)$coefficients[3,1],2)))
+
+
+
+dat <- data.frame(prob = dat$ill/(dat$ill+dat$healthy),x1 = dat$x1,x2 = dat$x2,fit = predict(m, dat))
+
+
+#convert those logit values to probabilities
+dat$fit_prob <- exp(dat$fit)/(1+exp(dat$fit))
+
+dat$fit_prob2 <- dat$fit_prob
+meanDat <- mean(dat$fit_prob2)
+dat[dat$fit_prob2<meanDat,"fit_prob2"] <- 0
+dat[dat$fit_prob2>=meanDat,"fit_prob2"] <- 1
+
+hh <- round(dat[,c("x1","fit_prob2")],1)
+
+# Summarise data to create histogram counts
+h = hh %>% group_by(fit_prob2) %>%
+  mutate(breaks = cut(x1, breaks=seq(-2,2,length.out=7),labels=seq(-2,2,length.out=6), include.lowest=TRUE),
+         breaks = as.numeric(as.character(breaks))) %>%
+  group_by(fit_prob2, breaks) %>%
+  summarise(n = n()) %>%
+  mutate(pct = ifelse(fit_prob2==0, n/sum(n), 1 - n/sum(n)))
+
+
+
+
+p <- ggplot() + 
+  #geom_point() +
+  geom_segment(data=h, size=4, show.legend=FALSE,aes(x=breaks, xend=breaks, y=fit_prob2, yend=pct,color=factor(fit_prob2))) +
+  geom_line(data=dat,aes(x=x1, y=fit_prob))+
+  scale_y_continuous(limits=c(-0.02,1.02)) +
+  xlab(preds[i])+
+  ylab("Prevalence")+
+  theme_bw(base_size=12)
+print(p)
+}
+
+dev.off()
+
+
+```
