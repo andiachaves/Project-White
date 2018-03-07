@@ -67,7 +67,7 @@ dim(Whiteplague_workingdata)
 
 ## Data preparation
 ```{r}
-df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth","Temp_sca","DHW_sca")]
 
 df$healthy <- df$Ntot-df$ill
 df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
@@ -80,7 +80,18 @@ df$Month_index=as.integer(df$Month)
 df$Obsid_index=as.integer(df$Obsid)
 df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
 
-Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+df$Chl_sca2       <- df$Chl_sca*df$Chl_sca
+df$Oxy_sca2       <- df$Oxy_sca*df$Oxy_sca
+df$Sal_sca2       <- df$Sal_sca*df$Sal_sca
+df$Temp_sca2      <- df$Temp_sca*df$Temp_sca
+df$DHW_sca2       <- df$DHW_sc*df$DHW_sc
+df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
+df$Depth2         <- df$Depth*df$Depth
+
+Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2")]
+
+
+#Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
 ```
 
 
@@ -140,7 +151,7 @@ posterior<-extract(stan.white,inc_warmup=F,permute=F)
 Ntot <- Whiteplague_workingdata$Ntot
 observedWhitePlague <- Whiteplague_workingdata$ill
 
-Nchains=Nchains # number of chains, see model definition
+Nchains=4 # number of chains, see model definition
 modelpredictionsChains <- paste(rep("modelPredictions[,,",Nchains),1:Nchains,rep("]",Nchains),sep="")
 
 
@@ -175,7 +186,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/2018.02.24a_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("results/2018.03.07_Whiteplague_Environmental_model_result.Rdata",sep=""))
 ```
 
 
@@ -190,10 +201,6 @@ save(stan.white, file =paste("data/2018.02.24a_Whiteplague_model_result.Rdata",s
 #testZeroInflation(WhitePlagueDHARMaResponse)
 ```
 
-#Save the model run results
-```{r}
-save(stan.white, file =paste("data/2018.03.01_Whiteplague_model_result.Rdata",sep=""))
-```
 
 # Session information for model run
 ```{r}

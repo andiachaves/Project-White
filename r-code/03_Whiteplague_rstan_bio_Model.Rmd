@@ -75,7 +75,7 @@ df <- data.frame(Whiteplague_workingdata_Annual[,c("Station_code","Year","Season
 df$healthy  <- df$Ntot-df$ill
 df$Year     <- as.factor(Whiteplague_workingdata_Annual$Year)
 df$Site     <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Station_code))
-df$Depth    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Depth))
+#df$Depth    <- as.factor(as.numeric(Whiteplague_workingdata_Annual$Depth))
 df$Obsid    <- as.factor(1:nrow(df))
 #df$SiteYear <- as.factor(as.numeric(as.factor(paste(df$Year,df$Site,sep="-"))))
 
@@ -99,7 +99,7 @@ df$Sponges2       <- df$Sponges*df$Sponges
 df$Macroalgae2    <- df$Macroalgae*df$Macroalgae
 df$Cyanobacteria2 <- df$Cyanobacteria*df$Cyanobacteria
 df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
-#df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
+df$Depth2         <- df$Depth*df$Depth
 
 
 
@@ -107,12 +107,10 @@ df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
 #                      "DHW_sca","DHW_sca2","Sand", "Sand2","Coral","Coral2", "Sponges","Sponges2","Macroalgae", "Macroalgae2","Cyanobacteria","Cyanobacteria2")]
 
 
-# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
-#                      "Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
 
-Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2",
-                     "Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+#Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
 
 
@@ -220,7 +218,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("data/Extraction_diagnosis/2018.02.28b_Whiteplague_model_result.Rdata",sep=""))
+save(stan.white, file =paste("results/2018.03.7_Whiteplague_Biological_model_result.Rdata",sep=""))
 ```
 
 
@@ -235,10 +233,6 @@ save(stan.white, file =paste("data/Extraction_diagnosis/2018.02.28b_Whiteplague_
 #testZeroInflation(WhitePlagueDHARMaResponse)
 ```
 
-#Save the model run results
-```{r}
-save(stan.white, file =paste("data/2017.11.21a_Whiteplague_model_result.Rdata",sep=""))
-```
 
 # Session information for model run
 ```{r}
