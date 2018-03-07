@@ -53,7 +53,7 @@ tauYears  ~ inv_gamma(0.001, 0.001);
 // other options
 //uniform(0,100);
 //student_t(1,0,1);
-//cauchy(0,2.5);
+//tauYears  ~ cauchy(0,2.5);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
 }

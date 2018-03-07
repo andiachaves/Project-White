@@ -102,12 +102,7 @@ df$Turb_sca2       <- df$Turb_sca*df$Turb_sca
 df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
 
 
-
-# Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2",
-#                      "DHW_sca","DHW_sca2","Sand", "Sand2","Coral","Coral2", "Sponges","Sponges2","Macroalgae", "Macroalgae2","Cyanobacteria","Cyanobacteria2")]
-
-
-Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Depth_tran_sca","Depth_tran_sca2","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Depth_tran_sca","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
 
 
@@ -216,7 +211,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("results/2018.03.8_Whiteplague_Biological_model_result.Rdata",sep=""))
+save(stan.white, file =paste("results/2018.03.09_Whiteplague_Biological_model_result.Rdata",sep=""))
 ```
 
 
