@@ -37,8 +37,8 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 #### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
-NameOfModelRun <- "2018.03.08_Whiteplague_Environmental_model_result_graphinput" # last environmental
-#NameOfModelRun <- "2018.03.07_Whiteplague_Biological_model_result_graphinput" # last biological
+#NameOfModelRun <- "2018.03.08_Whiteplague_Environmental_model_result_graphinput" # last environmental
+NameOfModelRun <- "2018.03.08_Whiteplague_Biological_model_result_graphinput" # last biological
 load(file=paste("results/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 
@@ -51,19 +51,19 @@ library(lattice)
 
 
 ```{r}
-# ill <- Whiteplague_workingdata_Annual$ill
-# Latitude <- Whiteplague_workingdata_Annual$Latitude
-# Longitude <- Whiteplague_workingdata_Annual$Longitude
-# Year <- Whiteplague_workingdata_Annual$Year
-# #Month_12 <- Whiteplague_workingdata_Annual$Month_12 # NOT READY
-# Station_code <- Whiteplague_workingdata_Annual$Station_code
+ill <- Whiteplague_workingdata_Annual$ill
+Latitude <- Whiteplague_workingdata_Annual$Latitude
+Longitude <- Whiteplague_workingdata_Annual$Longitude
+Year <- Whiteplague_workingdata_Annual$Year
+#Month_12 <- Whiteplague_workingdata_Annual$Month_12 # NOT READY
+Station_code <- Whiteplague_workingdata_Annual$Station_code
 
-ill <- Whiteplague_workingdata$ill
-Latitude <- Whiteplague_workingdata$Latitude
-Longitude <- Whiteplague_workingdata$Longitude
-Year <- Whiteplague_workingdata$Year
-Month_12 <- Whiteplague_workingdata$Month_12
-Station_code <- Whiteplague_workingdata$Station_code
+# ill <- Whiteplague_workingdata$ill
+# Latitude <- Whiteplague_workingdata$Latitude
+# Longitude <- Whiteplague_workingdata$Longitude
+# Year <- Whiteplague_workingdata$Year
+# Month_12 <- Whiteplague_workingdata$Month_12
+# Station_code <- Whiteplague_workingdata$Station_code
 ```
 
 

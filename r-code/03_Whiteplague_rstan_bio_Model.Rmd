@@ -70,7 +70,7 @@ library(DHARMa) #to extract posterior
 
 ## Data preparation
 ```{r}
-df <- data.frame(Whiteplague_workingdata_Annual[,c("Station_code","Year","Season","Depth", "Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")])
+df <- data.frame(Whiteplague_workingdata_Annual[,c("Station_code","Year","Season","Depth_tran_sca", "Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca", "Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")])
 
 df$healthy  <- df$Ntot-df$ill
 df$Year     <- as.factor(Whiteplague_workingdata_Annual$Year)
@@ -88,18 +88,18 @@ df$Obsid_index = as.integer(df$Obsid)
 
 #Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Sand", "Coral", "Sponges","Macroalgae", "Cyanobacteria")]
 
-df$Chl_sca2       <- df$Chl_sca*df$Chl_sca
-df$Oxy_sca2       <- df$Oxy_sca*df$Oxy_sca
-df$Sal_sca2       <- df$Sal_sca*df$Sal_sca
-df$Temp_sca2      <- df$Temp_sca*df$Temp_sca
-df$DHW_sca2       <- df$DHW_sc*df$DHW_sc
-df$Sand2          <- df$Sand*df$Sand
-df$Coral2         <- df$Coral*df$Coral
-df$Sponges2       <- df$Sponges*df$Sponges
-df$Macroalgae2    <- df$Macroalgae*df$Macroalgae
-df$Cyanobacteria2 <- df$Cyanobacteria*df$Cyanobacteria
-df$Turb_sca2      <- df$Turb_sca*df$Turb_sca
-df$Depth2         <- df$Depth*df$Depth
+df$Chl_sca2        <- df$Chl_sca*df$Chl_sca
+df$Oxy_sca2        <- df$Oxy_sca*df$Oxy_sca
+df$Sal_sca2        <- df$Sal_sca*df$Sal_sca
+df$Temp_sca2       <- df$Temp_sca*df$Temp_sca
+df$DHW_sca2        <- df$DHW_sc*df$DHW_sc
+df$Sand2           <- df$Sand*df$Sand
+df$Coral2          <- df$Coral*df$Coral
+df$Sponges2        <- df$Sponges*df$Sponges
+df$Macroalgae2     <- df$Macroalgae*df$Macroalgae
+df$Cyanobacteria2  <- df$Cyanobacteria*df$Cyanobacteria
+df$Turb_sca2       <- df$Turb_sca*df$Turb_sca
+df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
 
 
 
@@ -107,10 +107,8 @@ df$Depth2         <- df$Depth*df$Depth
 #                      "DHW_sca","DHW_sca2","Sand", "Sand2","Coral","Coral2", "Sponges","Sponges2","Macroalgae", "Macroalgae2","Cyanobacteria","Cyanobacteria2")]
 
 
-Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Depth_tran_sca","Depth_tran_sca2","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
-
-#Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 
 
 
@@ -165,7 +163,7 @@ NvarEnvironment <- ncol(Environment)
 printVarEnvironment <- paste(rep("parEnvironment[",NvarEnvironment),1:NvarEnvironment,rep("]",NvarEnvironment),sep="")
 
 print(stan.white,pars=c("b0",printVarEnvironment),probs=c(.1,.5,.9))
-plot(stan.white,pars=c("b0",printVarEnvironment))
+plot(stan.white,pars=c(printVarEnvironment))
 
 
 #plotting the posterior distribution for the parameters
@@ -218,7 +216,7 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("results/2018.03.7_Whiteplague_Biological_model_result.Rdata",sep=""))
+save(stan.white, file =paste("results/2018.03.8_Whiteplague_Biological_model_result.Rdata",sep=""))
 ```
 
 
