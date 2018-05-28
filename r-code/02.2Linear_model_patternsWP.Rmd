@@ -1,0 +1,194 @@
+---
+title: "linear model disease patters"
+author: "Andia Chaves Fonnegra"
+date: "5/28/2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+#Introduction
+
+This document provides the r-code for a linaer model to understand the patterns of white plague disease on St. Thomas coral reefs. The specific objectives of this analysis are: (1) to evaluate if patterns of disease are different among depth, and (2) to evaluate how disease patterns are per month, season and year). 
+
+#Data
+The white plague prevalence data is teh same we sued for the rstan biological and environmental models, cna be dowloaded inxxxxxxx. The file "whiteplague_working.RData" needs to be placed in a folder called "data".
+"
+
+
+## Load data
+```{r}
+rm(list=ls(all=TRUE))
+
+
+load(file="data/Whiteplague_workingdata.Rdata")
+head(Whiteplague_workingdata)
+dim(Whiteplague_workingdata)
+
+WP<-Whiteplague_workingdata
+head(WP)
+```
+
+
+#Check probability distribution in the data.
+# I follow suggestions by: http://ase.tufts.edu/gsc/gradresources/guidetomixedmodelsinr/mixed%20model%20guide.html
+#The y axis represents the observations and the x axis represents the quantiles modeled by the distribution. 
+#The solid red line represents a perfect distribution fit and the dashed red lines are the confidence intervals of the perfect distribution fit. 
+
+```{r}
+#normality test
+#Shapiro-Wilkinson normality test
+shapiro.test(WP$Plague)
+#for producing a normal quantile-quantile plot
+qqnorm(WP$Plague)
+qqline(WP$Plague)
+
+#If p> than 0.05. Data is normal, if not, not normal
+#WP data is not normal. However it folowws a log normal
+#Bartlest test of homegenty of variances
+bartlett.test(WP$Plague~WP$Station_code)
+#If p> than 0.05. variances are homogeneous, if not, not homogeneous
+
+```
+
+#check outliers and data in general with boxplot
+```{r}
+par(mfrow=c(2,2))
+plot(WP$Plague)
+boxplot(WP$Plague)
+hist(WP$Plague,main="")
+y2<-WP$Plague
+y2[52]<-21.75
+plot(y2)
+
+summary(WP$Plague)
+```
+
+
+#Checking which distribution white plague data follows.
+#You want to pick the distribution for which the largest number of #observations falls between the dashed lines. 
+```{r}
+## Loading required package: car
+require(car)
+require(MASS)
+# This is to check if follows a normal distribution. But we need to ad the value of 1 to avoid problems
+Plague<-WP$Plague+1
+
+qqp(Plague, "norm")
+# This is to check if follows a LOG normal distribution
+qqp(Plague, "lnorm")
+
+#In this case, that's the #lognormal distribution, is the best distribution for the data we have.
+```
+
+
+#Now, armed with the knowledge of which probability distribution fits best, I can try fitting a model.
+
+#I choose a linear mix effect model (lmer). lmer fits as  a linear #mixed-effects models with specified mixtures of fixed effects and
+#random effects and allow for the specification of correlation structure #amongst the explanatory variables and autocorrelation of the response #variable (e.g. time series effects with repeated measures). lmer allows for #non-normal errors and non-constant variance with the same error families as a GLM.
+
+#So data is not normal and has autocorrelation due to the time series effect with repeated measurement.
+#------------------------------------
+#Some information from the R book:
+#Deciding the fix and random effects to undertand patterns of white plagued disease. Mixed-effects models are so called because the explanatory variables are a mixture of fixed effects and random effects:
+#• fixed effects influence only the mean of y;
+#• random effects influence only the variance of y.
+
+#Fixed effects are unknown constants to be estimated from the data. Random effects govern the variance – covariance structure of the response variable. #
+
+#The fixed effects are often experimental treatments that
+#were applied under our direction.
+
+#The random effects are either categorical or continuous variables that are #distinguished by the fact that we are typically not interested in the #parameter values, but only in the variance they explain.
+#-----------------------------------------------
+
+#Pick fixed and random effects
+```{r}
+#Fixed effects are station and depth (experimental treatment)
+#Random effects are month, season and year (temporal pseudoreplication)
+
+#Random effect needs to indicate that the monthly measurement 
+#represents pseudoreplication within each station
+```
+
+
+#For data inspections we start with a pannel plot also called trellis plots or lattice plots for that we need nlme and lattice libraries
+```{r}
+library(lattice)
+require(lme4)
+library(lme4)
+```
+
+#First we group the dataframe into a groupedData object. Here we indicate the fixed effect by defining temperature as outer 
+#Here we get plot for each Site (Station)
+
+```{r}
+#here I indicate that depth and site are fixed effects that interact (B), whereas month, season and year are random (A) Simultaneously the intercept and the slope of B depend of time (A)
+#lmer(Y ~ 1 + B + (1 + B | A), data=d)
+
+#test wp per year
+model1 <- lmer(WP$Plague~1+(1|WP$Year),REML = FALSE)
+summary(model1)
+qqp(residuals(model1),"lnorm")
+
+#adding depth as fixed factor, and depth as depending of month
+model2 <- lmer(WP$Plague~WP$Depth_transect + (1+WP$Depth_transect|WP$Month_12),REML = FALSE)
+summary(model2)
+qqp(residuals(model2),"lnorm")
+#good fit
+
+#using station o as fixed factor and months
+model3 <- lmer(WP$Plague~WP$Station_code + (1+WP$Station_code|WP$Month_12), REML = FALSE)
+summary(model3)
+qqp(residuals(model3),"lnorm")
+#did not converged
+
+#adding depth as fixed factor, and depth as depending of year
+model4 <- lmer(WP$Plague~WP$Depth_transect + (1+WP$Depth_transect|WP$Year),REML = FALSE)
+               
+summary(model4)
+qqp(residuals(model4),"lnorm")
+
+
+#adding depth as fixed factor, and depth as depending of year
+model5 <- lmer(WP$Plague~WP$Depth_transect + (1+WP$Depth_transect|WP$Season), REML = FALSE)
+               
+summary(model5)
+qqp(residuals(model5),"lnorm")
+
+
+#real model taking into account all fixed and random factors is not possible. It does not allowed to nest month, seasons and years
+modelall <- lmer(WP$Plague~WP$Depth_transect + (1+WP$Depth_transect|WP$Year/WP$Season/WP$Month_12))
+               summary(modelall)
+qqp(residuals(modelall),"lnorm")
+#So it is asking for a variable that group time factor as one, basically a variable that combines Year-Season and Month.
+
+```
+
+#Create a new time variable combining month, season and year
+```{r}
+WP$time <-as.character(interaction(WP$Year,WP$Season,WP$Month_12))
+
+WP$time
+head(WP)
+
+```
+
+#Run model with the time variable as a random variable
+```{r}
+#real model taking into account depth as fixed factor and time as random (time variable is a combined variable that including month, seasons and years)
+modelall <- lmer(WP$Plague~WP$Depth_transect + (1+WP$Depth_transect|WP$time),REML = FALSE )
+summary(modelall)
+qqp(residuals(modelall),"lnorm")
+#So it is asking for a variable that group time factor as one, basically a variable that combines Year-Season and Month.
+```
+

@@ -121,8 +121,7 @@ library(devtools)
 theme_set(theme_classic())
 #Option 1
 ggplot(Whiteplague_workingdata, aes(x = reorder(Depth_categories, Plague, fun = median), y = Plague,fill=Station_code)) + geom_boxplot()+
-theme(axis.text.x = element_text(angle=360, vjust=0.6)) + 
-  labs(x= "Stations", y="White Plague Prevalence")
+theme(axis.text.x = element_text(angle=360, vjust=0.8, size=16), axis.text.y = element_text(angle=360, vjust=0.4, size=14), legend.key.size = unit(1.1, "cm"), axis.title.y= element_text(size=16,face="bold", margin = margin(t = 20, r = 30, b = 0, l = 10)), axis.title.x= element_text(size=16,face="bold", margin = margin(t = 30, r = 20, b = 10, l = 0))) + labs(x= "Stations", y="White Plague Prevalence")
 
 #Option 2) I prefer this graph, however I would like that moddepth stations will be together in teh middle, and not in different positions. ahh.
 
