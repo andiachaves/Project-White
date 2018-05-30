@@ -78,8 +78,8 @@ summary(WP$Plague)
 #You want to pick the distribution for which the largest number of #observations falls between the dashed lines. 
 ```{r}
 ## Loading required package: car
-require(car)
-require(MASS)
+library(car)
+library(MASS)
 # This is to check if follows a normal distribution. But we need to ad the value of 1 to avoid problems
 Plague<-WP$Plague+1
 
@@ -190,5 +190,146 @@ modelall <- lmer(WP$Plague~WP$Depth_transect + (1+WP$Depth_transect|WP$time),REM
 summary(modelall)
 qqp(residuals(modelall),"lnorm")
 #So it is asking for a variable that group time factor as one, basically a variable that combines Year-Season and Month.
+```
+
+#Binomial models
+#Generalized Mixed-effect model using Depth, Month, Season and Year as fixed factors and accounting for the temporal and spatial pseudoreplication using a random factor variable (magic variable that is a combination of Year-Season-Month-Site)
+
+#Libraries
+```{r}
+library(lme4)
+library(glmm)
+library(coefplot) ## for coefplot2
+library(reshape)
+library(plyr)
+library(ggplot2)
+library(gridExtra)
+library(emdbook) ## for qchibarsq
+library(MASS)
+
+```
+
+
+#Binomial model
+```{r}
+attach(WP)
+
+model1<- glmer(Plague ~ Depth_transect + (1 | time), family="binomial"(link="logit"),data=WP, nAGo=25)
+
+summary(model1)
+qqp(residuals(model1),"lnorm")
+
+```
+
+#GLMM to test WP disease pattersn in relation to depth, month, season and year.
+```{r}
+# Using GLM (family= Binomial) # for White Plague Pervalence in relation to other environmental variables
+str(WP)
+#Check all variables as factors
+#Evaluating WP prevalence in relation to Depth and time
+WP$Depth_transect <-as.factor(WP$Depth_transect) # Change Depth as factor
+WP$Year<-as.factor(WP$Year) # Change Year as factor
+WP$Season<-as.factor(WP$Season) # Change Season as factor
+WP$Month_12<-as.factor(WP$Month_12) # Change Month as factor
+WP$time<-as.factor(WP$time)
+
+
+#Give number of corals with and without diseases for the binomial, as it needs both to run
+not.ill<- WP$Ntot-WP$ill
+not.ill
+ill<-WP$ill
+ill
+y<-cbind(ill,not.ill) # binding both vectors of ill and no.ill corals - binomial
+
+#This is a simplify example with glm)
+m1<- glm(y~WP$Depth_transect,family= binomial)
+print(summary(m1))
+qqp(residuals(m1),"norm")
+#---------------------------------------------
+
+#Now with glmm------------
+
+#just Depth and using Month to account for the temporal pseudoreplication
+m2<- glmer(y ~ Depth_transect + (1 | Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m2))
+qqp(residuals(m2),"norm")
+
+#Just Depth and using time to account for the temporal pseudoreplication
+m3<- glmer(y ~ Depth_transect + (1 | time), family="binomial"(link="logit"),data=WP)
+print(summary(m3))
+qqp(residuals(m3),"norm")
+#--results as same with only month---
+
+#Just Depth and using depth linked time to account for the spatial and temporal pseudoreplication
+m4<- glmer(y ~ Depth_transect + (1 + Depth_transect| time), family="binomial"(link="logit"),data=WP)
+print(summary(m4))
+qqp(residuals(m4),"norm")
+#--Not possibleE
+#Error: number of observations (=239) < number of random effects (=260) for term (1 + Depth_transect | time); the random-effects parameters are probably unidentifiable#
+
+#So, adding in the random effecr month as nested within depth for account for pseudoreplication.
+m5<- glmer(y ~ Depth_transect + (1| Depth_transect/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m5))
+qqp(residuals(m5),"norm")
+#--this one improve residuals fitting
+
+#Depth as fixed, change in random for station/time. Station works better
+m6<- glmer(y ~ Depth_transect + (1|Station_code/time), family="binomial"(link="logit"),data=WP)
+print(summary(m6))
+qqp(residuals(m6),"norm")
+
+##Depth as fixed, change in random for station/Month.Results evry similar to m6
+m7<- glmer(y ~ Depth_transect + (1|Station_code/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m7))
+qqp(residuals(m7),"norm")
+
+#Combining both depth and month as fixed factors 
+m8<- glmer(y ~ Depth_transect*Month_12 + (1|Station_code/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m8))
+qqp(residuals(m8),"norm")
+#there is not effect of month when adding the depth interaction
+
+#Only checking for month effect
+m9<- glmer(y ~ Month_12 + (1|Station_code/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m9))
+qqp(residuals(m9),"norm")
+#there is an effect per month.
+
+#Only season
+m9.1<- glmer(y ~ Season + (1|Station_code/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m9.1))
+qqp(residuals(m9.1),"norm")
+
+
+#Season and depth 
+
+m10<- glmer(y ~ Depth_transect*Season +(1|Station_code/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m10))
+qqp(residuals(m10),"norm")
+#there is 
+
+#Only Season
+m11<- glmer(y ~ Season +(1|Station_code/Month_12), family="binomial"(link="logit"),data=WP)
+print(summary(m11))
+qqp(residuals(m11),"norm")
+
+
+#Only Year
+m11<- glmer(y ~ Depth_transect*Year +(1|Station_code/time), family="binomial"(link="logit"),data=WP)
+print(summary(m11))
+qqp(residuals(m11),"norm")
+
+#All, glmer(Y ~ D*M + D*S + D*Y + (1|Station/time(Y-M-S)), data=d
+m12<- glmer(y ~ Depth_transect*Month_12+Depth_transect*Season+Depth_transect*Year +(1|Station_code/time), family="binomial"(link="logit"),data=WP)
+print(summary(m12))
+qqp(residuals(m12),"norm")
+
+
+#All, glmer(Y ~ D + M + S +Y + (1|Station/time(Y-M-S)), data=d
+m12<- glmer(y ~ Depth_transect+Season+Month+Year +(1|Station_code/time), family="binomial"(link="logit"),data=WP)
+print(summary(m12))
+qqp(residuals(m12),"norm")
+
+
 ```
 
