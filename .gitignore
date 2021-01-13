@@ -3,6 +3,9 @@
 .RData
 *.Rdata
 *.pdf
+*.DS_Store
+*.svg
+*.rds
 
 .Data/*
 .Figures_Season/*
@@ -10,8 +13,6 @@
 data/*
 results/*
 literature/*
-article/Submitted Abstract- WP-disease-Gordon Research Conference 2018.docx
-article/Abstract- WP-disease-Gordon Research Conference 2018_BP.docx
-article/Abstract- WP-disease-Gordon Research Conference 2018.docx
-*.svg
-*.rds
+article/*
+figures/*
+r-code/older_versions/*
