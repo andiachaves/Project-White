@@ -1,0 +1,61 @@
+---
+title: "Quadratic term"
+author: "Bernd Panassiti"
+date: "5/28/2018"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+
+# Load data and libraries
+```{r}
+source("r-code/00_helper_functions.r")
+
+load(file="data/Whiteplague_workingdata.Rdata")
+WP<-Whiteplague_workingdata
+
+library(ggplot2)
+```
+
+
+
+# Example for quadratic term
+DHW (degree heating week) is used as variable.
+
+Parameter in final models:
+Intercept = 1 (I do not know the correct one)
+DHW       = 1
+DHW2:     = -0.2
+
+```{r}
+Dhw       = WP$Max_DHW
+DhwScaled = WP$DHW_sca
+
+
+```
+
+
+```{r}
+range(DhwScaled)
+# -0.4396064  5.4177272
+
+DhwNew  = seq(-0.4,5.4,length.out = 100)
+DhwNew2 = DhwNew*DhwNew
+p = inv.logit(1 + (DhwNew*1) + (DhwNew2*-0.2))
+
+df = data.frame(cbind (DhwNew,p))
+
+ggplot(df,aes(x= DhwNew,y=p))+geom_line()
+```

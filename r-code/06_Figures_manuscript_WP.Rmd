@@ -26,7 +26,7 @@ opts_knit$set(root.dir='../') # definining working directory; or normalizePath('
 rm(list=ls(all=TRUE))
 
 # load settings, data & libraries
-source("r-code/R - 00 - settings.r")
+source("r-code/00_settings.r")
 load("data/predictors_response2012_work.RData")
 
 library(rstan) # extraction of posterior, function:stanGraphInput
