@@ -77,6 +77,7 @@ Station_code <- Whiteplague_workingdata_Annual$Station_code
 #### Create DHARMa object
 ```{r,echo=FALSE}
 # Symptomatic corals - Response scale - inv.logit
+set.seed(2021)
 WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlague,
   observedResponse = ill,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)
 ```
@@ -86,6 +87,55 @@ WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredicted
 ```{r}
 plot(WhitePlagueDHARMaResponse)
 ```
+
+
+#### Spatial autocorrelation
+```{r}
+#test Spatial autocorrelation Moran's I
+
+# Problem repeating sites result in 0 distances!
+library(dplyr)
+df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata_Annual$Latitude,y=Whiteplague_workingdata_Annual$Longitude)
+
+# 1 option - group and mean
+
+dfNew <- data.frame(df %>%
+  group_by(x, y) %>%
+  summarize(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
+
+testSpatialAutocorrelation(simulationOutput = dfNew$scaledResiduals, x = dfNew$x,y = dfNew$y)
+
+# 	DHARMa Moran's I test for spatial autocorrelation
+# 
+# data:  dfNew$scaledResiduals
+# observed = -0.307581, expected = -0.083333, sd = 0.165954, p-value = 0.1766
+# alternative hypothesis: Spatial autocorrelation
+# 
+# 
+# 2. option - random noise
+df$x_new <- rnorm(df$x,df$x,0.001)
+df$y_new <- rnorm(df$y,df$y,0.001)
+
+testSpatialAutocorrelation(simulationOutput = df$scaledResiduals, x = df$x_new,y = df$y_new)
+```
+
+Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
+
+### Test for residuals temporal autocorrelation
+```{r}
+df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata_Annual$Latitude,y=Whiteplague_workingdata_Annual$Longitude)
+
+# test temporal autocorrelation Durbin-Watson test in the residuals
+
+
+#Year
+dfNew=recalculateResiduals(WhitePlagueDHARMaResponse, group = Whiteplague_workingdata_Annual$Year)
+testTemporalAutocorrelation(simulationOutput = dfNew, time=1:3,plot=T)
+
+#Random time
+testTemporalAutocorrelation(simulationOutput = WhitePlagueDHARMaResponse, time = "random")
+```
+
 
 
 #Predictive maps of disease
@@ -212,34 +262,5 @@ v2<-viewport(width = 0.05, height = 0.05, x = dfSite$x[1], y = dfSite$y[1],defau
 print(p2,vp=v2)
 
 }
-```
-
-
-# Create table for Supplemental material
-```{r}
-tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$ observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/tableSI.csv", sep=",", col.names=TRUE)
-```
-
-
-# Create table for Supplemental material
-```{r}
-df = varMedianPlotWhitePlague
-df %>% group_by(X1) %>% summarise(median=mean(X2))
-tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$ observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/tableSI.csv", sep=",", col.names=TRUE)
-```
-
-# Biological model - Create table of  scaled residuals for SI
-```{r}
-load("results/2021.01.17_Whiteplague_Biological_model_result.Rdata")
-dfEnv = summary(stan.white, pars= c("parEnvironment[1]","parEnvironment[2]","parEnvironment[3]","parEnvironment[4]","parEnvironment[5]","parEnvironment[6]","parEnvironment[7]","parEnvironment[8]","parEnvironment[9]","parEnvironment[10]","parEnvironment[11]","parEnvironment[12]","parEnvironment[13]","parEnvironment[14]","parEnvironment[15]","parEnvironment[16]","parEnvironment[17]","parEnvironment[18]"))$summary
-myLabels = c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Depth_tran_sca","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")
-rownames(dfEnv) = myLabels
-```
-
-```{r}
-tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$ observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/tableSI.csv", sep=",", col.names=TRUE)
 ```
 

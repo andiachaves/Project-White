@@ -1,0 +1,116 @@
+---
+title: "Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands"
+abstract: "This document provides the r-code for the white plague disease model described on the article:"Environmental drivers of white plague disease on shallow and mesophotic coral reefs, U.S. Virgin Islands" Description of the model in terms of data collection, white plague disease, parameter estimations and fitting of the model can be found in Appendix A."
+  keywords: white plague, coral reefs, bayesian model, environment
+date: "13/01/2021"
+output: pdf_document
+number_sections: yes
+    toc: yes
+header-includes: \usepackage{graphicx}
+email: \email{}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, warnings=FALSE}
+library(knitr)
+opts_knit$set(root.dir='../')                     # definining working directory; or normalizePath('../')
+opts_chunk$set(fig.align='center',                # aligns all figures
+                echo=TRUE,                        # shows r-code
+                message=FALSE,                    # suppresses library outputs
+                warnings=FALSE,                   # suppresses library outputs
+                tidy=TRUE,  # prevents the source code from running off a pdf page
+                dev='pdf')                        # pdf device
+```
+
+# Introduction
+
+This document provides the r-code for the envionmental model of white plague disease model as described in the submitted manuscript. The model identifies and quantifies the influence of environmental factors on WP disease prevalence using Bayesian inference. We use rstan for statistical inference (http://mc-stan.org/about/). 
+
+# Data
+The white plague prevalence data and corresponding environmental variables used in this model are provided in the file "whiteplague_working.RData" which can be found in the folder called "data".
+
+
+# Model
+
+## Load libraries
+```{r}
+library(rstan)
+rstan_options(auto_write = TRUE) # automatically save the compilied Stan program
+options(mc.cores = parallel::detectCores()) # execute multiple Markov chains in paral
+
+library("bayesplot")
+library("ggplot2")
+```
+
+## Load data
+```{r}
+load(file="data/Whiteplague_workingdata.Rdata")
+head(Whiteplague_workingdata)
+dim(Whiteplague_workingdata)
+```
+
+## Data preparation
+```{r}
+df <- Whiteplague_workingdata[,c("Ntot","ill","Plague","Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Depth_tran_sca","Temp_sca","DHW_sca")]
+
+df$healthy <- df$Ntot-df$ill
+df$Month   <- as.factor(Whiteplague_workingdata$Month_12)
+df$Site    <- as.factor(as.numeric(Whiteplague_workingdata$Station_name))
+df$Obsid   <- as.factor(1:nrow(df))
+df$SiteMonth <- as.factor(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
+
+df$Site_index <- as.integer(df$Site)
+df$Month_index=as.integer(df$Month)
+df$Obsid_index=as.integer(df$Obsid)
+df$SiteMonth_index=as.integer(as.numeric(as.factor(paste(df$Month,df$Site,sep="-"))))
+
+Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca","DHW_sca","Depth_tran_sca")]
+```
+
+
+## Model definition
+```{r}
+dataList = list(
+  TotalObservedcolonies = df$Ntot, #Total observed colonies Shallow (2 years) Deep (4 years)
+  Diseasedcolonies = df$ill, # Total numer of disease colonies Shallow (2 years) Deep (4 years)
+  nWP = nrow(df), #White Plague prevalence total number of rows
+  observedWpPrevalence = df$Plague, # Total Prevalence of White Plague Shallow (2 years) Deep (4 years)
+  
+  Environment = Environment,
+  nEnvi = ncol(Environment),
+  
+  SiteMonth = df$SiteMonth_index,
+  nSiteMonth =length(unique(df$SiteMonth_index))
+)
+```
+
+
+
+## Running the model
+```{r model_run,eval=FALSE}
+set.seed(2017)
+fit <- stan("r-code/03_Whiteplague_rstan_env_Model.stan",
+                   data = dataList,
+                   iter = 30000, 
+                   chains = 4,
+                   control = list(adapt_delta = 0.99,max_treedepth = 15),
+                   refresh=10)
+```
+
+
+
+# Plot of credible interval of parameter estimates
+The default is to show 50% intervals (the thick segments) and 90% intervals (the thinner outer lines).
+```{r}
+posterior<-extract(fit,inc_warmup=F,permute=F)
+color_scheme_set("red")
+p=mcmc_intervals(posterior, pars = c("parEnvironment[1]","parEnvironment[2]","parEnvironment[3]","parEnvironment[4]","parEnvironment[5]","parEnvironment[6]","parEnvironment[7]"))
+
+
+#names(Environment)
+myLabels=c("Chlorphyll","Oxygen","Salinity","Turbidity","Temperatur","DHW","Depth")
+p + scale_y_discrete(labels= myLabels) # Final plot
+```
+
+ 

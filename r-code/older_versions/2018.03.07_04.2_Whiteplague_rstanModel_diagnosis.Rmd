@@ -74,44 +74,6 @@ plotSimulatedResiduals(simulationOutput = WhitePlagueDHARMaResponse)
 
 
 
-#### Spatial autocorrelation
-```{r}
-#test Spatial autocorrelation Moran's I
-
-# Problem repeating sites result in 0 distances!
-library(dplyr)
-df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata_Annual$Latitude,y=Whiteplague_workingdata_Annual$Longitude)
-
-# 1 option - group and mean
-
-dfNew <- as.data.frame(df %>%
-  group_by(x, y) %>%
-  summarize(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
-
-testSpatialAutocorrelation(simulationOutput = dfNew, x = dfNew$x,y = dfNew$y)
-
-# 2. option - random noise
-df$x_new <- rnorm(df$x,df$x,0.001)
-df$y_new <- rnorm(df$y,df$y,0.001)
-
-testSpatialAutocorrelation(simulationOutput = df, x = df$x_new,y = df$y_new)
-```
-
-Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
-
-### Test for residuals temporal autocorrelation
-```{r}
-# test temporal autocorrelation Durbin-Watson test in the residuals
-
-#Year
-testTemporalAutocorrelation(simulationOutput = df, time = Whiteplague_workingdata_Annual$Year, plot=T)
-
-#Random time
-#testTemporalAutocorrelation(simulationOutput = df, time = "random")
-
-#Same as.. Month
-testTemporalAutocorrelation(simulationOutput= WhitePlagueDHARMaResponse, time = Whiteplague_workingdata$Month_12, plot=T)
-```
 
 ##Checking temporal autocorrelation with histograms and correlation plots 
 ```{r}

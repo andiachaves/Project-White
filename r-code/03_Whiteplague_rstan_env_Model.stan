@@ -43,10 +43,6 @@ parEnvironment ~ normal(0, 10);
 
 //Random effects priors
 eta_1 ~ normal(0, 100);
-
-//sigmalev_1 ~ uniform(0,100);
-//sigmalev_1 ~ student_t(1,0,1);
-//sigmalev_1 ~ cauchy(0,2.5);
 sigmalev_1 ~ inv_gamma(0.001, 0.001);
 
 Diseasedcolonies ~ binomial_logit(TotalObservedcolonies,RealDisease);
