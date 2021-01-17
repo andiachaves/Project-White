@@ -16,3 +16,5 @@ literature/*
 article/*
 figures/*
 r-code/older_versions/*
+
+working_code.Rmd
