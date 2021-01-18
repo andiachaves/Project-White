@@ -29,6 +29,7 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 #Introduction
 
 This document provides the r-code for the white plague disease model described on the article.The model address to the objectives of this study: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental and BIOLOGICAL factors on WP disease prevalence using Bayesian inference. We use rstan for statistical inference (http://mc-stan.org/about/). 
+The model uses abiotic (without quadratic term) and biotics and year as random effect.
 
 #Data
 The white plague prevalence data and corresponding environmental and biological variables used in this model can be downloaded from xxxxxxx. The file "whiteplague_working.RData" needs to be placed in a folder called "Data".
@@ -86,21 +87,9 @@ df$Year_index  = as.integer(df$Year)
 df$Depth_index = as.integer(df$Depth)
 df$Obsid_index = as.integer(df$Obsid)
 
-df$Chl_sca2        <- df$Chl_sca*df$Chl_sca
-df$Oxy_sca2        <- df$Oxy_sca*df$Oxy_sca
-df$Sal_sca2        <- df$Sal_sca*df$Sal_sca
-df$Temp_sca2       <- df$Temp_sca*df$Temp_sca
-df$DHW_sca2        <- df$DHW_sc*df$DHW_sc
-df$Sand2           <- df$Sand*df$Sand
-df$Coral2          <- df$Coral*df$Coral
-df$Sponges2        <- df$Sponges*df$Sponges
-df$Macroalgae2     <- df$Macroalgae*df$Macroalgae
-df$Cyanobacteria2  <- df$Cyanobacteria*df$Cyanobacteria
-df$Turb_sca2       <- df$Turb_sca*df$Turb_sca
-df$Depth_tran_sca2 <- df$Depth_tran_sca*df$Depth_tran_sca
 
 
-Environment <- df[,c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Depth_tran_sca","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
+Environment <- df[,c("Chl_sca","Oxy_sca","Sal_sca","Turb_sca","Temp_sca", "DHW_sca","Depth_tran_sca","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")]
 ```
 
 
@@ -129,6 +118,7 @@ dataList = list(
 
 ```{r model_run,eval=FALSE}
 time <- proc.time()
+set.seed(2021)
 stan.white <- stan("r-code/03_Whiteplague_rstan_bio_Model.stan",
                    data = dataList,
                    iter = 30000, 
@@ -141,16 +131,16 @@ stan.white <- stan("r-code/03_Whiteplague_rstan_bio_Model.stan",
 
 #Save the model run results
 ```{r}
-save(stan.white, file ="results/2021.01.17_Whiteplague_Biological_model_result.Rdata")
+save(stan.white, file ="results/2021.01.18_Whiteplague_Biological_model_result.Rdata")
 ```
 
 
 ```{r}
 fit = stan.white
-names(fit)[2:19] = names(Environment)
+names(fit)[2:13] = names(Environment)
 plot(fit,pars=names(Environment)) # with environment
 
-plot(fit,pars=names(Environment)[14:18])
+plot(fit,pars=names(Environment)[8:12])
 
 summary(fit,pars=names(Environment))$summary
 ```
@@ -198,6 +188,6 @@ plot(WhitePlagueDHARMaResponse)
 
 ```{r}
 tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/2021.01.17-BiologicalModel_tableSI.csv", sep=",", col.names=TRUE)
+write.table(tableSI,"results/2021.01.18-BiologicalModel_tableSI.csv", sep=",", col.names=TRUE)
 ```
 

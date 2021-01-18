@@ -4,6 +4,8 @@ author: "Bernd Panassiti"
 date: 'created: 26.07.2017, last modified: `r format(Sys.Date(), format="%d.%m.%Y")`'
 output: html_document
 header-includes: \usepackage{graphicx}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Introduction
@@ -43,10 +45,8 @@ library(zoo) # rollapply
 #Load files workingdata and stan file with the results of the model
 load(file="data/Whiteplague_workingdata.Rdata")
 
-NameOfModelRun <- "2021.01.17_Whiteplague_Biological_model_result" # last biological
-#NameOfModelRun <- "2018.03.08_Whiteplague_Environmental_model_result" # last environmental
+NameOfModelRun <- "2021.01.18_Whiteplague_Environmental_model_result" # last environmental
 load(file=paste("results/",NameOfModelRun,".Rdata",sep=""))
-
 ```
 
 
@@ -55,10 +55,8 @@ load(file=paste("results/",NameOfModelRun,".Rdata",sep=""))
 ### Define Observed data
 
 ```{r ObsPred,,echo=FALSE}
-observedWhitePlague<-Whiteplague_workingdata_Annual$Plague
-Ntot <- Whiteplague_workingdata_Annual$Ntot
-# observedWhitePlague<-Whiteplague_workingdata$Plague
-# Ntot <- Whiteplague_workingdata$Ntot
+observedWhitePlague<-Whiteplague_workingdata$Plague
+Ntot <- Whiteplague_workingdata$Ntot
 ```
 
 

@@ -42,8 +42,7 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 #### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
-#NameOfModelRun <- "2018.03.08_Whiteplague_Environmental_model_result_graphinput" # last environmental
-NameOfModelRun <- "2021.01.17_Whiteplague_Biological_model_result_graphinput" # last biological
+NameOfModelRun <- "2021.01.18_Whiteplague_Environmental_model_result_graphinput" # last environmental
 load(file=paste("results/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 
@@ -56,27 +55,20 @@ library(lattice)
 
 
 ```{r}
-# Biological model
-ill <- Whiteplague_workingdata_Annual$ill
-Latitude <- Whiteplague_workingdata_Annual$Latitude
-Longitude <- Whiteplague_workingdata_Annual$Longitude
-Year <- Whiteplague_workingdata_Annual$Year
-#Month_12 <- Whiteplague_workingdata_Annual$Month_12 # NOT READY
-Station_code <- Whiteplague_workingdata_Annual$Station_code
-
 # Environmental model
-# ill <- Whiteplague_workingdata$ill
-# Latitude <- Whiteplague_workingdata$Latitude
-# Longitude <- Whiteplague_workingdata$Longitude
-# Year <- Whiteplague_workingdata$Year
-# Month_12 <- Whiteplague_workingdata$Month_12
-# Station_code <- Whiteplague_workingdata$Station_code
+ill <- Whiteplague_workingdata$ill
+Latitude <- Whiteplague_workingdata$Latitude
+Longitude <- Whiteplague_workingdata$Longitude
+Year <- Whiteplague_workingdata$Year
+Month_12 <- Whiteplague_workingdata$Month_12
+Station_code <- Whiteplague_workingdata$Station_code
 ```
 
 
 #### Create DHARMa object
 ```{r,echo=FALSE}
 # Symptomatic corals - Response scale - inv.logit
+set.seed(2021)
 WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredictedWhitePlague,
   observedResponse = ill,fittedPredictedResponse = predictionsResponseMedianWhitePlague,integerResponse = T)
 ```
@@ -86,6 +78,75 @@ WhitePlagueDHARMaResponse <- createDHARMa(simulatedResponse = simulatedPredicted
 ```{r}
 plot(WhitePlagueDHARMaResponse)
 ```
+
+
+
+
+
+
+#### Spatial autocorrelation
+```{r}
+#test Spatial autocorrelation Moran's I
+
+# Problem repeating sites result in 0 distances!
+library(dplyr)
+df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata$Latitude,y=Whiteplague_workingdata$Longitude)
+
+# 1 option - group and mean
+dfNew <- data.frame(df %>% group_by(x,y) %>% summarise(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
+
+testSpatialAutocorrelation(simulationOutput = dfNew$scaledResiduals, x = dfNew$x,y = dfNew$y)
+
+# 	DHARMa Moran's I test for spatial autocorrelation
+# 
+# data:  dfNew$scaledResiduals
+# observed = 0.0083251, expected = -0.0833333, sd = 0.1725908, p-value =
+# 0.5954
+# alternative hypothesis: Spatial autocorrelation
+# 
+# 
+# 2. option - random noise
+set.seed(123)
+df$x_new <- rnorm(df$x,df$x,0.001)
+df$y_new <- rnorm(df$y,df$y,0.001)
+
+
+testSpatialAutocorrelation(simulationOutput = df$scaledResiduals, x = df$x_new,y = df$y_new)
+
+# DHARMa Moran's I test for spatial autocorrelation
+# 
+# data:  df$scaledResiduals
+# observed = -0.0429681, expected = -0.0042017, sd = 0.0225725, p-value =
+# 0.0859
+# alternative hypothesis: Spatial autocorrelation
+```
+
+Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
+
+### Test for residuals temporal autocorrelation
+```{r}
+# test temporal autocorrelation Durbin-Watson test in the residuals
+#Year
+set.seed(123)
+dfNew=recalculateResiduals(WhitePlagueDHARMaResponse, group = Whiteplague_workingdata$Month)
+
+testTemporalAutocorrelation(simulationOutput = dfNew, time=1:12,plot=T)
+# 
+# 	Durbin-Watson test
+# 
+# data:  simulationOutput$scaledResiduals ~ 1
+# DW = 1.8131, p-value = 0.7378
+# alternative hypothesis: true autocorrelation is not 0
+```
+
+
+
+
+
+
+
+
+
 
 
 #Predictive maps of disease
@@ -213,33 +274,3 @@ print(p2,vp=v2)
 
 }
 ```
-
-
-# Create table for Supplemental material
-```{r}
-tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$ observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/tableSI.csv", sep=",", col.names=TRUE)
-```
-
-
-# Create table for Supplemental material
-```{r}
-df = varMedianPlotWhitePlague
-df %>% group_by(X1) %>% summarise(median=mean(X2))
-tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$ observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/tableSI.csv", sep=",", col.names=TRUE)
-```
-
-# Biological model - Create table of  scaled residuals for SI
-```{r}
-load("results/2021.01.17_Whiteplague_Biological_model_result.Rdata")
-dfEnv = summary(stan.white, pars= c("parEnvironment[1]","parEnvironment[2]","parEnvironment[3]","parEnvironment[4]","parEnvironment[5]","parEnvironment[6]","parEnvironment[7]","parEnvironment[8]","parEnvironment[9]","parEnvironment[10]","parEnvironment[11]","parEnvironment[12]","parEnvironment[13]","parEnvironment[14]","parEnvironment[15]","parEnvironment[16]","parEnvironment[17]","parEnvironment[18]"))$summary
-myLabels = c("Chl_sca","Chl_sca2","Oxy_sca","Oxy_sca2","Sal_sca","Sal_sca2","Turb_sca","Turb_sca2","Temp_sca","Temp_sca2", "DHW_sca","DHW_sca2","Depth_tran_sca","Sand","Coral","Sponges","Macroalgae", "Cyanobacteria")
-rownames(dfEnv) = myLabels
-```
-
-```{r}
-tableSI =data.frame(sites=Station_code,WhitePlagueDHARMaResponse$ observedResponse,WhitePlagueDHARMaResponse$fittedPredictedResponse,WhitePlagueDHARMaResponse$scaledResiduals)
-write.table(tableSI,"results/tableSI.csv", sep=",", col.names=TRUE)
-```
-

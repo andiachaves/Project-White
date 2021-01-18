@@ -42,8 +42,7 @@ The Skript is based on the residuals analysis provided in Panassiti et al., 2016
 #### Loading data & libraries
 ```{r}
 rm(list=ls(all=TRUE))
-#NameOfModelRun <- "2018.03.08_Whiteplague_Environmental_model_result_graphinput" # last environmental
-NameOfModelRun <- "2021.01.17_Whiteplague_Biological_model_result_graphinput" # last biological
+NameOfModelRun <- "2021.01.18_Whiteplague_Biological_model_result_graphinput" # last biological
 load(file=paste("results/",NameOfModelRun,".Rdata",sep=""))
 load(file="data/Whiteplague_workingdata.Rdata")
 
@@ -61,16 +60,7 @@ ill <- Whiteplague_workingdata_Annual$ill
 Latitude <- Whiteplague_workingdata_Annual$Latitude
 Longitude <- Whiteplague_workingdata_Annual$Longitude
 Year <- Whiteplague_workingdata_Annual$Year
-#Month_12 <- Whiteplague_workingdata_Annual$Month_12 # NOT READY
 Station_code <- Whiteplague_workingdata_Annual$Station_code
-
-# Environmental model
-# ill <- Whiteplague_workingdata$ill
-# Latitude <- Whiteplague_workingdata$Latitude
-# Longitude <- Whiteplague_workingdata$Longitude
-# Year <- Whiteplague_workingdata$Year
-# Month_12 <- Whiteplague_workingdata$Month_12
-# Station_code <- Whiteplague_workingdata$Station_code
 ```
 
 
@@ -99,16 +89,16 @@ df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whi
 
 # 1 option - group and mean
 
-dfNew <- data.frame(df %>%
-  group_by(x, y) %>%
-  summarize(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
+dfNew <- data.frame(df %>% group_by(x,y) %>% summarise(scaledResiduals = mean(scaledResiduals, na.rm = TRUE)))
 
+set.seed(2021)
 testSpatialAutocorrelation(simulationOutput = dfNew$scaledResiduals, x = dfNew$x,y = dfNew$y)
 
 # 	DHARMa Moran's I test for spatial autocorrelation
 # 
 # data:  dfNew$scaledResiduals
-# observed = -0.307581, expected = -0.083333, sd = 0.165954, p-value = 0.1766
+# observed = -0.229728, expected = -0.083333, sd = 0.171874, p-value
+# = 0.3944
 # alternative hypothesis: Spatial autocorrelation
 # 
 # 
@@ -116,24 +106,31 @@ testSpatialAutocorrelation(simulationOutput = dfNew$scaledResiduals, x = dfNew$x
 df$x_new <- rnorm(df$x,df$x,0.001)
 df$y_new <- rnorm(df$y,df$y,0.001)
 
+set.seed(2021)
 testSpatialAutocorrelation(simulationOutput = df$scaledResiduals, x = df$x_new,y = df$y_new)
+
+# 	DHARMa Moran's I test for spatial autocorrelation
+# 
+# data:  df$scaledResiduals
+# observed = -0.116665, expected = -0.034483, sd = 0.145487, p-value
+# = 0.5722
+# alternative hypothesis: Spatial autocorrelation
 ```
 
 Both tests indicate that we should reject the null of no spatial auto-correlation. There is spatial autocorrelation.
 
 ### Test for residuals temporal autocorrelation
 ```{r}
-df <- data.frame(scaledResiduals=WhitePlagueDHARMaResponse$scaledResiduals,x=Whiteplague_workingdata_Annual$Latitude,y=Whiteplague_workingdata_Annual$Longitude)
-
 # test temporal autocorrelation Durbin-Watson test in the residuals
-
-
 #Year
 dfNew=recalculateResiduals(WhitePlagueDHARMaResponse, group = Whiteplague_workingdata_Annual$Year)
+set.seed(2021)
 testTemporalAutocorrelation(simulationOutput = dfNew, time=1:3,plot=T)
-
-#Random time
-testTemporalAutocorrelation(simulationOutput = WhitePlagueDHARMaResponse, time = "random")
+# 	Durbin-Watson test
+# 
+# data:  simulationOutput$scaledResiduals ~ 1
+# DW = 2.9214, p-value = 0.2542
+# alternative hypothesis: true autocorrelation is not 0
 ```
 
 
