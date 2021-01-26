@@ -30,7 +30,7 @@ opts_chunk$set(fig.align='center',                # aligns all figures
 This appendix contains additional information to the article ``Elevated seawater turbidity and temperature as drivers of white plague disease on shallow and mesophotic coral reefs''.  
 
 
-This document provides the r-code for the ``Environmental model'', a statistical model that relates abiotic environmental variables to the white plague prevalences on corales in the Caribbean. The objectives of our study were to: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental factors on WP disease prevalence using Bayesian inference. We use RStan for statistical inference (http://mc-stan.org/about/). 
+This document provides the R-code for the ``Environmental model'', a statistical model that relates abiotic environmental variables to the white plague prevalences on corales in the Caribbean. The objectives of our study were to: (1) to evaluate the annual patterns of WP disease, and (2) to identify and quantify the influence of environmental factors on WP disease prevalence using Bayesian inference. We use RStan for statistical inference (http://mc-stan.org/about/). 
 
 #Data
 The white plague prevalence data and corresponding environmental variables used in this model can be downloaded from xxxxxxx. Please note, here we present as an example the model code for the ``Environmental model''.  
@@ -157,14 +157,12 @@ for(i in 1:nWP) DiseasePredictions [i] = binomial_rng(TotalObservedcolonies[i],
 ## Running the model
 
 ```{r model_run,eval=FALSE, echo=TRUE}
-time <- proc.time()
 stan.white <-rstan("Whiteplague_rstan_env_Model.stan",
                       data = dataList,
-                      iter = 1000, 
+                      iter = 30000, 
                       chains = 4,
                       control = list(adapt_delta = 0.99,max_treedepth = 15),
                       refresh=10)
-(proc.time() - time)/60/60
 ```
 
 

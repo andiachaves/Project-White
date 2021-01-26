@@ -120,7 +120,7 @@ stan.white <- stan("r-code/03_Whiteplague_rstan_env_Model.stan",
 
 #Save the model run results
 ```{r}
-save(stan.white, file =paste("results/2021.01.18_Whiteplague_Environmental_model_result.Rdata",sep=""))
+save(stan.white, file ="results/2021.01.18_Whiteplague_Environmental_model_result.Rdata")
 ```
 
 
